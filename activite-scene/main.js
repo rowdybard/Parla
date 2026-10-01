@@ -1,23 +1,31 @@
 // Parla — Activité: the header's living scene, built the way the techdemo is
 // (three.js through an importmap, no build step, one small module per part).
 //
-// A night lagoon in the site's colours. Words in French, English, Spanish and
-// Malagasy are written in light above the water, each carried to its
-// translation by a thread of light; the lagoon mirrors them; a vanilla moon
-// glitters on the ripples, and baobabs stand on the far shore. A click in the sky
-// writes another. It pauses off screen, in a hidden tab, and with the header's
-// « Animation » toggle, and shows one still frame for prefers-reduced-motion.
+// A beach at sunset, pink and lilac as the owner asked: words in French,
+// English, Spanish and Malagasy are written in light over the sea, each carried
+// to its translation by a thread of gold; the sea mirrors them, the sun glitters
+// on the ripples, waves roll in over pale pink sand, and sea oats sway on the
+// dunes. A click in the sky writes another. It pauses off screen, in a hidden
+// tab, and with the header's « Animation » toggle, and shows one still frame for
+// prefers-reduced-motion.
+//
+// Memory follows the techdemo's no-leak rules: everything is allocated when the
+// scene is built, nothing in the render loop, and destroy() gives it all back in
+// the techdemo's order (loop, listeners, observers, parts, passes, renderer,
+// context). With #debug in the address, window.parlaScene.rebuild() tears the
+// scene down and builds it again, for the leak test.
 import * as THREE from "three";
 import { createAtlas } from "./atlas.js";
+import { createBeach } from "./beach.js";
+import { createGrass } from "./grass.js";
 import { createPost } from "./post.js";
-import { createShore } from "./shore.js";
-import { createSky, MOON_LAYER } from "./sky.js";
+import { createSky, SUN_LAYER } from "./sky.js";
+import { sandHeight } from "./terrain.js";
 import { createThreads } from "./threads.js";
 import { createWater } from "./water.js";
 import { CONCEPTS, createWords } from "./words.js";
 
 const host = document.getElementById("sky");
-const canvas = document.getElementById("skyCanvas");
 const copy = document.getElementById("skyCopy");
 const toggle = document.getElementById("motionToggle");
 const topbar = host && host.querySelector(".topbar");
@@ -28,15 +36,45 @@ const TIERS = [
   { pixelRatio: 1.5, samples: 0, bloom: 0.5, mirror: 0.45 },
   { pixelRatio: 2, samples: 4, bloom: 0.5, mirror: 0.5 }
 ];
-const EYE = new THREE.Vector3(0, 2.4, 10);
-const LOOK = new THREE.Vector3(0, 7.2, -60);
+// standing at the water's edge, looking out to sea a little to the left of the sun
+const EYE = new THREE.Vector3(0, sandHeight(0, 10) + 1.7, 10);
+const LOOK = new THREE.Vector3(-7, EYE.y - 3.4, -100);
 const PREF = "parla:animation";
 
-if (host && canvas && copy) {
-  start().catch(error => {
+if (host && copy && document.getElementById("skyCanvas")) boot();
+
+async function boot() {
+  await fonts(); // the words take the accent serif's shape
+  let current = launch();
+  if (!location.hash.includes("debug")) return;
+  // for tests: drive the scene, read its counts, and rebuild it
+  window.parlaScene = {
+    rebuild() {
+      if (current) current.destroy();
+      current = launch();
+    },
+    destroy() {
+      if (current) current.destroy();
+      current = null;
+    },
+    get renderer() { return current && current.renderer; },
+    info: () => current.renderer.info,
+    tier: () => current.tier(),
+    time: () => current.time(),
+    step: seconds => current.step(seconds),
+    frameInfo: () => current.frameInfo()
+  };
+}
+
+function launch() {
+  const canvas = document.getElementById("skyCanvas");
+  try {
+    return createScene(canvas);
+  } catch (error) {
     console.warn("Parla: the header scene could not start.", error);
-    canvas.style.visibility = "hidden";
-  });
+    canvas.style.visibility = "hidden"; // the header's own gradient shows instead
+    return null;
+  }
 }
 
 function fonts() {
@@ -45,20 +83,27 @@ function fonts() {
   return Promise.race([loaded, new Promise(done => setTimeout(done, 2500))]);
 }
 
+// which of the five cards is open in the editor (it tints the words)
 function activeCard() {
-  const tabs = document.querySelectorAll("#cardNavigation .card-tab");
-  for (let i = 0; i < tabs.length; i++) if (tabs[i].classList.contains("active")) return i;
-  return 0;
+  const tab = document.querySelector("#cardNavigation .card-tab.active");
+  let i = 0;
+  for (let el = tab && tab.previousElementSibling; el; el = el.previousElementSibling) {
+    if (el.classList.contains("card-tab")) i++;
+  }
+  return i;
 }
 
-async function start() {
+function createScene(canvas) {
+  const abort = new AbortController();
+  const { signal } = abort;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  // Neutral keeps the pinks pink (ACES would wash them towards orange and grey)
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 0.92;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 2, 0.1, 6000);
-  camera.layers.enable(MOON_LAYER);
-  const moonDir = new THREE.Vector3(0.4, 0.2, -1).normalize();
+  camera.layers.enable(SUN_LAYER);
+  const sunDir = new THREE.Vector3(0.2, 0.05, -1).normalize();
   const rest = () => {
     camera.position.copy(EYE);
     camera.lookAt(LOOK);
@@ -66,42 +111,59 @@ async function start() {
   };
   rest();
 
-  await fonts(); // the words take the accent serif's shape
-
   const phone = matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 600;
   let tier = phone ? 1 : 2;
+  // shared with the parts; the boxes are in normalised screen space, measured on resize
   const ctx = {
-    scene, camera, moonDir, eye: EYE,
-    atlas: createAtlas(CONCEPTS.flat()),
-    height: 1, wordPx: 60, floor: -0.1, ceiling: 0.8, avoid: null, wide: true,
+    scene, camera, sunDir, eye: EYE, atlas: null,
+    height: 1, wordPx: 60, floor: -0.1, ceiling: 0.8, wide: true,
+    avoid: { x0: 9, x1: 9, y0: 9, y1: 9 }, // the title and its subtitle
+    sun: { x0: 9, x1: 9, y0: 9, y1: 9 },
     stage: activeCard,
     maxIdeas: () => (ctx.wide ? 3 : 2)
   };
-  const sky = createSky(ctx);
-  ctx.horizon = sky.horizon;
-  const water = createWater(ctx);
-  const shore = createShore(ctx);
-  const threads = (ctx.threads = createThreads(ctx));
-  const words = createWords(ctx);
-  const post = createPost(renderer, scene, camera);
-  const parts = [sky, water, shore, words, threads];
 
-  // where the words may go, in normalised screen space: above the horizon,
-  // below the top bar, clear of the title
+  // the parts, updated in this order and disposed in reverse
+  const parts = [];
+  let water = null, words = null, threads = null, post = null;
+  let viewObserver = null, sizeObserver = null, destroyed = false;
+  try {
+    ctx.atlas = createAtlas(CONCEPTS.flat());
+    const sky = createSky(ctx);
+    parts.push(sky);
+    ctx.gradient = sky.gradient;
+    parts.push((water = createWater(ctx)));
+    parts.push(createBeach(ctx));
+    parts.push(createGrass(ctx));
+    parts.push((threads = ctx.threads = createThreads(ctx)));
+    parts.push((words = createWords(ctx)));
+    post = createPost(renderer, scene, camera);
+  } catch (error) {
+    destroy();
+    throw error;
+  }
+
+  // where the words may go: above the horizon, below the top bar, clear of the title
   const v = new THREE.Vector3();
   function measure() {
     const box = host.getBoundingClientRect(), w = box.width, h = box.height;
     const ndcX = px => (px / w) * 2 - 1, ndcY = py => 1 - (py / h) * 2;
     const c = copy.getBoundingClientRect();
-    ctx.avoid = { x0: ndcX(c.left - box.left), x1: ndcX(c.right - box.left), y0: ndcY(c.bottom - box.top), y1: ndcY(c.top - box.top) };
+    ctx.avoid.x0 = ndcX(c.left - box.left);
+    ctx.avoid.x1 = ndcX(c.right - box.left);
+    ctx.avoid.y0 = ndcY(c.bottom - box.top);
+    ctx.avoid.y1 = ndcY(c.top - box.top);
     ctx.ceiling = topbar ? ndcY(topbar.getBoundingClientRect().bottom - box.top) - 0.04 : 0.8;
     ctx.floor = v.set(0, 0, -5000).project(camera).y + 0.06;
     ctx.height = h;
     ctx.wide = w >= 700;
     ctx.wordPx = ctx.wide ? Math.min(Math.max(h * 0.095, 44), 64) : Math.min(Math.max(h * 0.085, 34), 44);
-    // keep the words off the moon
-    v.copy(camera.position).addScaledVector(moonDir, 100).project(camera);
-    ctx.moon = { x0: v.x - 0.07, x1: v.x + 0.07, y0: v.y - 0.12, y1: v.y + 0.12 };
+    // keep the words off the sun
+    v.copy(camera.position).addScaledVector(sunDir, 100).project(camera);
+    ctx.sun.x0 = v.x - 0.08;
+    ctx.sun.x1 = v.x + 0.08;
+    ctx.sun.y0 = v.y - 0.14;
+    ctx.sun.y1 = v.y + 0.16;
   }
 
   function resize() {
@@ -111,21 +173,24 @@ async function start() {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    post.setSamples(t.samples);
+    post.setSamples(t.samples); // a new target only when the tier's samples change; the old ones are disposed
     post.setSize(w, h, pixelRatio, t.bloom);
     water.setSize(w * pixelRatio * t.mirror, h * pixelRatio * t.mirror);
     rest();
-    // the moon high on the right of the frame, whatever its shape
-    moonDir.set(w > h ? 0.46 : 0.42, 0.5, 0.5).unproject(camera).sub(camera.position).normalize();
+    // the sun low over the sea, right of centre (further right on a tall screen, so the
+    // words have the left of the sky)
+    const horizon = v.set(0, 0, -5000).project(camera).y;
+    sunDir.set(w > h ? 0.2 : 0.5, horizon + 0.1, 0.5).unproject(camera).sub(camera.position).normalize();
     measure();
   }
 
-  // ----- the loop -----
-  let time = 0, last = 0, running = false, animate = false, onScreen = true, still = false;
+  // ----- the loop: nothing in it allocates -----
+  let time = 0, last = 0, running = false, animate = false, onScreen = true, still = false, shown = false;
   const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
   let warm = 0, frames = 0, spent = 0;
 
   function frame(now) {
+    // clamped, so a stall or a long pause never jumps the scene on
     const dt = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60;
     last = now;
     time += dt;
@@ -134,7 +199,7 @@ async function start() {
     pointer.sy += (pointer.y - pointer.sy) * Math.min(1, dt * 1.6);
     camera.position.set(EYE.x + pointer.sx * 0.9, EYE.y - pointer.sy * 0.35, EYE.z);
     camera.lookAt(LOOK);
-    for (const part of parts) part.update(dt, time);
+    for (let i = 0; i < parts.length; i++) parts[i].update(dt, time);
     post.render();
     watch(dt);
   }
@@ -155,7 +220,7 @@ async function start() {
 
   // draws the scene as it stands, without moving it on
   function redraw() {
-    for (const part of parts) if (!(still && part === threads)) part.update(0, time);
+    for (let i = 0; i < parts.length; i++) if (!(still && parts[i] === threads)) parts[i].update(0, time);
     if (still) threads.settle();
     post.render();
   }
@@ -171,7 +236,6 @@ async function start() {
   let wanted = true;
   try { wanted = localStorage.getItem(PREF) !== "off"; } catch (e) { /* storage blocked: animation stays on */ }
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-  let shown = false;
 
   function apply() {
     const on = wanted && !reduced.matches;
@@ -197,8 +261,7 @@ async function start() {
     sync();
   }
 
-  // ----- events -----
-  const signal = new AbortController().signal;
+  // ----- events: every listener takes the one signal, so destroy() removes them all -----
   if (toggle) {
     toggle.addEventListener("click", () => {
       wanted = !wanted;
@@ -208,14 +271,25 @@ async function start() {
   }
   reduced.addEventListener("change", apply, { signal });
   document.addEventListener("visibilitychange", sync, { signal });
-  new IntersectionObserver(entries => {
+  viewObserver = new IntersectionObserver(entries => {
     onScreen = entries[entries.length - 1].isIntersecting;
     sync();
-  }).observe(host);
-  new ResizeObserver(() => {
+  });
+  viewObserver.observe(host);
+  sizeObserver = new ResizeObserver(() => {
     resize();
-    if (!running) redraw(); // resizing clears the canvas
-  }).observe(host);
+    if (shown && !running) redraw(); // resizing clears the canvas
+  });
+  sizeObserver.observe(host);
+  // ResizeObserver doesn't report a new pixel ratio (a window dragged to another screen)
+  const watchPixelRatio = () => {
+    matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener("change", () => {
+      resize();
+      if (shown && !running) redraw();
+      watchPixelRatio();
+    }, { once: true, signal });
+  };
+  watchPixelRatio();
   if (matchMedia("(pointer: fine)").matches) {
     host.addEventListener("pointermove", e => {
       const box = host.getBoundingClientRect();
@@ -231,36 +305,65 @@ async function start() {
     const box = host.getBoundingClientRect();
     words.writeAt(time, ((e.clientX - box.left) / box.width) * 2 - 1, 1 - ((e.clientY - box.top) / box.height) * 2);
   }, { signal });
-  canvas.addEventListener("webglcontextlost", e => {
-    e.preventDefault();
-    renderer.setAnimationLoop(null);
-    canvas.style.visibility = "hidden"; // the header's own night background shows instead
-  }, { signal });
+  // the GPU took the context back: let everything go, and the header's own gradient shows
+  canvas.addEventListener("webglcontextlost", () => destroy(), { signal });
 
   resize();
-  try { await renderer.compileAsync(scene, camera); } catch (e) { /* compiles on first frame instead */ }
-  apply();
+  // compile the shaders off the main thread where the browser can, then start. They're
+  // compiled for the composer's target, where the scene is drawn: compiled for the
+  // screen they'd be other variants (tone mapped), and the real ones would still stall.
+  if (renderer.extensions.has("KHR_parallel_shader_compile")) {
+    renderer.setRenderTarget(post.target);
+    const compiling = renderer.compileAsync(scene, camera);
+    renderer.setRenderTarget(null);
+    compiling.catch(() => {}).then(() => {
+      if (!destroyed) apply();
+    });
+  } else apply();
 
-  if (location.hash.includes("debug")) {
-    window.parlaScene = {
-      renderer, info: () => renderer.info, tier: () => tier, time: () => time,
-      // moves the scene on by `seconds` without waiting for frames (slow software WebGL in tests)
-      step(seconds) {
-        for (let s = 0; s < seconds; s += 1 / 30) {
-          time += 1 / 30;
-          for (const part of parts) part.update(1 / 30, time);
-        }
-        post.render();
-      },
-      // draw calls and triangles for one whole frame, mirror and bloom included
-      frameInfo() {
-        renderer.info.autoReset = false;
-        renderer.info.reset();
-        post.render();
-        const { calls, triangles } = renderer.info.render;
-        renderer.info.autoReset = true;
-        return { calls, triangles, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, programs: renderer.info.programs.length };
-      }
-    };
+  // The techdemo's teardown order (its no-leak rule 8).
+  function destroy() {
+    if (destroyed) return;
+    destroyed = true;
+    renderer.setAnimationLoop(null);
+    abort.abort();
+    if (viewObserver) viewObserver.disconnect();
+    if (sizeObserver) sizeObserver.disconnect();
+    for (let i = parts.length - 1; i >= 0; i--) parts[i].dispose();
+    parts.length = 0;
+    if (ctx.atlas) ctx.atlas.dispose();
+    if (post) post.dispose();
+    const lost = renderer.getContext().isContextLost();
+    renderer.dispose();
+    if (!lost) renderer.forceContextLoss(); // browsers cap how many contexts can be alive
+    // a canvas keeps its lost context: leave a fresh one in its place
+    canvas.replaceWith(canvas.cloneNode(false));
+    host.classList.remove("is-live");
+    if (toggle) toggle.hidden = true;
   }
+
+  return {
+    destroy,
+    renderer,
+    tier: () => tier,
+    time: () => time,
+    // moves the scene on by `seconds` without waiting for frames (slow software WebGL in tests)
+    step(seconds) {
+      for (let s = 0; s < seconds; s += 1 / 30) {
+        time += 1 / 30;
+        for (let i = 0; i < parts.length; i++) parts[i].update(1 / 30, time);
+      }
+      post.render();
+    },
+    // draw calls and triangles for one whole frame (mirror and bloom included), and memory
+    frameInfo() {
+      renderer.info.autoReset = false;
+      renderer.info.reset();
+      post.render();
+      const { calls, triangles } = renderer.info.render;
+      renderer.info.autoReset = true;
+      const { geometries, textures } = renderer.info.memory;
+      return { calls, triangles, geometries, textures, programs: renderer.info.programs.length };
+    }
+  };
 }

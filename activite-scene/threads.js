@@ -52,7 +52,8 @@ const fragmentShader = /* glsl */ `
     float edge = 1.0 - smoothstep(0.45, 1.0, abs(vSide));
     float nib = exp(-(vHead - vS) * 40.0) * step(vHead, 0.995);
     float tail = smoothstep(vTail, vTail + 0.22, vS);
-    gl_FragColor = vec4(vColor * (1.0 + nib * 3.0), edge * tail);
+    float mirrored = step(cameraPosition.y, 0.0); // drawn into the sea's mirror: half strength
+    gl_FragColor = vec4(vColor * (1.0 + nib * 3.0) * (1.0 - 0.5 * mirrored), edge * tail);
   }
 `;
 
@@ -94,6 +95,7 @@ export function createThreads({ scene }) {
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
+  mesh.renderOrder = 1; // over the sea
   scene.add(mesh);
 
   // timing per thread: when it starts, how long the nib takes, how long it stays, how long the tail takes
@@ -122,7 +124,7 @@ export function createThreads({ scene }) {
 
   return {
     // a: where the stroke leaves (end of a word), b: where it lands, up: the camera's up
-    spawn(a, b, camUp, hex, start, draw, width) {
+    spawn(a, b, camUp, tint, start, draw, width) {
       const r = cursor;
       cursor = (cursor + 1) % COUNT;
       chord.subVectors(b, a);
@@ -156,7 +158,7 @@ export function createThreads({ scene }) {
       position.addUpdateRange(base * 3, PER * 3);
       tangent.addUpdateRange(base * 3, PER * 3);
       position.needsUpdate = tangent.needsUpdate = true;
-      uniforms.uColor.value[r].set(hex).multiplyScalar(2.1);
+      uniforms.uColor.value[r].copy(tint).multiplyScalar(1.9);
       uniforms.uWidth.value[r] = width;
       const t = timing[r];
       t.start = start;
@@ -174,7 +176,8 @@ export function createThreads({ scene }) {
     },
     // after the still frame: threads that were held drawn let go from now
     release(time) {
-      for (const t of timing) {
+      for (let r = 0; r < COUNT; r++) {
+        const t = timing[r];
         if (t.start > -1e8 && time - t.start > t.draw + t.stay) t.start = time - t.draw - t.stay;
       }
     },

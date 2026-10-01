@@ -1,6 +1,6 @@
 // Post-processing, as in the techdemo: the scene renders into a half-float
 // target so glowing ink can go above 1, bloom picks up only what is brighter
-// than its threshold, and OutputPass applies ACES tone mapping and sRGB.
+// than its threshold, and OutputPass applies the renderer's tone mapping and sRGB.
 import * as THREE from "three";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
@@ -34,16 +34,19 @@ export function createPost(renderer, scene, camera) {
   const target = samples => new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples });
   let samples = 4;
   const composer = new EffectComposer(renderer, target(samples));
+  const scenePass = new RenderPass(scene, camera);
   const safe = new ShaderPass(SafeShader);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.22, 1.0);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.32, 0.2, 1.0);
   const output = new OutputPass();
-  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(scenePass);
   composer.addPass(safe);
   composer.addPass(bloom);
   composer.addPass(output);
 
   return {
     render() { composer.render(); },
+    // where the scene is drawn (shaders are compiled for it: no tone mapping, linear colour)
+    get target() { return composer.readBuffer; },
     setSize(width, height, pixelRatio, bloomScale) {
       composer.setPixelRatio(pixelRatio);
       composer.setSize(width, height);
@@ -54,11 +57,13 @@ export function createPost(renderer, scene, camera) {
       samples = n;
       composer.reset(target(n)); // disposes the old targets
     },
+    // each pass, then the composer's own targets (it doesn't dispose its passes)
     dispose() {
-      composer.dispose();
+      scenePass.dispose();
       safe.dispose();
       bloom.dispose();
       output.dispose();
+      composer.dispose();
     }
   };
 }

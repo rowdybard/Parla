@@ -1,16 +1,16 @@
-// The night over the lagoon: a gradient from --night overhead to a lit horizon,
-// warm vanilla on the moon's side and a trace of lagoon green on the other, a
-// faint band of stars, twinkling stars, and a vanilla moon with its halo.
+// The sunset: coral at the horizon through pink and orchid to periwinkle
+// overhead, long streaks of cloud lit from below (gold near the sun, hot pink,
+// lilac higher up), and the sun itself sitting low over the sea.
 import * as THREE from "three";
-import { hash } from "./glsl.js";
-import { hex, color } from "./palette.js";
+import { hash, skyGradient } from "./glsl.js";
+import { sunset, color } from "./palette.js";
 
 const DOME = 2400;
-const MOON_DISTANCE = 2000;
-// The moon is drawn on its own layer, which the lagoon's mirror doesn't see: its
-// path on the water comes from the glints on the ripples instead of a blurred copy.
-export const MOON_LAYER = 1;
-const MOON_RADIUS = 0.017; // radians: a little larger than life, as it looks low on the horizon
+const SUN_DISTANCE = 2000;
+const SUN_RADIUS = 0.016; // radians: a little larger than life, as it looks at sunset
+// The sun is drawn on its own layer, which the sea's mirror doesn't see: its path
+// on the water comes from glitter on the ripples instead of a blurred copy.
+export const SUN_LAYER = 1;
 
 const skyShader = {
   vertexShader: /* glsl */ `
@@ -22,52 +22,33 @@ const skyShader = {
   `,
   fragmentShader: /* glsl */ `
     uniform float uTime;
-    uniform vec3 uZenith, uMid, uHorizon, uWarm, uLagoon, uMoonDir;
+    uniform vec3 uZenith, uHigh, uLow, uHorizon, uGold, uSunDir, uCloudPink, uCloudLilac;
     varying vec3 vDir;
     ${hash}
-
-    float starField(vec3 d, float scale, float rarity, float size) {
-      vec3 p = d * scale;
-      vec3 cell = floor(p);
-      float h = hash31(cell);
-      if (h < rarity) return 0.0;
-      vec3 jitter = vec3(hash31(cell + 1.7), hash31(cell + 3.1), hash31(cell + 5.3)) - 0.5;
-      float r = length(fract(p) - 0.5 - jitter * 0.55);
-      float twinkle = 0.55 + 0.45 * sin(uTime * (0.7 + 2.6 * hash31(cell + 7.7)) + h * 80.0);
-      return smoothstep(size, 0.0, r) * twinkle * (h - rarity) / (1.0 - rarity);
-    }
-
+    ${skyGradient}
     void main() {
       vec3 d = normalize(vDir);
-      float up = max(d.y, 0.0);
-      vec3 col = mix(uHorizon, uMid, smoothstep(0.0, 0.17, up));
-      col = mix(col, uZenith, smoothstep(0.12, 0.72, up));
-
-      // vanilla light low over the water on the moon's side, a little lagoon on the other
-      float toward = dot(normalize(d.xz + 1e-5), normalize(uMoonDir.xz));
-      float low = exp(-up * 11.0);
-      col += uWarm * pow(max(toward, 0.0), 14.0) * low * 0.09;
-      col += uLagoon * pow(max(0.5 - 0.5 * toward, 0.0), 2.0) * exp(-up * 8.0) * 0.035;
-
-      // a faint band of starlight across the sky
-      vec3 bandAxis = normalize(vec3(0.42, 0.62, 0.66));
-      float band = exp(-pow(dot(d, bandAxis), 2.0) * 22.0);
-      vec2 bp = vec2(atan(d.z, d.x) * 3.0, d.y * 9.0);
-      float dust = noise2(bp * 2.3) * 0.6 + noise2(bp * 6.1) * 0.4;
-      col += mix(uLagoon, vec3(0.45, 0.6, 1.0), 0.55) * band * dust * 0.05 * smoothstep(0.03, 0.3, up);
-
-      // stars, faint and many, then a few bright ones; they sink into the haze
-      float stars = starField(d, 300.0, 0.972, 0.13) * 0.9 + starField(d, 110.0, 0.988, 0.09) * 2.4;
-      col += vec3(1.0, 0.96, 0.9) * stars * smoothstep(0.03, 0.24, d.y);
-
-      // below the horizon (only ever seen in grazing reflections): dark water-sky
-      if (d.y < 0.0) col = mix(uHorizon, uZenith, smoothstep(0.0, 0.25, -d.y));
+      vec3 col = skyGradient(d);
+      if (d.y > 0.0) {
+        // a high layer of cloud, in long streaks along the horizon, drifting
+        vec2 p = d.xz / (d.y + 0.05);
+        p = vec2(p.x * 0.33, p.y * 1.1) + vec2(uTime * 0.008, 0.0);
+        float c = fbm(p * 1.3);
+        float cover = smoothstep(0.4, 0.74, c) * smoothstep(0.012, 0.06, d.y) * (1.0 - smoothstep(0.55, 0.95, d.y));
+        float toward = dot(normalize(d.xz + 1e-5), normalize(uSunDir.xz));
+        vec3 lit = mix(uCloudPink, uGold, pow(max(toward, 0.0), 6.0) * exp(-d.y * 5.0));
+        lit = mix(lit, uCloudLilac, smoothstep(0.12, 0.55, d.y) * 0.75);
+        // thin edges catch more light than thick middles
+        // thick middles shade towards violet
+        lit = mix(lit, lit * vec3(0.72, 0.6, 0.95), smoothstep(0.6, 0.85, c));
+        col = mix(col, lit, cover * 0.92);
+      }
       gl_FragColor = vec4(col, 1.0);
     }
   `
 };
 
-const moonShader = {
+const sunShader = {
   vertexShader: /* glsl */ `
     varying vec2 vUv;
     void main() {
@@ -78,28 +59,26 @@ const moonShader = {
   fragmentShader: /* glsl */ `
     uniform vec3 uColor, uHalo;
     varying vec2 vUv;
-    ${hash}
     void main() {
       float r = length(vUv);
-      float disc = smoothstep(0.25, 0.238, r);
-      // soft grey seas on the face
-      float seas = noise2(vUv * 9.0 + 3.0) * 0.6 + noise2(vUv * 21.0) * 0.4;
-      float face = 1.0 - 0.22 * smoothstep(0.45, 0.8, seas);
-      float halo = exp(-max(r - 0.24, 0.0) * 7.0) * 0.22 + exp(-r * 2.4) * 0.07;
-      gl_FragColor = vec4(uColor * disc * face + uHalo * halo * (1.0 - disc), 1.0);
+      float disc = smoothstep(0.25, 0.235, r);
+      float halo = exp(-max(r - 0.23, 0.0) * 5.0) * 0.5 + exp(-r * 2.2) * 0.25;
+      gl_FragColor = vec4(uColor * disc + uHalo * halo * (1.0 - disc), 1.0);
     }
   `
 };
 
-export function createSky({ scene, camera, moonDir }) {
+export function createSky({ scene, camera, sunDir }) {
   const uniforms = {
     uTime: { value: 0 },
-    uZenith: { value: color("#050d14") },
-    uMid: { value: color(hex.night2) },
-    uHorizon: { value: color("#163743") },
-    uWarm: { value: color(hex.vanilla) },
-    uLagoon: { value: color(hex.lagoon) },
-    uMoonDir: { value: moonDir }
+    uZenith: { value: color(sunset.zenith) },
+    uHigh: { value: color(sunset.high) },
+    uLow: { value: color(sunset.low) },
+    uHorizon: { value: color(sunset.horizon) },
+    uGold: { value: color(sunset.gold) },
+    uCloudPink: { value: color(sunset.cloudPink) },
+    uCloudLilac: { value: color(sunset.cloudLilac) },
+    uSunDir: { value: sunDir }
   };
   const dome = new THREE.Mesh(
     new THREE.SphereGeometry(DOME, 48, 24),
@@ -109,37 +88,35 @@ export function createSky({ scene, camera, moonDir }) {
   dome.frustumCulled = false;
   scene.add(dome);
 
-  const moonMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      uColor: { value: color(hex.paper).lerp(color(hex.vanilla), 0.3).multiplyScalar(1.12) },
-      uHalo: { value: color(hex.vanilla, 0.24) }
-    },
-    ...moonShader,
+  const sunMaterial = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: color(sunset.sun, 2.6) }, uHalo: { value: color(sunset.gold, 0.45) } },
+    ...sunShader,
     transparent: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false
   });
-  const moon = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), moonMaterial);
-  moon.renderOrder = -1;
-  moon.frustumCulled = false;
-  moon.scale.setScalar(MOON_DISTANCE * Math.tan(MOON_RADIUS) * 8); // the disc fills a quarter of the quad
-  moon.layers.set(MOON_LAYER);
-  scene.add(moon);
+  const sun = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), sunMaterial);
+  sun.renderOrder = -1;
+  sun.frustumCulled = false;
+  sun.layers.set(SUN_LAYER);
+  sun.scale.setScalar(SUN_DISTANCE * Math.tan(SUN_RADIUS) * 8); // the disc fills a quarter of the quad
+  scene.add(sun);
 
   return {
-    horizon: uniforms.uHorizon.value,
+    // the gradient's colours, for the sand and the sea to match
+    gradient: uniforms,
     update(dt, time) {
       uniforms.uTime.value = time;
       dome.position.copy(camera.position);
-      moon.position.copy(camera.position).addScaledVector(moonDir, MOON_DISTANCE);
-      moon.lookAt(camera.position);
+      sun.position.copy(camera.position).addScaledVector(sunDir, SUN_DISTANCE);
+      sun.lookAt(camera.position);
     },
     dispose() {
       dome.geometry.dispose();
       dome.material.dispose();
-      moon.geometry.dispose();
-      moonMaterial.dispose();
-      scene.remove(dome, moon);
+      sun.geometry.dispose();
+      sunMaterial.dispose();
+      scene.remove(dome, sun);
     }
   };
 }
