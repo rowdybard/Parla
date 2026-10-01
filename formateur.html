@@ -1,0 +1,4888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace formateur — Parla by Hitondra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Styles spécifiques à l'espace formateur (n'altèrent pas style.css) */
+  .fm-row{
+    background:var(--white);border:1px solid var(--sand-stroke);border-radius:14px;
+    padding:16px 18px;margin-bottom:12px;cursor:pointer;transition:border-color .15s,transform .1s;
+  }
+  .fm-row:hover{border-color:var(--green);}
+  .fm-row:active{transform:scale(0.995);}
+  .fm-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .fm-learner{font-weight:700;font-size:15px;}
+  .fm-meta{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .fm-mission{font-size:13.5px;color:var(--ink-soft);margin-top:8px;}
+  .fm-answer-preview{
+    font-size:13.5px;color:var(--ink-soft);margin-top:8px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .fm-filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .fm-filter-btn{
+    padding:8px 16px;border-radius:20px;border:1px solid var(--sand-stroke);
+    background:var(--white);font-size:13px;font-weight:600;color:var(--ink-soft);
+  }
+  .fm-filter-btn.on{background:var(--ink);color:var(--white);border-color:var(--ink);}
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(8,20,29,0.5);
+    display:none;align-items:center;justify-content:center;z-index:200;padding:18px;
+  }
+
+#learnerDetailModal{
+  display:none;
+}
+    
+  .modal-overlay.on{display:flex;}
+  .modal-box{
+    background:var(--white);border-radius:20px;max-width:540px;width:100%;
+    max-height:88vh;overflow-y:auto;padding:26px;
+  }
+  .modal-close{
+    float:right;background:none;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;line-height:1;
+  }
+  .modal-title{font-family:var(--f-display);font-size:20px;margin-bottom:4px;}
+  .modal-sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:18px;}
+ .readonly-block{
+  background:transparent;
+  border-radius:0;
+  padding:0;
+  font-size:14px;
+  white-space:normal;
+  margin-bottom:16px;
+  color:var(--ink);
+}
+  .confirm-msg{
+    background:var(--green-light);color:var(--green-deep);padding:12px 16px;
+    border-radius:12px;font-size:13.5px;margin-top:14px;display:none;
+  }
+
+/* ÉVALUATION DU FORMATEUR */
+
+.cor-eval-dimension {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--sand-stroke);
+}
+
+.cor-eval-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-top: 10px;
+}
+
+.cor-eval-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.cor-eval-comment {
+  width: 100%;
+  margin-top: 10px;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+/* PROGRESSION DES APPRENANTS */
+
+.learner-progress-chart {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--sand-stroke);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.learner-progress-svg {
+  width: 100%;
+  height: 140px;
+  display: block;
+}
+
+.learner-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.learner-progress-labels span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Masquer les détails de progression dans les cartes apprenants */
+.learner-row > div[style*="margin-top:12px"] {
+  display: none !important;
+}
+
+#learnerDetailModal[hidden] {
+  display: none !important;
+}
+
+.cor-answer-card {
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.cor-answer-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cor-answer-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.cor-answer-card-subtitle {
+  display: inline;
+  margin-left: 6px;
+  font-size: 11px;
+  color: #99a8b2;
+}
+
+.cor-answer-card-body {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.cor-result-correct,
+.cor-result-incorrect,
+.cor-result-pending {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cor-result-correct {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cor-result-incorrect {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.cor-result-pending {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.cor-answer-empty {
+  color: #99a8b2;
+  font-style: italic;
+}
+
+.cor-answer-list {
+  margin: 3px 0 0;
+  padding-left: 20px;
+}
+
+.cor-answer-list li {
+  margin-bottom: 2px;
+}
+
+.cor-answer-pairs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cor-answer-pair {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 7px;
+  border-radius: 5px;
+  background: #f9fafb;
+}
+
+.cor-answer-pair strong {
+  color: #111827;
+}
+
+.cor-sentence-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cor-word-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  background: #f7fdfb;
+  border: 1px solid #e1f6ef;
+  border-radius: 10px;
+}
+
+.cor-word-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #6ed5b3;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cor-word-text {
+  font-weight: 600;
+}
+
+.cor-sentence-result {
+  padding: 10px 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  color: #495761;
+}
+    
+.cor-open-response {
+  padding: 8px 10px;
+  border-left: 3px solid #7bd9ba;
+  border-radius: 5px;
+  background: #f9fafb;
+}
+    
+</style>
+</head>
+<body>
+
+<div id="loadingScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <span class="spinner spinner-dark" style="width:26px;height:26px;"></span>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none;">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo brand">Parla</div>
+      <div class="topbar-meta" id="topbarMeta">Espace formateur</div>
+    </div>
+    <div class="topbar-user">
+      <div class="avatar" id="avatarInitial">?</div>
+      <button class="btn btn-danger-outline btn-sm" id="logoutBtn">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <nav class="side-nav" id="sideNav">
+
+  <a href="#" data-view="dashboard" class="on">
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span> Tableau de bord
+  </a>
+
+  <a href="#" data-view="missions">
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></span> Missions
+  </a>
+
+  <a href="#" data-view="learners">
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg></span> Apprenants
+  </a>
+
+  <a href="#" data-view="live-sessions">
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span> Session live
+  </a>
+
+  <a href="#" data-view="questions">
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg></span> Questions
+  </a>
+
+  <a
+    href="admin-paiements.html"
+    id="adminPaymentsLink"
+    style="display:none;"
+  >
+    <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span> Paiements
+  </a>
+
+<a
+  href="temoignage.html"
+  id="adminTestimonialsLink"
+  style="display:none;"
+>
+  <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span> Témoignages
+</a>
+
+</nav>
+
+    <main class="content">
+
+      <!-- ================= TABLEAU DE BORD ================= -->
+      <section class="view on" id="view-dashboard">
+        <h1 class="view-title">Tableau de bord</h1>
+        <p class="view-sub">Vue d'ensemble de l'activité des apprenants.</p>
+
+        <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:22px;">
+          <div class="stat-card">
+            <div class="stat-num" id="statLearners">0</div>
+            <div class="stat-lbl">Apprenants</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statMissions">0</div>
+            <div class="stat-lbl">Missions</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statSubmissions">0</div>
+            <div class="stat-lbl">Réponses reçues</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statToCorrect">0</div>
+            <div class="stat-lbl">À corriger</div>
+          </div>
+        </div>
+
+        <div class="fm-filters">
+          <button class="fm-filter-btn on" data-filter="all">Toutes</button>
+          <button class="fm-filter-btn" data-filter="submitted">À corriger</button>
+          <button class="fm-filter-btn" data-filter="corrected">Corrigées</button>
+        </div>
+
+        <div id="submissionsSlot">
+          <div class="empty-state">Chargement…</div>
+        </div>
+       </section>
+
+<!-- ================= SESSION LIVE ================= -->
+<section class="view" id="view-live-sessions">
+  <h1 class="view-title">Session live</h1>
+  <p class="view-sub">Organisez vos visioconférences Google Meet.</p>
+
+  <div class="section-header">
+    <div></div>
+
+    <button
+  type="button"
+  class="btn-primary"
+  id="openLiveSessionButton"
+>
+  + Nouvelle session
+</button>
+      
+  </div>
+
+  <div id="liveSessionsSlot">
+    <div class="empty-state">
+      Aucune session live pour le moment.
+    </div>
+  </div>
+</section>
+        
+      <!-- ================= MISSIONS ================= -->
+      <section class="view" id="view-missions">
+        <h1 class="view-title">Missions</h1>
+        <p class="view-sub">Créez et gérez les missions proposées aux apprenants.</p>
+
+        <button class="btn btn-primary" id="newMissionBtn">
+          + Nouvelle mission
+        </button>
+
+        <div id="missionsSlot" style="margin-top:20px;">
+          <div class="empty-state">Chargement…</div>
+        </div>
+      </section>
+        
+<section class="view" id="view-learners">
+  <h1 class="view-title">Apprenants</h1>
+  <p class="view-sub">Consultez les apprenants inscrits sur Parla.</p>
+
+  <div id="learnersSlot" style="margin-top:20px;">
+    <div class="empty-state">Chargement…</div>
+  </div>
+</section>
+
+      <!-- ================= QUESTIONS ================= -->
+      <section class="view" id="view-questions">
+        <h1 class="view-title">Questions des apprenants</h1>
+        <p class="view-sub">Répondez aux questions envoyées par vos apprenants.</p>
+
+        <div class="fm-filters">
+          <button class="fm-filter-btn on" data-qfilter="all">Toutes</button>
+          <button class="fm-filter-btn" data-qfilter="open">En attente</button>
+          <button class="fm-filter-btn" data-qfilter="answered">Répondues</button>
+        </div>
+
+        <div id="questionsSlot">
+          <div class="empty-state">Chargement…</div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="#" data-view="dashboard" class="on"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>Tableau</a>
+    <a href="#" data-view="questions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg></span>Questions</a>
+  </nav>
+
+</div>
+
+<!-- ================= MODALE DÉTAIL APPRENANT ================= -->
+<div class="modal-overlay" id="learnerDetailModal" hidden>
+  <div class="modal-box">
+
+    <button
+      class="modal-close"
+      id="learnerDetailClose"
+      aria-label="Fermer"
+    >
+      ✕
+    </button>
+
+    <div class="modal-title" id="learnerDetailName">
+      Apprenant
+    </div>
+
+    <div class="modal-sub" id="learnerDetailInfo">
+      —
+    </div>
+
+    <div style="margin-top:20px;">
+
+      <div style="
+        font-weight:700;
+        margin-bottom:10px;
+      ">
+        Progression
+      </div>
+
+      <div id="learnerDetailProgress">
+        <div class="hint">
+          Chargement…
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ================= MODALE CORRECTION ================= -->
+<div class="modal-overlay" id="correctionModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeCorrectionModal">✕</button>
+    <div class="modal-title" id="corLearnerName">—</div>
+    <div class="modal-sub" id="corMissionInfo">—</div>
+
+   <div class="hint" style="margin-bottom:6px;">Réponse envoyée</div>
+<div class="readonly-block" id="corAnswerText">—</div>
+
+<div id="corAudioBlock" style="display:none;margin-bottom:16px;">
+  <div class="hint" style="margin-bottom:6px;">🎧 Réponse vocale</div>
+  <audio id="corAudioPlayer" controls style="width:100%;"></audio>
+</div>
+
+    <div
+  id="corEvaluationBlock"
+  style="
+    margin-top:18px;
+    margin-bottom:18px;
+    padding:14px;
+    border:1px solid var(--sand-stroke);
+    border-radius:14px;
+    background:var(--sand);
+  "
+>
+
+  <div style="
+    font-weight:700;
+    margin-bottom:4px;
+  ">
+    Évaluation
+  </div>
+
+  <div class="hint" style="margin-bottom:14px;">
+    Les objectifs indiquent ce qui a été travaillé dans la mission.
+    Évaluez ensuite la performance de l’apprenant selon les différentes dimensions.
+  </div>
+
+  <!-- OBJECTIFS -->
+  <div style="font-weight:700; margin:16px 0 8px;">
+    Objectifs travaillés
+  </div>
+
+  <div id="corObjectivesList">
+    <div class="hint">
+      Chargement des objectifs…
+    </div>
+  </div>
+
+  <!-- ÉVALUATION DES DIMENSIONS -->
+  <div style="font-weight:700; margin:24px 0 8px;">
+    Évaluation des compétences
+  </div>
+
+  <div class="hint" style="margin-bottom:14px;">
+    Pour chaque dimension, choisissez le niveau correspondant à la performance observée.
+  </div>
+
+  <div id="corEvaluationDimensions">
+
+    <!-- RÉALISATION DE LA TÂCHE -->
+<div class="cor-eval-dimension" data-dimension="task_completion">
+
+  <div style="font-weight:700;">
+    Réalisation de la tâche
+    <span class="hint">/5</span>
+  </div>
+
+  <div class="cor-eval-options">
+
+    <label>
+      <input
+        type="radio"
+        name="eval_task_completion"
+        value="insuffisant"
+      >
+      Insuffisant
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_task_completion"
+        value="partiel"
+      >
+      Partiel
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_task_completion"
+        value="satisfaisant"
+      >
+      Satisfaisant
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_task_completion"
+        value="tres_bien"
+      >
+      Très bien
+    </label>
+
+  </div>
+
+  <textarea
+    id="eval_comment_task_completion"
+    class="cor-eval-comment"
+    rows="2"
+    placeholder="Observation sur la réalisation de la tâche…"
+  ></textarea>
+
+</div>
+      
+    <!-- COMPRÉHENSION -->
+    <div class="cor-eval-dimension" data-dimension="comprehension">
+      <div style="font-weight:700;">
+        Compréhension <span class="hint">/4</span>
+      </div>
+
+      <div class="cor-eval-options">
+        <label><input type="radio" name="eval_comprehension" value="insuffisant"> Insuffisant</label>
+        <label><input type="radio" name="eval_comprehension" value="partiel"> Partiel</label>
+        <label><input type="radio" name="eval_comprehension" value="satisfaisant"> Satisfaisant</label>
+        <label><input type="radio" name="eval_comprehension" value="tres_bien"> Très bien</label>
+      </div>
+
+      <textarea
+        id="eval_comment_comprehension"
+        class="cor-eval-comment"
+        rows="2"
+        placeholder="Observation…"
+      ></textarea>
+    </div>
+
+    <!-- GRAMMAIRE -->
+    <div class="cor-eval-dimension" data-dimension="grammar">
+      <div style="font-weight:700;">
+        Grammaire <span class="hint">/3</span>
+      </div>
+
+      <div class="cor-eval-options">
+        <label><input type="radio" name="eval_grammar" value="insuffisant"> Insuffisant</label>
+        <label><input type="radio" name="eval_grammar" value="partiel"> Partiel</label>
+        <label><input type="radio" name="eval_grammar" value="satisfaisant"> Satisfaisant</label>
+        <label><input type="radio" name="eval_grammar" value="tres_bien"> Très bien</label>
+      </div>
+
+      <textarea
+        id="eval_comment_grammar"
+        class="cor-eval-comment"
+        rows="2"
+        placeholder="Observation…"
+      ></textarea>
+    </div>
+
+    <!-- VOCABULAIRE -->
+    <div class="cor-eval-dimension" data-dimension="vocabulary">
+      <div style="font-weight:700;">
+        Vocabulaire <span class="hint">/3</span>
+      </div>
+
+      <div class="cor-eval-options">
+        <label><input type="radio" name="eval_vocabulary" value="insuffisant"> Insuffisant</label>
+        <label><input type="radio" name="eval_vocabulary" value="partiel"> Partiel</label>
+        <label><input type="radio" name="eval_vocabulary" value="satisfaisant"> Satisfaisant</label>
+        <label><input type="radio" name="eval_vocabulary" value="tres_bien"> Très bien</label>
+      </div>
+
+      <textarea
+        id="eval_comment_vocabulary"
+        class="cor-eval-comment"
+        rows="2"
+        placeholder="Observation…"
+      ></textarea>
+    </div>
+
+    <!-- PRODUCTION -->
+    <div class="cor-eval-dimension" data-dimension="production">
+      <div style="font-weight:700;">
+        Production <span class="hint">/3</span>
+      </div>
+
+      <div class="cor-eval-options">
+        <label><input type="radio" name="eval_production" value="insuffisant"> Insuffisant</label>
+        <label><input type="radio" name="eval_production" value="partiel"> Partiel</label>
+        <label><input type="radio" name="eval_production" value="satisfaisant"> Satisfaisant</label>
+        <label><input type="radio" name="eval_production" value="tres_bien"> Très bien</label>
+      </div>
+
+      <textarea
+        id="eval_comment_production"
+        class="cor-eval-comment"
+        rows="2"
+        placeholder="Observation…"
+      ></textarea>
+    </div>
+
+    <!-- PRONONCIATION -->
+<div class="cor-eval-dimension" data-dimension="pronunciation">
+
+  <div style="font-weight:700;">
+    Prononciation
+    <span class="hint">/2</span>
+  </div>
+
+  <div
+    class="hint cor-pronunciation-hint"
+    style="margin-top:4px;"
+  >
+    La prononciation sera évaluée si une réponse audio est disponible.
+  </div>
+
+  <div class="cor-eval-options">
+
+    <label>
+      <input
+        type="radio"
+        name="eval_pronunciation"
+        value="insuffisant"
+      >
+      Insuffisant
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_pronunciation"
+        value="partiel"
+      >
+      Partiel
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_pronunciation"
+        value="satisfaisant"
+      >
+      Satisfaisant
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_pronunciation"
+        value="tres_bien"
+      >
+      Très bien
+    </label>
+
+    <label>
+      <input
+        type="radio"
+        name="eval_pronunciation"
+        value="non_applicable"
+      >
+      Non applicable
+    </label>
+
+  </div>
+
+  <textarea
+    id="eval_comment_pronunciation"
+    class="cor-eval-comment"
+    rows="2"
+    placeholder="Observation sur la prononciation…"
+  ></textarea>
+
+</div>
+
+  </div>
+
+  <!-- SCORE -->
+  <div
+    id="corScorePreview"
+    style="
+      margin-top:20px;
+      padding:14px;
+      border-radius:10px;
+      background:var(--panel, #f5f5f5);
+      display:none;
+    "
+  >
+    <div style="font-weight:700;">Résultat</div>
+
+    <div style="margin-top:6px;">
+      Score : <strong id="corScoreValue">— / 20</strong>
+    </div>
+
+    <div style="margin-top:4px;">
+      Niveau : <strong id="corLevelValue">—</strong>
+    </div>
+  </div>
+
+</div>
+
+<label
+  for="corFeedback"
+  style="display:block;font-weight:600;margin-bottom:8px;"
+>
+  Feedback
+</label>
+
+<textarea
+  id="corFeedback"
+  class="answer-box"
+  placeholder="Écrivez votre feedback pour l'apprenant..."
+></textarea>
+
+<button
+  class="btn btn-primary"
+  id="saveCorrectionBtn"
+  style="margin-top:14px;"
+>
+  Enregistrer la correction
+</button>
+
+<div
+  class="error-msg"
+  id="corErrorBox"
+  style="display:none;"
+></div>
+
+<div
+  class="confirm-msg"
+  id="corConfirmBox"
+>
+  Correction enregistrée ✓
+</div>
+
+  </div>
+</div>
+
+<!-- ================= MODALE RÉPONSE À UNE QUESTION ================= -->
+<div class="modal-overlay" id="questionModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeQuestionModal">✕</button>
+    <div class="modal-title" id="qLearnerName">—</div>
+    <div class="modal-sub" id="qMissionInfo">—</div>
+
+    <div class="hint" style="margin-bottom:6px;">Question</div>
+    <div class="readonly-block" id="qQuestionText">—</div>
+
+    <label for="qAnswerBox" style="display:block;font-weight:600;margin-bottom:8px;">Votre réponse</label>
+    <textarea id="qAnswerBox" class="answer-box" placeholder="Écrivez votre réponse..."></textarea>
+
+    <button class="btn btn-primary" id="saveAnswerBtn" style="margin-top:14px;">Envoyer la réponse</button>
+    <div class="error-msg" id="qErrorBox" style="display:none;"></div>
+    <div class="confirm-msg" id="qConfirmBox">Réponse envoyée ✓</div>
+  </div>
+</div>
+
+<!-- ================= MODALE NOUVELLE MISSION ================= -->
+<div class="modal-overlay" id="missionModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeMissionModal">✕</button>
+
+    <div class="modal-title">Nouvelle mission</div>
+    <div class="modal-sub">Créez une mission pour vos apprenants.</div>
+
+    <div class="field">
+      <label for="missionTitle">Titre</label>
+      <input type="text" id="missionTitle" placeholder="Ex. Se présenter">
+    </div>
+
+    <div class="field">
+      <label for="missionDescription">Description</label>
+      <textarea id="missionDescription" class="answer-box"
+        placeholder="Décrivez la mission..."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="missionLanguage">Langue</label>
+      <select id="missionLanguage">
+        <option value="Français">Français</option>
+        <option value="Anglais">Anglais</option>
+        <option value="Espagnol">Espagnol</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="missionLevel">Niveau</label>
+      <select id="missionLevel">
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+        <option value="C1">C1</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="missionWeek">Semaine</label>
+      <input type="number" id="missionWeek" min="1" value="1">
+    </div>
+
+    <div class="field">
+      <label for="missionMinutes">Durée estimée (minutes)</label>
+      <input type="number" id="missionMinutes" min="1" value="30">
+    </div>
+
+<div class="field">
+
+  <label>Objectifs de cette mission</label>
+
+  <div id="missionObjectivesList"
+       style="
+         display:flex;
+         flex-direction:column;
+         gap:10px;
+       ">
+    <div class="hint">
+      Chargement des objectifs…
+    </div>
+  </div>
+
+</div>
+
+<div id="objectivePicker"
+     style="
+       display:none;
+       margin-top:14px;
+       padding:14px;
+       border:1px solid var(--sand-stroke);
+       border-radius:12px;
+       background:var(--white);
+     ">
+
+  <div style="
+    font-weight:700;
+    margin-bottom:10px;
+  ">
+    Ajouter un objectif
+  </div>
+
+  <div id="objectivePickerList"
+       style="
+         display:flex;
+         flex-direction:column;
+         gap:8px;
+       ">
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-secondary"
+    id="closeObjectivePickerBtn"
+    style="margin-top:12px;">
+    Fermer
+  </button>
+
+</div>
+
+    <button class="btn btn-primary" id="saveMissionBtn" style="margin-top:14px;">
+      Créer la mission
+    </button>
+
+    <div class="error-msg" id="missionErrorBox" style="display:none;"></div>
+    <div class="confirm-msg" id="missionConfirmBox">
+      Mission créée ✓
+    </div>
+  </div>
+</div>
+    
+<!-- Librairie Supabase (doit être chargée avant config.js) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+/* =========================================================
+   Parla by Hitondra — Espace formateur
+   Toutes les données proviennent de Supabase.
+   ========================================================= */
+
+const state = {
+  user: null,
+  profile: null,
+  submissions: [],
+  questions: [],
+  submissionFilter: 'all',
+  questionFilter: 'all',
+  activeSubmission: null,
+  activeQuestion: null,
+  activeMission: null,
+  objectives: [],
+  objectivePickerType: null,
+  selectedMissionObjectives: []
+};
+
+// ---------- Utilitaires ----------
+function escapeHtml(str){
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function formatDate(iso){
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function languageLabel(code){
+  const map = { francais:'Français', anglais:'Anglais', espagnol:'Espagnol',
+                fr:'Français', en:'Anglais', es:'Espagnol' };
+  return map[(code||'').toLowerCase()] || code || '—';
+}
+
+function learnerFullName(p){
+  if (!p) return 'Apprenant inconnu';
+  return `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Apprenant';
+}
+
+// ---------- Navigation ----------
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.getElementById('view-' + name).classList.add('on');
+  document.querySelectorAll('#sideNav a, #bottomNav a').forEach(a => {
+    a.classList.toggle('on', a.dataset.view === name);
+  });
+}
+document.querySelectorAll('#sideNav a, #bottomNav a').forEach(a => {
+
+  a.addEventListener('click', function(e){
+
+    // Les liens vers une autre page fonctionnent normalement.
+    if (this.getAttribute('href') !== '#') {
+      return;
+    }
+
+    e.preventDefault();
+
+    showView(this.dataset.view);
+
+  });
+
+});
+
+// ---------- Déconnexion ----------
+document.getElementById('logoutBtn').addEventListener('click', async function(){
+  await supabaseClient.auth.signOut();
+  window.location.href = 'connexion.html';
+});
+
+// ---------- Point d'entrée ----------
+(async function init(){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { window.location.href = 'connexion.html'; return; }
+  state.user = user;
+
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+  console.error('Erreur récupération profil :', profileError);
+  return;
+}
+
+const role = (profile.role || '').toLowerCase();
+
+if (role !== 'teacher' && role !== 'admin') {
+  window.location.href = 'membre.html';
+  return;
+}
+
+if (role === 'admin') {
+
+  const adminPaymentsLink =
+    document.getElementById('adminPaymentsLink');
+
+  if (adminPaymentsLink) {
+    adminPaymentsLink.style.display = 'flex';
+  }
+
+  const adminTestimonialsLink =
+    document.getElementById('adminTestimonialsLink');
+
+  if (adminTestimonialsLink) {
+    adminTestimonialsLink.style.display = 'flex';
+  }
+
+}
+    
+  state.profile = profile;
+  document.getElementById('avatarInitial').textContent = (profile.first_name || '?').charAt(0).toUpperCase();
+
+await loadDashboardData();
+await loadMissionsData();
+await loadLearnersData();
+
+document.getElementById('learnerDetailModal').style.display = 'none';
+
+await loadQuestionsData();
+await loadObjectives();
+renderMissionObjectives();
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+})();
+
+// ---------- Chargement des missions ----------
+async function loadMissionsData() {
+
+  const {
+    data: profile,
+    error: profileError
+  } = await supabaseClient
+    .from('profiles')
+    .select('language')
+    .eq('id', state.user.id)
+    .single();
+
+  const slot =
+    document.getElementById('missionsSlot');
+
+  const userRole =
+    (state.profile?.role || '')
+      .trim()
+      .toLowerCase();
+
+  if (profileError || !profile) {
+    console.error(
+      'Erreur récupération langue du formateur :',
+      profileError
+    );
+
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de récupérer la langue du formateur.</div>';
+
+    return;
+  }
+
+  const teacherLanguage =
+    (profile.language || '')
+      .trim()
+      .toLowerCase();
+
+  if (!teacherLanguage) {
+    slot.innerHTML =
+      '<div class="empty-state">Aucune langue n’est définie pour votre profil.</div>';
+
+    return;
+  }
+
+  const {
+    data: allMissions,
+    error
+  } = await supabaseClient
+    .from('missions')
+    .select('*')
+    .order('week_number', {
+      ascending: true
+    });
+
+  if (error) {
+    console.error(
+      'Erreur chargement missions :',
+      error
+    );
+
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de charger les missions.</div>';
+
+    return;
+  }
+
+  const missions =
+    userRole === 'admin'
+      ? (allMissions || [])
+      : (allMissions || []).filter(
+          mission =>
+            (mission.language || '')
+              .trim()
+              .toLowerCase() === teacherLanguage
+        );
+
+  if (missions.length === 0) {
+    slot.innerHTML =
+      '<div class="empty-state">Aucune mission pour votre langue pour le moment.</div>';
+
+    return;
+  }
+
+  slot.innerHTML = missions.map(m => `
+
+    <div class="fm-row">
+
+      <div class="fm-row-top">
+
+        <div>
+          <div class="fm-learner">
+            ${escapeHtml(m.title)}
+          </div>
+
+          <div class="fm-meta">
+            ${escapeHtml(m.language)}
+            ·
+            ${escapeHtml(m.level)}
+            ·
+            Semaine ${m.week_number ?? '—'}
+          </div>
+        </div>
+
+        <div
+          style="display:flex;gap:8px;align-items:center;"
+        >
+
+          <button
+            type="button"
+            class="btn btn-sm btn-primary edit-mission-btn"
+            data-mission-id="${m.id}"
+          >
+            Modifier
+          </button>
+
+          <a
+            class="btn btn-sm btn-primary"
+            href="activite.html?mission_id=${m.id}"
+            style="text-decoration:none;"
+          >
+            Activités
+          </a>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary delete-mission-btn"
+            data-mission-id="${m.id}"
+          >
+            Supprimer
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="fm-answer-preview">
+        ${escapeHtml(
+          m.description || 'Aucune description.'
+        )}
+      </div>
+
+    </div>
+
+  `).join('');
+
+  document
+    .querySelectorAll('.edit-mission-btn')
+    .forEach(btn => {
+
+      btn.addEventListener(
+        'click',
+        async function(e) {
+
+          e.stopPropagation();
+
+          const missionId =
+            Number(this.dataset.missionId);
+
+          const mission =
+            missions.find(
+              m => m.id === missionId
+            );
+
+          if (!mission) return;
+
+          state.activeMission =
+            mission;
+
+          state.selectedMissionObjectives =
+            [];
+
+          const {
+            data: missionObjectives,
+            error: objectivesError
+          } = await supabaseClient
+            .from('mission_objectives')
+            .select(`
+              objective_id,
+              cefr_objectives (
+                id,
+                level,
+                competency,
+                objective_number,
+                title,
+                description,
+                sort_order
+              )
+            `)
+            .eq(
+              'mission_id',
+              missionId
+            );
+
+          if (objectivesError) {
+
+            console.error(
+              'Erreur chargement objectifs de la mission :',
+              objectivesError
+            );
+
+          } else {
+
+            state.selectedMissionObjectives =
+              (missionObjectives || [])
+                .map(
+                  item =>
+                    item.cefr_objectives
+                )
+                .filter(Boolean);
+
+          }
+
+          document
+            .getElementById('saveMissionBtn')
+            .textContent =
+              'Enregistrer les modifications';
+
+          document
+            .getElementById('missionTitle')
+            .value =
+              mission.title || '';
+
+          document
+            .getElementById('missionDescription')
+            .value =
+              mission.description || '';
+
+          document
+            .getElementById('missionLanguage')
+            .value =
+              mission.language || 'Français';
+
+          document
+            .getElementById('missionLevel')
+            .value =
+              mission.level || 'A1';
+
+          document
+            .getElementById('missionWeek')
+            .value =
+              mission.week_number || 1;
+
+          document
+            .getElementById('missionMinutes')
+            .value =
+              mission.estimated_minutes || 30;
+
+          renderMissionObjectives();
+          renderSelectedMissionObjectives();
+
+          document
+            .getElementById('missionModal')
+            .classList.add('on');
+
+        }
+      );
+
+    });
+
+
+  document
+    .querySelectorAll('.delete-mission-btn')
+    .forEach(btn => {
+
+      btn.addEventListener(
+        'click',
+        async function(e) {
+
+          e.stopPropagation();
+
+          const missionId =
+            Number(this.dataset.missionId);
+
+          if (!missionId) return;
+
+          const mission =
+            missions.find(
+              m => m.id === missionId
+            );
+
+          if (!mission) return;
+
+          const confirmed =
+            confirm(
+              `Supprimer la mission « ${mission.title} » ?`
+            );
+
+          if (!confirmed) return;
+
+          const {
+            error
+          } = await supabaseClient
+            .from('missions')
+            .delete()
+            .eq(
+              'id',
+              missionId
+            );
+
+          if (error) {
+
+            console.error(
+              'Erreur suppression mission :',
+              error
+            );
+
+            alert(
+              'Impossible de supprimer la mission : ' +
+              error.message
+            );
+
+            return;
+          }
+
+          await loadMissionsData();
+
+        }
+      );
+
+    });
+
+}
+    
+    // ---------- Missions pour session live ----------
+// ---------- Semaines pour session live ----------
+async function loadLiveSessionWeeks() {
+  const select = document.getElementById('liveWeek');
+
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">Choisir une semaine</option>
+    ${Array.from({ length: 12 }, (_, index) => {
+      const week = index + 1;
+
+      return `
+        <option value="${week}">
+          Semaine ${week}
+        </option>
+      `;
+    }).join('')}
+  `;
+}
+    
+// ---------- Affichage des sessions live ----------
+async function loadLiveSessions() {
+  const slot = document.getElementById('liveSessionsSlot');
+
+  if (!slot) return;
+
+  const { data: sessions, error } =
+    await supabaseClient
+      .from('live_sessions')
+      .select(`
+        *,
+        missions (
+          title,
+          language,
+          week_number
+        )
+      `)
+      .order('starts_at', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement sessions live :', error);
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de charger les sessions.</div>';
+    return;
+  }
+
+  if (!sessions || sessions.length === 0) {
+    slot.innerHTML =
+      '<div class="empty-state">Aucune session live pour le moment.</div>';
+    return;
+  }
+
+  slot.innerHTML = sessions.map(session => `
+    <div class="fm-row">
+      <div class="fm-row-top">
+        <div>
+          <div class="fm-learner">
+            ${escapeHtml(session.title)}
+          </div>
+
+          <div class="fm-meta">
+            Semaine ${session.missions?.week_number ?? '—'}
+            · ${escapeHtml(session.missions?.language || '')}
+          </div>
+        </div>
+
+        <span class="badge badge-done">
+          ${session.duration_minutes} min
+        </span>
+      </div>
+
+      <div class="fm-answer-preview">
+        ${new Date(session.starts_at).toLocaleString('fr-FR')}
+      </div>
+
+         ${
+        session.status === 'cancelled'
+          ? `
+            <div style="margin-top:12px;">
+              <span class="badge">
+                 Annulée
+              </span>
+            </div>
+          `
+          : `
+            ${
+              session.google_meet_url
+                ? `
+                  <div style="margin-top:12px;">
+                    <a
+                      href="${escapeHtml(session.google_meet_url)}"
+                      target="_blank"
+                      rel="noopener"
+                      class="btn btn-sm btn-primary"
+                    >
+                      Rejoindre Google Meet
+                    </a>
+                  </div>
+                `
+                : ''
+            }
+
+            <div style="margin-top:12px;">
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                onclick="cancelLiveSession('${session.id}')"
+              >
+                Annuler
+              </button>
+            </div>
+          `
+      }
+
+    </div>
+  `).join('');
+}
+
+loadLiveSessions();
+
+// ---------- Chargement du tableau de bord ----------
+async function loadDashboardData(){
+
+  // Récupère la langue du formateur connecté
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('language')
+    .eq('id', state.user.id)
+    .single();
+
+  if (profileError || !profile) {
+    console.error('Erreur récupération langue du formateur :', profileError);
+    return;
+  }
+
+  const teacherLanguage =
+    (profile.language || '').trim().toLowerCase();
+    const userRole =
+  (state.profile?.role || '').trim().toLowerCase();
+
+  // Nombre d'apprenants de la langue du formateur
+const { data: allLearners, error: learnersError } =
+  await supabaseClient
+    .from('profiles')
+    .select('id, language')
+    .eq('role', 'learner');
+
+if (learnersError) {
+  console.error(
+    'Erreur chargement des apprenants :',
+    learnersError
+  );
+  return;
+}
+
+const activeEnrollments = await supabaseClient
+  .from('course_enrollments')
+  .select('user_id')
+  .eq('status', 'active');
+
+if (activeEnrollments.error) {
+  console.error(
+    'Erreur chargement des inscriptions actives :',
+    activeEnrollments.error
+  );
+  return;
+}
+
+const activeLearnerIds =
+  (activeEnrollments.data || []).map(
+    enrollment => enrollment.user_id
+  );
+
+const learners =
+  userRole === 'admin'
+    ? (allLearners || []).filter(
+        learner => activeLearnerIds.includes(learner.id)
+      )
+    : (allLearners || []).filter(
+        learner =>
+          activeLearnerIds.includes(learner.id) &&
+          (learner.language || '').trim().toLowerCase() === teacherLanguage
+      );
+
+const learnersCount = learners.length;
+
+  // Récupère les missions
+  const { data: allMissions, error: missionsError } =
+    await supabaseClient
+      .from('missions')
+      .select('*');
+
+  if (missionsError) {
+    console.error('Erreur chargement missions :', missionsError);
+    return;
+  }
+
+  // Garde uniquement les missions de la langue du formateur
+  const missions =
+  userRole === 'admin'
+    ? (allMissions || [])
+    : (allMissions || []).filter(mission =>
+        (mission.language || '').trim().toLowerCase() === teacherLanguage
+      );
+
+  const missionsCount = missions.length;
+
+  // IDs des missions autorisées pour ce formateur
+  const missionIds = missions.map(mission => mission.id);
+
+  // Charge les réponses
+  let submissions = [];
+
+  if (missionIds.length > 0) {
+
+    const { data, error: submissionsError } =
+      await supabaseClient
+        .from('submissions')
+        .select('*')
+        .in('mission_id', missionIds)
+        .order('submitted_at', { ascending: false });
+
+    if (submissionsError) {
+      console.error(
+        'Erreur chargement des réponses :',
+        submissionsError
+      );
+    } else {
+      submissions = data || [];
+    }
+  }
+
+  const subs = submissions || [];
+
+  // Récupère les apprenants liés aux réponses
+  const learnerIds = [
+    ...new Set(
+      subs
+        .map(s => s.learner_id)
+        .filter(Boolean)
+    )
+  ];
+
+  const [
+    { data: profilesData },
+    { data: missionsData }
+  ] = await Promise.all([
+
+    learnerIds.length
+      ? supabaseClient
+          .from('profiles')
+          .select('*')
+          .in('id', learnerIds)
+      : { data: [] },
+
+    missionIds.length
+      ? supabaseClient
+          .from('missions')
+          .select('*')
+          .in('id', missionIds)
+      : { data: [] }
+
+  ]);
+
+  const profileMap =
+    new Map(
+      (profilesData || []).map(p => [p.id, p])
+    );
+
+  const missionMap =
+    new Map(
+      (missionsData || []).map(m => [m.id, m])
+    );
+
+  state.submissions = subs.map(s => ({
+    ...s,
+    learnerProfile:
+      profileMap.get(s.learner_id) || null,
+    mission:
+      missionMap.get(s.mission_id) || null
+  }));
+
+  // Mise à jour des statistiques
+  document.getElementById('statLearners').textContent =
+    learnersCount || 0;
+
+  document.getElementById('statMissions').textContent =
+    missionsCount || 0;
+
+  document.getElementById('statSubmissions').textContent =
+    subs.length;
+
+  document.getElementById('statToCorrect').textContent =
+    subs.filter(
+      s => s.status !== 'corrected'
+    ).length;
+
+  renderSubmissions();
+}
+
+async function loadLearnersData(){
+
+  const slot = document.getElementById('learnersSlot');
+
+  // Récupère la langue du formateur connecté
+  const { data: teacherProfile, error: teacherError } =
+    await supabaseClient
+      .from('profiles')
+      .select('language')
+      .eq('id', state.user.id)
+      .single();
+
+  if (teacherError || !teacherProfile) {
+    console.error(
+      'Erreur récupération langue du formateur :',
+      teacherError
+    );
+
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de récupérer la langue du formateur.</div>';
+
+    return;
+  }
+
+    // Normalise la langue
+  const userRole =
+    (state.profile?.role || '').trim().toLowerCase();
+
+  const teacherLanguage =
+    (teacherProfile.language || '').trim().toLowerCase();
+
+  if (userRole !== 'admin' && !teacherLanguage) {
+    slot.innerHTML =
+      '<div class="empty-state">Aucune langue n’est définie pour votre profil.</div>';
+    return;
+  }
+
+  // Récupère les inscriptions actives
+const { data: activeEnrollments, error: enrollmentsError } =
+  await supabaseClient
+    .from('course_enrollments')
+    .select('user_id')
+    .eq('status', 'active');
+
+console.log('INSCRIPTIONS ACTIVES :', activeEnrollments);
+console.log('ERREUR INSCRIPTIONS :', enrollmentsError);
+
+if (enrollmentsError) {
+  console.error(
+    'Erreur chargement des inscriptions actives :',
+    enrollmentsError
+  );
+
+  slot.innerHTML =
+    '<div class="error-msg">Impossible de charger les apprenants inscrits.</div>';
+
+  return;
+}
+
+const activeLearnerIds =
+  (activeEnrollments || []).map(
+    enrollment => enrollment.user_id
+  );
+
+// Récupère uniquement les apprenants ayant une formation active
+const { data: allLearners, error: learnersError } =
+  await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('role', 'learner')
+    .in('id', activeLearnerIds)
+    .order('first_name', { ascending: true });
+
+if (learnersError) {
+  console.error(
+    'Erreur chargement des apprenants :',
+    learnersError
+  );
+
+  slot.innerHTML =
+    '<div class="error-msg">Impossible de charger les apprenants.</div>';
+
+  return;
+}
+
+console.log('APPRENANTS ACTIFS :', allLearners);
+console.log('ERREUR APPRENANTS :', learnersError);
+
+// Admin : tous les apprenants actifs.
+// Teacher : uniquement les apprenants actifs de sa langue.
+const learners =
+  userRole === 'admin'
+    ? (allLearners || [])
+    : (allLearners || []).filter(learner =>
+        (learner.language || '').trim().toLowerCase() === teacherLanguage
+      );
+
+console.log('ROLE FORMATEUR :', userRole);
+console.log('LANGUE FORMATEUR :', teacherLanguage);
+console.log('APPRENANTS APRÈS FILTRE :', learners);
+console.log('NOMBRE APPRENANTS À AFFICHER :', learners.length);
+console.log('SLOT APPRENANTS :', slot);
+
+  /*
+   * Récupération des réponses des apprenants
+   */
+  const { data: submissions, error: submissionsError } =
+    await supabaseClient
+      .from('submissions')
+      .select(`
+        id,
+        learner_id,
+        mission_id,
+        submitted_at,
+        status,
+        missions (
+          id,
+          title,
+          week_number
+        )
+      `)
+      .in(
+        'learner_id',
+        learners.map(learner => learner.id)
+      )
+      .order('submitted_at', { ascending: true });
+
+  if (submissionsError) {
+
+    console.error(
+      'Erreur chargement des réponses des apprenants :',
+      submissionsError
+    );
+
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de charger la progression des apprenants.</div>';
+
+    return;
+  }
+
+  /*
+   * Récupération des évaluations enregistrées.
+   *
+   * Le score /20 est recalculé à partir des niveaux
+   * enregistrés dans submission_evaluations.
+   */
+  const submissionIds =
+    (submissions || []).map(submission => submission.id);
+
+  let evaluations = [];
+
+  if (submissionIds.length > 0) {
+
+    const {
+      data,
+      error: evaluationsError
+    } = await supabaseClient
+      .from('submission_evaluations')
+      .select(`
+        submission_id,
+        competency,
+        evaluation_level
+      `)
+      .in('submission_id', submissionIds)
+      .eq('evaluation_type', 'criterion');
+
+    if (evaluationsError) {
+
+      console.error(
+        'Erreur chargement des évaluations :',
+        evaluationsError
+      );
+
+    } else {
+
+      evaluations = data || [];
+
+    }
+  }
+
+  /*
+   * Barème utilisé dans la correction.
+   */
+  const points = {
+    realisation_tache: {
+      insuffisant: 0,
+      partiel: 2,
+      satisfaisant: 4,
+      tres_bien: 5
+    },
+
+    comprehension_orale: {
+      insuffisant: 0,
+      partiel: 2,
+      satisfaisant: 3,
+      tres_bien: 4
+    },
+
+    comprehension_ecrite: {
+      insuffisant: 0,
+      partiel: 2,
+      satisfaisant: 3,
+      tres_bien: 4
+    },
+
+    grammaire: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    vocabulaire: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    production_orale: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    production_ecrite: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    prononciation: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 2
+    }
+  };
+
+  const maxPoints = {
+    realisation_tache: 5,
+    comprehension_orale: 4,
+    comprehension_ecrite: 4,
+    grammaire: 3,
+    vocabulaire: 3,
+    production_orale: 3,
+    production_ecrite: 3,
+    prononciation: 2
+  };
+
+  /*
+   * Regroupe les évaluations par réponse.
+   */
+  const evaluationsBySubmission = {};
+
+  evaluations.forEach(evaluation => {
+
+    if (!evaluationsBySubmission[evaluation.submission_id]) {
+      evaluationsBySubmission[evaluation.submission_id] = [];
+    }
+
+    evaluationsBySubmission[evaluation.submission_id].push(
+      evaluation
+    );
+
+  });
+
+  /*
+   * Calcule le score /20 d'une réponse.
+   */
+  function calculateSubmissionScore(submissionId) {
+
+    const submissionEvaluations =
+      evaluationsBySubmission[submissionId] || [];
+
+    let totalPoints = 0;
+    let totalMaxPoints = 0;
+
+    submissionEvaluations.forEach(evaluation => {
+
+      const competency = evaluation.competency;
+      const level = evaluation.evaluation_level;
+
+      if (
+        level === 'non_applicable' ||
+        !points[competency] ||
+        !maxPoints[competency]
+      ) {
+        return;
+      }
+
+      if (
+        points[competency][level] === undefined
+      ) {
+        return;
+      }
+
+      totalPoints += points[competency][level];
+      totalMaxPoints += maxPoints[competency];
+
+    });
+
+    if (totalMaxPoints === 0) {
+      return null;
+    }
+
+    return Math.round(
+      ((totalPoints / totalMaxPoints) * 20) * 10
+    ) / 10;
+  }
+
+  /*
+   * Prépare les scores de chaque réponse.
+   */
+  const submissionsWithScores =
+    (submissions || []).map(submission => ({
+      ...submission,
+      score: calculateSubmissionScore(submission.id)
+    }));
+
+  /*
+   * Affichage des apprenants.
+   */
+  slot.innerHTML = learners.map(learner => {
+
+    const learnerSubmissions =
+      submissionsWithScores.filter(
+        submission =>
+          submission.learner_id === learner.id &&
+          submission.score !== null
+      );
+
+    return `
+      <div class="fm-row learner-row" data-learner-id="${learner.id}">
+
+        <div class="fm-row-top">
+
+          <div>
+            <div class="fm-learner">
+              ${escapeHtml(learner.first_name || '')}
+              ${escapeHtml(learner.last_name || '')}
+            </div>
+
+            <div class="fm-meta">
+              ${escapeHtml(learner.language || '—')} ·
+              ${escapeHtml(learner.level || '—')}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="fm-mission">
+          📞 ${escapeHtml(
+            learner.phone || 'Téléphone non renseigné'
+          )}
+        </div>
+
+        <div style="margin-top:12px;">
+
+  <div style="
+    font-weight:700;
+    margin-bottom:8px;
+  ">
+    Progression
+  </div>
+
+  ${
+    learnerSubmissions.length === 0
+      ? `
+        <div class="hint">
+          Aucun score enregistré pour le moment.
+        </div>
+      `
+      : `
+        <div class="learner-progress-chart">
+
+          <svg
+            class="learner-progress-svg"
+            viewBox="0 0 600 140"
+            preserveAspectRatio="none"
+          >
+
+            <!-- Ligne de référence 20/20 -->
+            <line
+              x1="0"
+              y1="10"
+              x2="600"
+              y2="10"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            <!-- Ligne de référence 10/20 -->
+            <line
+              x1="0"
+              y1="70"
+              x2="600"
+              y2="70"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            <!-- Ligne de référence 0/20 -->
+            <line
+              x1="0"
+              y1="130"
+              x2="600"
+              y2="130"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            ${
+              (() => {
+
+                const width = 600;
+                const height = 120;
+                const top = 10;
+
+                const scores =
+                  learnerSubmissions.map(
+                    submission => submission.score
+                  );
+
+                const maxIndex =
+                  Math.max(scores.length - 1, 1);
+
+                const points =
+                  scores.map((score, index) => {
+
+                    const x =
+                      (index / maxIndex) * width;
+
+                    const y =
+                      top +
+                      height -
+                      (score / 20) * height;
+
+                    return {
+                      x,
+                      y
+                    };
+
+                  });
+
+                const polyline =
+                  points
+                    .map(point =>
+                      `${point.x},${point.y}`
+                    )
+                    .join(' ');
+
+                return `
+
+                  <polyline
+                    points="${polyline}"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  ${points.map((point, index) => `
+                    <circle
+                      cx="${point.x}"
+                      cy="${point.y}"
+                      r="5"
+                      fill="var(--white)"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    >
+                      <title>
+                        ${scores[index]} / 20
+                      </title>
+                    </circle>
+                  `).join('')}
+
+                `;
+
+              })()
+            }
+
+          </svg>
+
+          <div class="learner-progress-labels">
+            ${learnerSubmissions.map(submission => `
+              <span title="${escapeHtml(
+                submission.missions
+                  ? submission.missions.title
+                  : 'Mission'
+              )}">
+                ${escapeHtml(
+                  submission.missions
+                    ? submission.missions.title
+                    : 'Mission'
+                )}
+              </span>
+            `).join('')}
+          </div>
+
+        </div>
+
+        <div style="
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          margin-top:10px;
+        ">
+          ${learnerSubmissions.map(submission => `
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              gap:12px;
+              padding:8px 10px;
+              border:1px solid var(--sand-stroke);
+              border-radius:8px;
+              background:var(--white);
+            ">
+
+              <div>
+                ${escapeHtml(
+                  submission.missions
+                    ? submission.missions.title
+                    : 'Mission'
+                )}
+              </div>
+
+              <strong>
+                ${submission.score} / 20
+              </strong>
+
+            </div>
+          `).join('')}
+        </div>
+      `
+  }
+
+</div>
+
+      </div>
+    `;
+
+  }).join('');
+
+  /*
+   * Pour l'instant, le clic conserve le comportement existant.
+   */
+  document.querySelectorAll('.learner-row').forEach(row => {
+
+  row.addEventListener('click', function(){
+
+    const learnerId =
+      this.dataset.learnerId;
+
+    const learner =
+      learners.find(
+        item => item.id === learnerId
+      );
+
+    if (!learner) return;
+
+    const learnerSubmissions =
+      submissionsWithScores.filter(
+        submission =>
+          submission.learner_id === learnerId &&
+          submission.score !== null
+      );
+
+    const detailModal =
+      document.getElementById(
+        'learnerDetailModal'
+      );
+
+    const detailName =
+      document.getElementById(
+        'learnerDetailName'
+      );
+
+    const detailInfo =
+      document.getElementById(
+        'learnerDetailInfo'
+      );
+
+    const detailProgress =
+      document.getElementById(
+        'learnerDetailProgress'
+      );
+
+    detailName.textContent =
+      `${learner.first_name || ''} ${learner.last_name || ''}`.trim()
+      || 'Apprenant';
+
+    detailInfo.textContent =
+      `${learner.language || '—'} · ${learner.level || '—'} · ${learner.phone || 'Téléphone non renseigné'}`;
+
+    if (learnerSubmissions.length === 0) {
+
+      detailProgress.innerHTML = `
+        <div class="hint">
+          Aucune mission corrigée pour le moment.
+        </div>
+      `;
+
+    } else {
+
+      const scores =
+        learnerSubmissions.map(
+          submission => submission.score
+        );
+
+      const average =
+        scores.reduce(
+          (sum, score) => sum + score,
+          0
+        ) / scores.length;
+
+      detailProgress.innerHTML = `
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(2, minmax(0, 1fr));
+          gap:10px;
+          margin-bottom:16px;
+        ">
+
+          <div style="
+            padding:12px;
+            border:1px solid var(--sand-stroke);
+            border-radius:10px;
+          ">
+            <div class="hint">
+              Moyenne
+            </div>
+
+            <strong style="font-size:22px;">
+              ${Math.round(average * 10) / 10} / 20
+            </strong>
+          </div>
+
+          <div style="
+            padding:12px;
+            border:1px solid var(--sand-stroke);
+            border-radius:10px;
+          ">
+            <div class="hint">
+              Missions corrigées
+            </div>
+
+            <strong style="font-size:22px;">
+              ${learnerSubmissions.length}
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="learner-progress-chart">
+
+          <svg
+            class="learner-progress-svg"
+            viewBox="0 0 600 180"
+            preserveAspectRatio="none"
+          >
+
+            <line
+              x1="0"
+              y1="10"
+              x2="600"
+              y2="10"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            <line
+              x1="0"
+              y1="90"
+              x2="600"
+              y2="90"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            <line
+              x1="0"
+              y1="170"
+              x2="600"
+              y2="170"
+              stroke="var(--sand-stroke)"
+              stroke-width="1"
+            />
+
+            ${
+              (() => {
+
+                const width = 600;
+                const height = 160;
+                const top = 10;
+
+                const maxIndex =
+                  Math.max(
+                    scores.length - 1,
+                    1
+                  );
+
+                const points =
+                  scores.map(
+                    (score, index) => {
+
+                      const x =
+                        (index / maxIndex) *
+                        width;
+
+                      const y =
+                        top +
+                        height -
+                        (score / 20) *
+                        height;
+
+                      return {
+                        x,
+                        y
+                      };
+
+                    }
+                  );
+
+                const polyline =
+                  points
+                    .map(
+                      point =>
+                        `${point.x},${point.y}`
+                    )
+                    .join(' ');
+
+                return `
+
+                  <polyline
+                    points="${polyline}"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+
+                  ${points.map(
+                    (point, index) => `
+                      <circle
+                        cx="${point.x}"
+                        cy="${point.y}"
+                        r="5"
+                        fill="var(--white)"
+                        stroke="currentColor"
+                        stroke-width="3"
+                      >
+                        <title>
+                          ${scores[index]} / 20
+                        </title>
+                      </circle>
+                    `
+                  ).join('')}
+
+                `;
+
+              })()
+            }
+
+          </svg>
+
+          <div class="learner-progress-labels">
+            ${learnerSubmissions.map(
+              submission => `
+                <span
+                  title="${escapeHtml(
+                    submission.missions
+                      ? submission.missions.title
+                      : 'Mission'
+                  )}"
+                >
+                  ${escapeHtml(
+                    submission.missions
+                      ? submission.missions.title
+                      : 'Mission'
+                  )}
+                </span>
+              `
+            ).join('')}
+          </div>
+
+        </div>
+
+        <div style="
+          font-weight:700;
+          margin-top:20px;
+          margin-bottom:10px;
+        ">
+          Missions réalisées
+        </div>
+
+        <div style="
+          display:flex;
+          flex-direction:column;
+          gap:8px;
+        ">
+
+          ${learnerSubmissions.map(
+            submission => `
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:12px;
+                padding:10px 12px;
+                border:1px solid var(--sand-stroke);
+                border-radius:10px;
+                background:var(--white);
+              ">
+
+                <div>
+                  <div style="font-weight:600;">
+                    ${escapeHtml(
+                      submission.missions
+                        ? submission.missions.title
+                        : 'Mission'
+                    )}
+                  </div>
+
+                  <div class="hint">
+                    ${submission.submitted_at
+                      ? formatDate(
+                          submission.submitted_at
+                        )
+                      : ''}
+                  </div>
+                </div>
+
+                <strong>
+                  ${submission.score} / 20
+                </strong>
+
+              </div>
+            `
+          ).join('')}
+
+        </div>
+      `;
+
+    }
+
+    detailModal.hidden = false;
+detailModal.style.display = 'flex';
+
+  });
+
+});
+
+}
+
+const learnerDetailClose =
+  document.getElementById('learnerDetailClose');
+
+if (learnerDetailClose) {
+
+  learnerDetailClose.addEventListener('click', function(){
+
+    const modal =
+      document.getElementById('learnerDetailModal');
+
+    if (modal) {
+  modal.style.display = 'none';
+  modal.hidden = true;
+}
+
+  });
+
+}
+
+    
+function renderSubmissions(){
+  const slot = document.getElementById('submissionsSlot');
+  let list = state.submissions;
+
+  if (state.submissionFilter === 'submitted') list = list.filter(s => s.status !== 'corrected');
+  if (state.submissionFilter === 'corrected') list = list.filter(s => s.status === 'corrected');
+
+  if (list.length === 0) {
+    slot.innerHTML = '<div class="empty-state">Aucune réponse pour ce filtre.</div>';
+    return;
+  }
+
+  slot.innerHTML = list.map(s => {
+    const isCorrected = s.status === 'corrected';
+    const p = s.learnerProfile;
+    const m = s.mission;
+    return `
+      <div class="fm-row" data-sub-id="${s.id}">
+        <div class="fm-row-top">
+          <div>
+            <div class="fm-learner">${escapeHtml(learnerFullName(p))}</div>
+            <div class="fm-meta">${languageLabel(p ? p.language : '')} · ${escapeHtml(p ? p.level : '—')} · envoyé le ${formatDate(s.submitted_at)}</div>
+          </div>
+          <span class="badge ${isCorrected ? 'badge-done' : 'badge-progress'}">${isCorrected ? 'Corrigé' : 'À corriger'}</span>
+        </div>
+        <div class="fm-mission">${escapeHtml(m ? m.title : 'Mission')}${m ? ' · Semaine ' + (m.week_number ?? '—') : ''}</div>
+        <div class="fm-answer-preview">
+  ${
+    s.text_answer
+      ? escapeHtml(s.text_answer)
+      : s.file_url
+        ? '🎧 Réponse vocale — cliquez pour écouter'
+        : 'Aucune réponse'
+  }
+
+</div>
+      </div>
+    `;
+  }).join('');
+
+  slot.querySelectorAll('.fm-row').forEach(row => {
+    row.addEventListener('click', () => openCorrectionModal(Number(row.dataset.subId)));
+  });
+}
+
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('on'));
+    this.classList.add('on');
+    state.submissionFilter = this.dataset.filter;
+    renderSubmissions();
+  });
+});
+
+// ---------- Objectifs pédagogiques ----------
+
+// ---------- Objectifs pédagogiques ----------
+
+async function loadObjectives(level = null){
+
+  const selectedLevel =
+    level ||
+    document.getElementById('missionLevel')?.value ||
+    'A1';
+
+  // 1. Charger les objectifs du niveau sélectionné
+  const { data: objectives, error: objectivesError } =
+    await supabaseClient
+      .from('cefr_objectives')
+      .select(`
+        id,
+        level,
+        competency,
+        objective_number,
+        title,
+        description,
+        sort_order
+      `)
+      .eq('active', true)
+      .eq('level', selectedLevel)
+      .order('sort_order', { ascending: true });
+
+  if (objectivesError) {
+    console.error('Erreur chargement objectifs :', objectivesError);
+    return;
+  }
+
+  // 2. Charger les traductions une seule fois
+  const { data: translations, error: translationsError } =
+    await supabaseClient
+      .from('objective_translations')
+      .select(`
+        objective_id,
+        language,
+        title,
+        description
+      `);
+
+  if (translationsError) {
+    console.error('Erreur chargement traductions :', translationsError);
+    return;
+  }
+
+  // 3. Associer la traduction via sort_order
+  //    et non via cefr_objectives.id
+  state.objectives = (objectives || []).map(objective => ({
+    ...objective,
+    objective_translations: (translations || []).filter(
+      translation =>
+        translation.objective_id === objective.sort_order
+    )
+  }));
+}
+
+/* ========================================================= TRADUCTION DES OBJECTIFS À AJOUTER ICI, UNE SEULE FOIS ========================================================= */
+function getCurrentLanguage() {
+
+  const missionLanguage =
+    document.getElementById('missionLanguage')?.value;
+
+  const languageMap = {
+    'Français': 'fr',
+    'Anglais': 'en',
+    'Espagnol': 'es'
+  };
+
+  return languageMap[missionLanguage] || 'fr';
+}
+
+
+function getObjectiveTranslation(objective) {
+
+  const currentLanguage =
+    getCurrentLanguage();
+
+  const translations =
+    objective.objective_translations || [];
+
+  // Cherche la traduction dans la langue actuellement sélectionnée
+  const translation =
+    translations.find(
+      item =>
+        item.language &&
+        item.language
+          .toLowerCase()
+          .split('-')[0] === currentLanguage
+    );
+
+  if (translation) {
+
+    return {
+      title:
+        translation.title ||
+        objective.title ||
+        '',
+
+      description:
+        translation.description ||
+        objective.description ||
+        ''
+    };
+  }
+
+  // Si aucune traduction n'existe dans la langue active,
+  // on utilise le français comme solution de secours.
+  const frenchTranslation =
+    translations.find(
+      item =>
+        item.language &&
+        item.language
+          .toLowerCase()
+          .split('-')[0] === 'fr'
+    );
+
+  return {
+    title:
+      frenchTranslation?.title ||
+      objective.title ||
+      '',
+
+    description:
+      frenchTranslation?.description ||
+      objective.description ||
+      ''
+  };
+}
+
+
+
+
+
+function renderMissionObjectives(){
+
+  const slot = document.getElementById('missionObjectivesList');
+
+  if (!slot) return;
+
+  slot.innerHTML = `
+    <div style="
+      border:1px solid var(--sand-stroke);
+      border-radius:12px;
+      padding:14px;
+      background:var(--white);
+    ">
+
+      <div style="
+        font-weight:700;
+        margin-bottom:10px;
+      ">
+        Objectifs communicatifs
+      </div>
+
+      <div id="communicativeObjectivesList"
+     style="
+       display:flex;
+       flex-direction:column;
+       gap:8px;
+  ">
+  <div class="hint">
+    Aucun objectif communicatif sélectionné.
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-secondary"
+    id="addCommunicativeObjectiveBtn">
+    + Ajouter un objectif
+  </button>
+</div>
+
+    </div>
+
+    <div style="
+      border:1px solid var(--sand-stroke);
+      border-radius:12px;
+      padding:14px;
+      background:var(--white);
+    ">
+
+      <div style="
+        font-weight:700;
+        margin-bottom:10px;
+      ">
+        Objectifs linguistiques
+      </div>
+
+      <div id="linguisticObjectivesList"
+     style="
+       display:flex;
+       flex-direction:column;
+       gap:8px;
+  ">
+  <div class="hint">
+    Aucun objectif linguistique sélectionné.
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-secondary"
+    id="addLinguisticObjectiveBtn">
+    + Ajouter un objectif
+  </button>
+</div>
+
+    </div>
+  `;
+}
+
+function openObjectivePicker(type){
+
+  const picker = document.getElementById('objectivePicker');
+  const list = document.getElementById('objectivePickerList');
+
+  if (!picker || !list) return;
+
+  state.objectivePickerType = type;
+
+  const communicativeCompetencies = [
+    'comprehension_orale',
+    'comprehension_ecrite',
+    'production_orale',
+    'production_ecrite',
+    'realisation_tache'
+  ];
+
+  const linguisticCompetencies = [
+    'grammaire',
+    'vocabulaire',
+    'prononciation'
+  ];
+
+  const allowedCompetencies =
+    type === 'communicative'
+      ? communicativeCompetencies
+      : linguisticCompetencies;
+
+  const selectedIds = state.selectedMissionObjectives.map(
+    objective => String(objective.id)
+  );
+
+  const availableObjectives = state.objectives.filter(objective =>
+    allowedCompetencies.includes(objective.competency) &&
+    !selectedIds.includes(String(objective.id))
+  );
+
+  if (availableObjectives.length === 0) {
+
+    list.innerHTML = `
+      <div class="hint">
+        Tous les objectifs disponibles ont déjà été ajoutés.
+      </div>
+    `;
+
+  } else {
+
+    list.innerHTML = availableObjectives.map(objective => {
+
+  const translation =
+    getObjectiveTranslation(objective);
+
+  return `
+    <button
+      type="button"
+      class="btn btn-secondary objective-picker-item"
+      data-objective-id="${objective.id}"
+      style="
+        text-align:left;
+        padding:10px 12px;
+      "
+    >
+      <strong>
+        ${escapeHtml(translation.title)}
+      </strong>
+
+      ${
+        translation.description
+          ? `
+            <span style="
+              display:block;
+              margin-top:4px;
+              font-size:12px;
+              color:var(--ink-soft);
+            ">
+              ${escapeHtml(translation.description)}
+            </span>
+          `
+          : ''
+      }
+    </button>
+  `;
+}).join('');
+      
+  }
+
+  picker.style.display = 'block';
+}
+
+function addMissionObjective(objectiveId){
+
+  const objective = state.objectives.find(
+    item => String(item.id) === String(objectiveId)
+  );
+
+  if (!objective) return;
+
+  const alreadySelected =
+    state.selectedMissionObjectives.some(
+      item => String(item.id) === String(objective.id)
+    );
+
+  if (alreadySelected) return;
+
+  state.selectedMissionObjectives.push(objective);
+
+  renderSelectedMissionObjectives();
+
+  const picker = document.getElementById('objectivePicker');
+
+  if (picker) {
+    picker.style.display = 'none';
+  }
+}
+
+function removeMissionObjective(objectiveId){
+
+  state.selectedMissionObjectives =
+    state.selectedMissionObjectives.filter(
+      objective => String(objective.id) !== String(objectiveId)
+    );
+
+  renderSelectedMissionObjectives();
+}
+
+function renderSelectedMissionObjectives(){
+
+  const communicativeSlot =
+    document.getElementById('communicativeObjectivesList');
+
+  const linguisticSlot =
+    document.getElementById('linguisticObjectivesList');
+
+  if (!communicativeSlot || !linguisticSlot) return;
+
+  const communicativeCompetencies = [
+    'comprehension_orale',
+    'comprehension_ecrite',
+    'production_orale',
+    'production_ecrite',
+    'realisation_tache'
+  ];
+
+  const communicativeObjectives =
+    state.selectedMissionObjectives.filter(objective =>
+      communicativeCompetencies.includes(objective.competency)
+    );
+
+  const linguisticObjectives =
+    state.selectedMissionObjectives.filter(objective =>
+      !communicativeCompetencies.includes(objective.competency)
+    );
+
+  communicativeSlot.innerHTML =
+    renderSelectedObjectiveGroup(
+      communicativeObjectives,
+      'communicative'
+    );
+
+  linguisticSlot.innerHTML =
+    renderSelectedObjectiveGroup(
+      linguisticObjectives,
+      'linguistic'
+    );
+}
+
+    
+function renderSelectedObjectiveGroup(objectives, type){
+
+  const buttonId =
+    type === 'communicative'
+      ? 'addCommunicativeObjectiveBtn'
+      : 'addLinguisticObjectiveBtn';
+
+  const buttonLabel = '+ Ajouter un objectif';
+
+  const objectivesHtml = objectives.map(objective => {
+
+  const translation =
+    getObjectiveTranslation(objective);
+
+  return `
+    <div
+      style="
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:10px;
+        padding:10px 12px;
+        border:1px solid var(--sand-stroke);
+        border-radius:10px;
+        background:var(--white);
+      "
+    >
+
+      <div style="flex:1;">
+        ${escapeHtml(translation.title)}
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-sm btn-secondary remove-mission-objective-btn"
+        data-objective-id="${objective.id}"
+        style="
+          flex-shrink:0;
+          padding:5px 9px;
+        "
+      >
+        Retirer
+      </button>
+
+    </div>
+  `;
+}).join('');
+
+  return `
+    ${
+      objectives.length
+        ? objectivesHtml
+        : `
+          <div class="hint">
+            Aucun objectif sélectionné.
+          </div>
+        `
+    }
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      id="${buttonId}">
+      ${buttonLabel}
+    </button>
+  `;
+}
+
+document.addEventListener('click', event => {
+
+  const communicativeButton =
+    event.target.closest('#addCommunicativeObjectiveBtn');
+
+  const linguisticButton =
+    event.target.closest('#addLinguisticObjectiveBtn');
+
+  const closePickerButton =
+    event.target.closest('#closeObjectivePickerBtn');
+
+  const objectiveButton =
+    event.target.closest('.objective-picker-item');
+
+  const removeObjectiveButton =
+    event.target.closest('.remove-mission-objective-btn');
+
+  if (communicativeButton) {
+    openObjectivePicker('communicative');
+    return;
+  }
+
+  if (linguisticButton) {
+    openObjectivePicker('linguistic');
+    return;
+  }
+
+  if (closePickerButton) {
+
+    const picker =
+      document.getElementById('objectivePicker');
+
+    if (picker) {
+      picker.style.display = 'none';
+    }
+
+    return;
+  }
+
+if (removeObjectiveButton) {
+
+  removeMissionObjective(
+    removeObjectiveButton.dataset.objectiveId
+  );
+
+  return;
+}
+
+  if (objectiveButton) {
+
+    addMissionObjective(
+      objectiveButton.dataset.objectiveId
+    );
+
+  }
+
+});
+
+// ---------- Nouvelle mission ----------
+document.getElementById('newMissionBtn').addEventListener('click', () => {
+
+  state.activeMission = null;
+  state.selectedMissionObjectives = [];
+
+  document.getElementById('saveMissionBtn').textContent =
+    'Créer la mission';
+
+  renderMissionObjectives();
+
+  document.getElementById('missionModal').classList.add('on');
+});
+
+document.getElementById('missionLevel').addEventListener('change', async function(){
+
+  const selectedLevel = this.value;
+
+  // Les objectifs précédemment sélectionnés ne correspondent
+  // plus forcément au nouveau niveau.
+  state.selectedMissionObjectives = [];
+
+  await loadObjectives(selectedLevel);
+
+  renderMissionObjectives();
+  renderSelectedMissionObjectives();
+
+});
+
+document.getElementById('closeMissionModal').addEventListener('click', () => {
+  document.getElementById('missionModal').classList.remove('on');
+});
+
+document.getElementById('saveMissionBtn').addEventListener('click', async function(){
+  const btn = this;
+
+  const title = document.getElementById('missionTitle').value.trim();
+  const description = document.getElementById('missionDescription').value.trim();
+  const language = document.getElementById('missionLanguage').value;
+  const level = document.getElementById('missionLevel').value;
+  const week = Number(document.getElementById('missionWeek').value);
+  const minutes = Number(document.getElementById('missionMinutes').value);
+
+  const errorBox = document.getElementById('missionErrorBox');
+  const confirmBox = document.getElementById('missionConfirmBox');
+
+  errorBox.style.display = 'none';
+  confirmBox.style.display = 'none';
+
+  if (!title) {
+    errorBox.textContent = 'Merci de renseigner un titre.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const missionData = {
+  title: title,
+  description: description,
+  language: language,
+  level: level,
+  week_number: week,
+  estimated_minutes: minutes,
+};
+
+  const isEditingMission = !!state.activeMission;
+
+let result;
+
+if (isEditingMission) {
+    result = await supabaseClient
+      .from('missions')
+      .update(missionData)
+      .eq('id', state.activeMission.id)
+      .select()
+      .single();
+  } else {
+    result = await supabaseClient
+      .from('missions')
+      .insert(missionData)
+      .select()
+      .single();
+  }
+
+  btn.disabled = false;
+  btn.textContent = original;
+
+  if (result.error) {
+    errorBox.textContent = state.activeMission
+      ? "La modification a échoué : " + result.error.message
+      : "La création a échoué : " + result.error.message;
+    errorBox.style.display = 'block';
+    return;
+  }
+
+    // Enregistrer les objectifs de la mission
+  const missionId = result.data.id;
+
+  console.log('Mission créée/modifiée :', missionId);
+  console.log('Objectifs sélectionnés :', state.selectedMissionObjectives);
+
+  // En modification, on supprime d'abord les anciens objectifs.
+  if (isEditingMission) {
+
+    const { error: deleteObjectivesError } =
+      await supabaseClient
+        .from('mission_objectives')
+        .delete()
+        .eq('mission_id', missionId);
+
+    if (deleteObjectivesError) {
+
+      errorBox.textContent =
+        "La mission a été enregistrée, mais les anciens objectifs n'ont pas pu être supprimés : "
+        + deleteObjectivesError.message;
+
+      errorBox.style.display = 'block';
+      return;
+    }
+  }
+
+  // Puis on enregistre les objectifs actuellement sélectionnés.
+  if (state.selectedMissionObjectives.length > 0) {
+
+    const missionObjectives =
+      state.selectedMissionObjectives.map(objective => ({
+        mission_id: missionId,
+        objective_id: objective.id
+      }));
+
+    const { error: objectivesError } =
+      await supabaseClient
+        .from('mission_objectives')
+        .insert(missionObjectives);
+
+    console.log(
+      'Erreur insertion objectifs :',
+      objectivesError
+    );
+
+    if (objectivesError) {
+
+      errorBox.textContent =
+        "La mission a été enregistrée, mais les objectifs n'ont pas pu être enregistrés : "
+        + objectivesError.message;
+
+      errorBox.style.display = 'block';
+      return;
+    }
+  }
+
+  confirmBox.textContent = state.activeMission
+    ? 'Mission modifiée ✓'
+    : 'Mission créée ✓';
+
+  confirmBox.style.display = 'block';
+
+  state.activeMission = null;
+
+  await loadMissionsData();
+
+  document.getElementById('statMissions').textContent =
+    document.querySelectorAll('#missionsSlot .fm-row').length;
+});
+
+// ---------- Modale de correction ----------
+async function loadCorrectionObjectives(missionId){
+
+  const slot = document.getElementById('corObjectivesList');
+
+  if (!slot) return;
+
+  slot.innerHTML = `
+    <div class="hint">
+      Chargement des objectifs…
+    </div>
+  `;
+
+  if (!missionId) {
+    slot.innerHTML = `
+      <div class="hint">
+        Aucun objectif associé à cette mission.
+      </div>
+    `;
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('mission_objectives')
+    .select(`
+      objective_id,
+      cefr_objectives (
+        id,
+        level,
+        competency,
+        objective_number,
+        title,
+        description,
+        sort_order
+      )
+    `)
+    .eq('mission_id', missionId);
+
+  if (error) {
+
+    console.error(
+      'Erreur chargement objectifs de correction :',
+      error
+    );
+
+    slot.innerHTML = `
+      <div class="error-msg">
+        Impossible de charger les objectifs.
+      </div>
+    `;
+
+    return;
+  }
+
+  const objectives = (data || [])
+    .map(item => item.cefr_objectives)
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        (a.sort_order || 0) - (b.sort_order || 0)
+    );
+
+  if (objectives.length === 0) {
+
+    slot.innerHTML = `
+      <div class="hint">
+        Aucun objectif n'a été associé à cette mission.
+      </div>
+    `;
+
+    return;
+  }
+
+  const communicativeCompetencies = [
+    'comprehension_orale',
+    'comprehension_ecrite',
+    'production_orale',
+    'production_ecrite',
+    'realisation_tache'
+  ];
+
+  const communicativeObjectives = objectives.filter(objective =>
+    communicativeCompetencies.includes(objective.competency)
+  );
+
+  const linguisticObjectives = objectives.filter(objective =>
+    !communicativeCompetencies.includes(objective.competency)
+  );
+
+  function renderObjective(objective) {
+
+    return `
+      <div style="
+        padding:12px;
+        border:1px solid var(--sand-stroke);
+        border-radius:10px;
+        background:var(--white);
+      ">
+
+        <div style="
+          font-weight:600;
+          margin-bottom:4px;
+        ">
+          ${escapeHtml(objective.title)}
+        </div>
+
+        ${
+          objective.description
+            ? `
+              <div style="
+                font-size:12px;
+                color:var(--ink-soft);
+              ">
+                ${escapeHtml(objective.description)}
+              </div>
+            `
+            : ''
+        }
+
+      </div>
+    `;
+  }
+
+  let html = '';
+
+  if (communicativeObjectives.length > 0) {
+
+    html += `
+      <div style="
+        font-weight:700;
+        margin-bottom:8px;
+      ">
+        Objectifs communicatifs
+      </div>
+
+      <div style="
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        margin-bottom:18px;
+      ">
+        ${communicativeObjectives
+          .map(renderObjective)
+          .join('')}
+      </div>
+    `;
+  }
+
+  if (linguisticObjectives.length > 0) {
+
+    html += `
+      <div style="
+        font-weight:700;
+        margin-bottom:8px;
+      ">
+        Objectifs linguistiques
+      </div>
+
+      <div style="
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+      ">
+        ${linguisticObjectives
+          .map(renderObjective)
+          .join('')}
+      </div>
+    `;
+  }
+
+  slot.innerHTML = html;
+}
+
+/* =========================================================
+   CALCUL DE L'ÉVALUATION
+   ========================================================= */
+
+function calculateCorrectionScore(){
+
+  const points = {
+    task_completion: {
+      insuffisant: 0,
+      partiel: 2,
+      satisfaisant: 4,
+      tres_bien: 5
+    },
+
+    comprehension: {
+      insuffisant: 0,
+      partiel: 2,
+      satisfaisant: 3,
+      tres_bien: 4
+    },
+
+    grammar: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    vocabulary: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    production: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 3
+    },
+
+    pronunciation: {
+      insuffisant: 0,
+      partiel: 1,
+      satisfaisant: 2,
+      tres_bien: 2
+    }
+  };
+
+  const maxPoints = {
+    task_completion: 5,
+    comprehension: 4,
+    grammar: 3,
+    vocabulary: 3,
+    production: 3,
+    pronunciation: 2
+  };
+
+  let totalPoints = 0;
+  let totalMaxPoints = 0;
+
+  document
+    .querySelectorAll('#corEvaluationDimensions .cor-eval-dimension')
+    .forEach(dimension => {
+
+      const dimensionName =
+        dimension.dataset.dimension;
+
+      const selected =
+        dimension.querySelector(
+          `input[name="eval_${dimensionName}"]:checked`
+        );
+
+      /* Aucune réponse sélectionnée :
+         la dimension n'entre pas encore dans le calcul. */
+      if (!selected) return;
+
+      const selectedValue = selected.value;
+
+/*
+ * Une dimension "Non applicable"
+ * ne participe pas au calcul.
+ */
+if (selectedValue === 'non_applicable') {
+  return;
+}
+
+if (
+  !points[dimensionName] ||
+  !maxPoints[dimensionName]
+) {
+  return;
+}
+
+      totalPoints +=
+        points[dimensionName][selectedValue];
+
+      totalMaxPoints +=
+        maxPoints[dimensionName];
+    });
+
+  const scorePreview =
+    document.getElementById('corScorePreview');
+
+  const scoreValue =
+    document.getElementById('corScoreValue');
+
+  const levelValue =
+    document.getElementById('corLevelValue');
+
+  if (
+    totalMaxPoints === 0
+  ) {
+    scorePreview.style.display = 'none';
+    scoreValue.textContent = '— / 20';
+    levelValue.textContent = '—';
+    return;
+  }
+
+  /*
+   * Normalisation sur 20.
+   *
+   * Exemple :
+   * 10 points obtenus sur 18 applicables
+   * = 11,1 / 20
+   */
+  const score =
+    (totalPoints / totalMaxPoints) * 20;
+
+  const roundedScore =
+    Math.round(score * 10) / 10;
+
+  let level = '';
+
+  if (roundedScore <= 4) {
+    level = 'Débutant';
+  } else if (roundedScore <= 9) {
+    level = 'A1−';
+  } else if (roundedScore <= 14) {
+    level = 'A1';
+  } else if (roundedScore <= 17) {
+    level = 'A1+';
+  } else {
+    level = 'Transition A2';
+  }
+
+  scoreValue.textContent =
+    `${roundedScore} / 20`;
+
+  levelValue.textContent =
+    level;
+
+  scorePreview.style.display = 'block';
+}
+
+
+/* =========================================================
+   MISE À JOUR AUTOMATIQUE DU SCORE
+   ========================================================= */
+
+document
+  .querySelectorAll(
+    '#corEvaluationDimensions input[type="radio"]'
+  )
+  .forEach(input => {
+
+    input.addEventListener(
+      'change',
+      calculateCorrectionScore
+    );
+
+  });
+
+
+async function openCorrectionModal(subId){
+  const s = state.submissions.find(x => x.id === subId);
+  if (!s) return;
+console.log('ID :', s.id);
+console.log('TEXT ANSWER :', s.text_answer);
+console.log('FILE URL :', s.file_url);
+console.log('TOUS LES CHAMPS :', Object.keys(s));
+console.log('CONTENU COMPLET :', JSON.stringify(s, null, 2));
+
+  state.activeSubmission = s;
+
+  document.getElementById('corLearnerName').textContent =
+    learnerFullName(s.learnerProfile);
+
+  document.getElementById('corMissionInfo').textContent =
+    `${s.mission ? s.mission.title : 'Mission'} · ${languageLabel(
+      s.learnerProfile ? s.learnerProfile.language : ''
+    )} · ${s.learnerProfile ? s.learnerProfile.level : ''}`;
+
+    const { data: cardAttempts, error: cardAttemptsError } =
+    await supabaseClient
+      .from('mission_card_attempts')
+      .select(`
+        card_order,
+        element_index,
+        exercise_type,
+        answer,
+        is_correct,
+        created_at
+      `)
+      .eq('mission_id', s.mission_id)
+      .eq('learner_id', s.learner_id)
+      .order('created_at', { ascending: true });
+
+  /*
+   * Chargement des cartes de la mission.
+   * Les catégories sont récupérées depuis le contenu réel
+   * de chaque carte : aucun nom de catégorie n'est codé en dur.
+   */
+  const { data: missionCards, error: missionCardsError } =
+    await supabaseClient
+      .from('mission_cards')
+      .select(`
+        card_order,
+        card_type,
+        content
+      `)
+      .eq('mission_id', s.mission_id)
+      .order('card_order', { ascending: true });
+
+  if (missionCardsError) {
+    console.error(
+      'Erreur chargement des cartes de mission :',
+      missionCardsError
+    );
+  }
+
+  const categoryLabels = {};
+
+  (missionCards || []).forEach(card => {
+
+    if (!card.content) return;
+
+    const content =
+      typeof card.content === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(card.content);
+            } catch {
+              return null;
+            }
+          })()
+        : card.content;
+
+    if (!content) return;
+
+    /*
+     * On cherchera les catégories dans les différentes
+     * structures possibles du contenu JSON.
+     */
+    const categories =
+      content.categories ||
+      content.categoryOptions ||
+      content.category_options ||
+      [];
+
+    if (!Array.isArray(categories)) return;
+
+    categories.forEach(category => {
+
+      if (!category || typeof category !== 'object') return;
+
+      const id =
+        category.id ||
+        category.value ||
+        category.code ||
+        category.key;
+
+      const label =
+        category.label ||
+        category.name ||
+        category.title;
+
+      if (id && label) {
+        categoryLabels[String(id)] = String(label);
+      }
+
+    });
+
+  });
+
+  console.log(
+    'Catégories de la mission :',
+    categoryLabels
+  );
+
+if (cardAttemptsError) {
+  console.error(
+    'Erreur chargement des réponses :',
+    cardAttemptsError
+  );
+
+  document.getElementById('corAnswerText').textContent =
+    'Impossible de charger les réponses de l’apprenant.';
+} else if (!cardAttempts || cardAttempts.length === 0) {
+
+  document.getElementById('corAnswerText').textContent =
+    'Aucune réponse détaillée enregistrée.';
+
+} else {
+
+  const formatAnswer = answer => {
+    if (answer === null || answer === undefined) {
+      return '—';
+    }
+
+    if (typeof answer === 'object') {
+      try {
+        return JSON.stringify(answer, null, 2);
+      } catch {
+        return String(answer);
+      }
+    }
+
+    return String(answer);
+  };
+
+ const exerciseLabels = {
+  multiple_choice: 'Question à choix multiple',
+  true_false: 'Vrai / Faux',
+  ordering: 'Remettre dans l’ordre',
+  select_from_text: 'Sélection dans le texte',
+  matching: 'Associer les éléments',
+  categorise: 'Classer les éléments',
+  build_sentence: 'Construire la phrase',
+  fill_blank: 'Compléter les phrases',
+  open_response: 'Réponse libre'
+};
+
+const formatLearnerAnswer = (attempt) => {
+  const answer = attempt.answer;
+
+  if (answer === null || answer === undefined) {
+    return '<span class="cor-answer-empty">Aucune réponse</span>';
+  }
+
+  if (attempt.exercise_type === 'multiple_choice') {
+    return escapeHtml(
+      Array.isArray(answer)
+        ? answer.join(' · ')
+        : String(answer)
+    );
+  }
+
+  if (attempt.exercise_type === 'true_false') {
+    return answer === true ? 'Vrai' : 'Faux';
+  }
+
+  if (attempt.exercise_type === 'ordering' && Array.isArray(answer)) {
+    return `
+      <ol class="cor-answer-list">
+        ${answer.map(item => {
+          const clean = String(item)
+            .replace(/^\d+\.\s*/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          return `<li>${escapeHtml(clean)}</li>`;
+        }).join('')}
+      </ol>
+    `;
+  }
+
+  if (attempt.exercise_type === 'matching' && Array.isArray(answer)) {
+    return `
+      <div class="cor-answer-pairs">
+        ${answer.map(pair => `
+          <div class="cor-answer-pair">
+            <span>${escapeHtml(pair.left || '')}</span>
+            <strong>${escapeHtml(pair.right || '')}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+   if (attempt.exercise_type === 'categorise' && Array.isArray(answer)) {
+
+  // Retrouve la carte concernée
+  const missionCard = (missionCards || []).find(
+    card => Number(card.card_order) === Number(attempt.card_order)
+  );
+
+  // Retrouve l'élément categorise concerné
+ const categoriseElement =
+  missionCard &&
+  Array.isArray(missionCard.content?.elements)
+    ? missionCard.content.elements.find(
+        element => element.type === 'categorise'
+      )
+    : null;
+
+  // Construit le mapping cat1 -> vrai nom, cat2 -> vrai nom, etc.
+  const categoryMap = {};
+
+  if (
+    categoriseElement &&
+    Array.isArray(categoriseElement.categories)
+  ) {
+    categoriseElement.categories.forEach(category => {
+      if (category?.id && category?.name) {
+        categoryMap[String(category.id)] = String(category.name);
+      }
+    });
+  }
+
+  return `
+    <div class="cor-answer-pairs">
+      ${answer.map(item => {
+
+        const categoryId =
+          item.categoryId ||
+          item.category ||
+          '';
+
+        const categoryName =
+          categoryMap[String(categoryId)] ||
+          categoryId;
+
+        return `
+          <div class="cor-answer-pair">
+            <span>${escapeHtml(item.item || '')}</span>
+            <strong>${escapeHtml(categoryName)}</strong>
+          </div>
+        `;
+
+      }).join('')}
+    </div>
+  `;
+}
+
+ if (attempt.exercise_type === 'build_sentence' && Array.isArray(answer)) {
+
+  const missionCard = (missionCards || []).find(
+    card => Number(card.card_order) === Number(attempt.card_order)
+  );
+
+  const buildSentenceElements =
+    missionCard &&
+    Array.isArray(missionCard.content?.elements)
+      ? missionCard.content.elements.filter(
+          element => element.type === 'build_sentence'
+        )
+      : [];
+
+  /*
+   * Chaque build_sentence possède ses propres tokens.
+   * On utilise leur nombre pour savoir où commence
+   * et où se termine chaque phrase dans la réponse du stagiaire.
+   */
+  let answerPosition = 0;
+
+  return `
+    <div class="cor-build-sentence">
+
+      ${
+        buildSentenceElements.length
+          ? buildSentenceElements.map((element, sentenceIndex) => {
+
+              const sourceWords = Array.isArray(element.tokens)
+                ? element.tokens
+                    .map(token => String(token.text || '').trim())
+                    .filter(Boolean)
+                : [];
+
+              const sentenceLength = sourceWords.length;
+
+              const traineeWords = answer
+                .slice(
+                  answerPosition,
+                  answerPosition + sentenceLength
+                )
+                .filter(Boolean)
+                .map(word => String(word).trim())
+                .filter(Boolean);
+
+              answerPosition += sentenceLength;
+
+              return `
+                <div class="cor-sentence-group">
+
+                  <div class="cor-sentence-group-title">
+                    Phrase ${sentenceIndex + 1}
+                  </div>
+
+                  <div class="cor-sentence-label">
+                    À remettre dans l'ordre
+                  </div>
+
+                  <div class="cor-sentence-order">
+                    ${
+                      sourceWords.map((word, index) => `
+                        <span class="cor-word-order">
+                          <span class="cor-word-number">
+                            ${index + 1}
+                          </span>
+                          <span class="cor-word-text">
+                            ${escapeHtml(word)}
+                          </span>
+                        </span>
+                      `).join('')
+                    }
+                  </div>
+
+                  <div class="cor-sentence-label">
+                    Réponse du stagiaire
+                  </div>
+
+                  <div class="cor-sentence-result">
+                    ${
+                      traineeWords.map((word, index) => `
+                       <span class="cor-trainee-word">
+  <span class="cor-word-text">
+    ${escapeHtml(word)}
+  </span>
+</span>
+                      `).join('')
+                    }
+                  </div>
+
+                </div>
+              `;
+            }).join('')
+          : `
+              <div class="cor-answer-empty">
+                Impossible de retrouver les phrases de l'activité.
+              </div>
+            `
+      }
+
+    </div>
+  `;
+}
+    
+  if (attempt.exercise_type === 'fill_blank' && Array.isArray(answer)) {
+    return `
+      <div class="cor-answer-pairs">
+        ${answer.map((item, index) => `
+          <div class="cor-answer-pair">
+            <span>Réponse ${index + 1}</span>
+            <strong>${escapeHtml(String(item))}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  if (attempt.exercise_type === 'open_response') {
+    return `
+      <div class="cor-open-response">
+        ${escapeHtml(String(answer)).replace(/\n/g, '<br>')}
+      </div>
+    `;
+  }
+
+  return escapeHtml(String(answer));
+};
+
+document.getElementById('corAnswerText').innerHTML =
+  cardAttempts
+    .map(attempt => {
+      const label =
+        exerciseLabels[attempt.exercise_type] || 'Exercice';
+
+      const resultClass =
+        attempt.is_correct === true
+          ? 'cor-result-correct'
+          : attempt.is_correct === false
+            ? 'cor-result-incorrect'
+            : 'cor-result-pending';
+
+      const resultLabel =
+        attempt.is_correct === true
+          ? '✓ Correct'
+          : attempt.is_correct === false
+            ? '✕ Incorrect'
+            : 'À vérifier';
+
+      return `
+        <div class="cor-answer-card">
+          <div class="cor-answer-card-header">
+            <div>
+              <div class="cor-answer-card-title">
+                ${escapeHtml(label)}
+              </div>
+
+              <div class="cor-answer-card-subtitle">
+                Activité ${attempt.card_order}
+              </div>
+            </div>
+
+            <span class="${resultClass}">
+              ${resultLabel}
+            </span>
+          </div>
+
+          <div class="cor-answer-card-body">
+            ${formatLearnerAnswer(attempt)}
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+    
+  document.getElementById('corFeedback').value =
+    s.feedback || '';
+
+  document.getElementById('corErrorBox').style.display = 'none';
+document.getElementById('corConfirmBox').style.display = 'none';
+
+}
+
+    // Réinitialiser l'évaluation
+  document.querySelectorAll(
+  '#corEvaluationDimensions textarea'
+).forEach(textarea => {
+  textarea.value = '';
+});
+
+/*
+ * Recharge les évaluations déjà enregistrées
+ */
+/*
+ * Recharge les évaluations déjà enregistrées
+ */
+const {
+  data: savedEvaluations,
+  error: savedEvaluationsError
+} = await supabaseClient
+  .from('submission_evaluations')
+  .select(`
+    competency,
+    evaluation_level,
+    comment
+  `)
+  .eq('submission_id', s.id)
+  .eq('evaluation_type', 'criterion');
+
+if (savedEvaluationsError) {
+
+  console.error(
+    'Erreur chargement des évaluations :',
+    savedEvaluationsError
+  );
+
+} else {
+
+  const competencyToDimension = {
+    realisation_tache: 'task_completion',
+    comprehension_orale: 'comprehension',
+    comprehension_ecrite: 'comprehension',
+    grammaire: 'grammar',
+    vocabulaire: 'vocabulary',
+    production_orale: 'production',
+    production_ecrite: 'production',
+    prononciation: 'pronunciation'
+  };
+
+  savedEvaluations.forEach(evaluation => {
+
+    const dimension =
+      competencyToDimension[
+        evaluation.competency
+      ];
+
+    if (!dimension) {
+      return;
+    }
+
+    const textarea =
+      document.getElementById(
+        `eval_comment_${dimension}`
+      );
+
+    if (textarea) {
+      textarea.value =
+        evaluation.comment || '';
+    }
+
+    const radio =
+      document.querySelector(
+        `input[name="eval_${dimension}"][value="${evaluation.evaluation_level}"]`
+      );
+
+    if (radio) {
+      radio.checked = true;
+    }
+
+  });
+}
+
+const pronunciationNotApplicable =
+  !s.file_url;
+
+  const pronunciationDimension =
+    document.querySelector(
+      '#corEvaluationDimensions [data-dimension="pronunciation"]'
+    );
+
+  if (pronunciationDimension) {
+
+    const pronunciationRadios =
+      pronunciationDimension.querySelectorAll(
+        'input[name="eval_pronunciation"]'
+      );
+
+    pronunciationRadios.forEach(input => {
+      input.checked = false;
+      input.disabled = pronunciationNotApplicable;
+    });
+
+    const notApplicableRadio =
+      pronunciationDimension.querySelector(
+        'input[name="eval_pronunciation"][value="non_applicable"]'
+      );
+
+    if (pronunciationNotApplicable && notApplicableRadio) {
+      notApplicableRadio.disabled = false;
+      notApplicableRadio.checked = true;
+    }
+
+    const pronunciationHint =
+      pronunciationDimension.querySelector(
+        '.cor-pronunciation-hint'
+      );
+
+    if (pronunciationHint) {
+      pronunciationHint.textContent =
+        pronunciationNotApplicable
+          ? 'Réponse écrite : prononciation non applicable.'
+          : 'Réponse audio : prononciation à évaluer.';
+    }
+  }
+
+  document.getElementById('corScorePreview').style.display = 'none';
+  document.getElementById('corScoreValue').textContent = '— / 20';
+  document.getElementById('corLevelValue').textContent = '—';
+
+    await loadCorrectionObjectives(s.mission_id);
+
+  // Calcul initial de l'évaluation
+  calculateCorrectionScore();
+
+  // Préparation du lecteur audio
+  const audioBlock = document.getElementById('corAudioBlock');
+  const audioPlayer = document.getElementById('corAudioPlayer');
+
+  audioBlock.style.display = 'none';
+  audioPlayer.pause();
+  audioPlayer.removeAttribute('src');
+  audioPlayer.load();
+
+  // Si une réponse audio existe
+  if (s.file_url) {
+
+    const { data, error } = await supabaseClient
+      .storage
+      .from('mission-audio')
+      .createSignedUrl(s.file_url, 60 * 60);
+
+    if (error) {
+      console.error('Erreur récupération audio :', error);
+
+      document.getElementById('corErrorBox').textContent =
+        "Impossible de charger la réponse audio : " + error.message;
+
+      document.getElementById('corErrorBox').style.display = 'block';
+
+    } else if (data?.signedUrl) {
+
+      audioPlayer.src = data.signedUrl;
+      audioBlock.style.display = 'block';
+    }
+  }
+
+  document.getElementById('correctionModal').classList.add('on');
+}
+
+document.getElementById('closeCorrectionModal').addEventListener('click', () => {
+  document.getElementById('correctionModal').classList.remove('on');
+});
+
+document.getElementById('saveCorrectionBtn').addEventListener('click', async function(){
+  const btn = this;
+  const s = state.activeSubmission;
+  if (!s) return;
+
+  const feedback =
+    document.getElementById('corFeedback').value.trim();
+
+  const errorBox =
+    document.getElementById('corErrorBox');
+
+  const confirmBox =
+    document.getElementById('corConfirmBox');
+
+  errorBox.style.display = 'none';
+  confirmBox.style.display = 'none';
+
+  btn.disabled = true;
+
+  const original =
+    btn.textContent;
+
+  btn.innerHTML =
+    '<span class="spinner"></span>';
+
+  /*
+   * Récupération des 6 critères d'évaluation
+   */
+  const evaluationDimensions = [
+    {
+      competency: 'realisation_tache',
+      dimension: 'task_completion'
+    },
+    {
+      competency:
+        s.file_url
+          ? 'comprehension_orale'
+          : 'comprehension_ecrite',
+      dimension: 'comprehension'
+    },
+    {
+      competency: 'grammaire',
+      dimension: 'grammar'
+    },
+    {
+      competency: 'vocabulaire',
+      dimension: 'vocabulary'
+    },
+    {
+      competency:
+        s.file_url
+          ? 'production_orale'
+          : 'production_ecrite',
+      dimension: 'production'
+    },
+    {
+      competency: 'prononciation',
+      dimension: 'pronunciation'
+    }
+  ];
+
+const evaluations = [];
+
+for (const item of evaluationDimensions) {
+
+  const selected =
+    document.querySelector(
+      `input[name="eval_${item.dimension}"]:checked`
+    );
+
+  if (!selected) {
+    continue;
+  }
+
+  /*
+   * La prononciation "Non applicable"
+   * n'est pas enregistrée comme une évaluation.
+   */
+  if (
+    item.dimension === 'pronunciation' &&
+    selected.value === 'non_applicable'
+  ) {
+    continue;
+  }
+
+  const comment =
+    document.getElementById(
+      `eval_comment_${item.dimension}`
+    )?.value.trim() || '';
+
+  evaluations.push({
+    submission_id: s.id,
+    objective_id: null,
+    competency: item.competency,
+    evaluation_type: 'criterion',
+    evaluation_level: selected.value,
+    achieved:
+      selected.value !== 'insuffisant',
+    comment: comment || null,
+    trainer_id:
+      state.profile?.id || null
+  });
+}
+
+  /*
+   * Enregistrement des évaluations détaillées
+   */
+  const { error: evaluationError } =
+    await supabaseClient
+      .from('submission_evaluations')
+      .delete()
+      .eq('submission_id', s.id);
+
+  if (evaluationError) {
+
+    btn.disabled = false;
+    btn.textContent = original;
+
+    errorBox.textContent =
+      "Impossible de préparer l'enregistrement de l'évaluation : "
+      + evaluationError.message;
+
+    errorBox.style.display = 'block';
+
+    return;
+  }
+
+  if (evaluations.length > 0) {
+
+    const { error: insertEvaluationError } =
+      await supabaseClient
+        .from('submission_evaluations')
+        .insert(evaluations);
+
+    if (insertEvaluationError) {
+
+      btn.disabled = false;
+      btn.textContent = original;
+
+      errorBox.textContent =
+        "L'enregistrement de l'évaluation a échoué : "
+        + insertEvaluationError.message;
+
+      errorBox.style.display = 'block';
+
+      return;
+    }
+  }
+
+  /*
+   * Enregistrement de la correction générale
+   */
+  const { data, error } =
+    await supabaseClient
+      .from('submissions')
+      .update({
+        feedback: feedback,
+        status: 'corrected',
+        corrected_at:
+          new Date().toISOString()
+      })
+      .eq('id', s.id)
+      .select()
+      .single();
+
+  btn.disabled = false;
+  btn.textContent = original;
+
+  if (error) {
+
+    errorBox.textContent =
+      "L'enregistrement a échoué : "
+      + error.message;
+
+    errorBox.style.display = 'block';
+
+    return;
+  }
+
+  /*
+   * Met à jour l'état local
+   */
+  Object.assign(s, data);
+
+  confirmBox.style.display =
+    'block';
+
+  document.getElementById(
+    'statToCorrect'
+  ).textContent =
+    state.submissions.filter(
+      x => x.status !== 'corrected'
+    ).length;
+
+  renderSubmissions();
+});
+
+// ---------- Chargement des questions ----------
+async function loadQuestionsData(){
+  const { data: questions } = await supabaseClient
+    .from('questions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  const qs = questions || [];
+  const learnerIds = [...new Set(qs.map(q => q.learner_id).filter(Boolean))];
+  const missionIds = [...new Set(qs.map(q => q.mission_id).filter(Boolean))];
+
+  const [{ data: profilesData }, { data: missionsData }] = await Promise.all([
+    learnerIds.length ? supabaseClient.from('profiles').select('*').in('id', learnerIds) : { data: [] },
+    missionIds.length ? supabaseClient.from('missions').select('*').in('id', missionIds) : { data: [] }
+  ]);
+
+  const profileMap = new Map((profilesData || []).map(p => [p.id, p]));
+  const missionMap = new Map((missionsData || []).map(m => [m.id, m]));
+
+  state.questions = qs.map(q => ({
+    ...q,
+    learnerProfile: profileMap.get(q.learner_id) || null,
+    mission: q.mission_id ? (missionMap.get(q.mission_id) || null) : null
+  }));
+
+  renderQuestions();
+}
+
+function renderQuestions(){
+  const slot = document.getElementById('questionsSlot');
+  let list = state.questions;
+
+  if (state.questionFilter === 'open') list = list.filter(q => q.status !== 'answered');
+  if (state.questionFilter === 'answered') list = list.filter(q => q.status === 'answered');
+
+  if (list.length === 0) {
+    slot.innerHTML = '<div class="empty-state">Aucune question pour ce filtre.</div>';
+    return;
+  }
+
+  slot.innerHTML = list.map(q => {
+    const answered = q.status === 'answered';
+    return `
+      <div class="fm-row" data-q-id="${q.id}">
+        <div class="fm-row-top">
+          <div>
+            <div class="fm-learner">${escapeHtml(learnerFullName(q.learnerProfile))}</div>
+            <div class="fm-meta">${q.mission ? escapeHtml(q.mission.title) : 'Aucune mission liée'} · ${formatDate(q.created_at)}</div>
+          </div>
+          <span class="badge ${answered ? 'badge-done' : 'badge-open'}">${answered ? 'Répondu' : 'En attente'}</span>
+        </div>
+        <div class="fm-answer-preview">${escapeHtml(q.question)}</div>
+      </div>
+    `;
+  }).join('');
+
+  slot.querySelectorAll('.fm-row').forEach(row => {
+    row.addEventListener('click', () => openQuestionModal(Number(row.dataset.qId)));
+  });
+}
+
+document.querySelectorAll('[data-qfilter]').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('[data-qfilter]').forEach(b => b.classList.remove('on'));
+    this.classList.add('on');
+    state.questionFilter = this.dataset.qfilter;
+    renderQuestions();
+  });
+});
+
+// ---------- Modale réponse à une question ----------
+function openQuestionModal(qId){
+  const q = state.questions.find(x => x.id === qId);
+  if (!q) return;
+  state.activeQuestion = q;
+
+  document.getElementById('qLearnerName').textContent = learnerFullName(q.learnerProfile);
+  document.getElementById('qMissionInfo').textContent = q.mission ? q.mission.title : 'Aucune mission liée';
+  document.getElementById('qQuestionText').textContent = q.question || '—';
+  document.getElementById('qAnswerBox').value = q.answer || '';
+  document.getElementById('qErrorBox').style.display = 'none';
+  document.getElementById('qConfirmBox').style.display = 'none';
+
+  document.getElementById('questionModal').classList.add('on');
+}
+
+document.getElementById('closeQuestionModal').addEventListener('click', () => {
+  document.getElementById('questionModal').classList.remove('on');
+});
+
+document.getElementById('saveAnswerBtn').addEventListener('click', async function(){
+  const btn = this;
+  const q = state.activeQuestion;
+  if (!q) return;
+
+  const answer = document.getElementById('qAnswerBox').value.trim();
+  const errorBox = document.getElementById('qErrorBox');
+  const confirmBox = document.getElementById('qConfirmBox');
+  errorBox.style.display = 'none';
+  confirmBox.style.display = 'none';
+
+  if (!answer) {
+    errorBox.textContent = 'Merci de rédiger une réponse avant d\'envoyer.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const { data, error } = await supabaseClient
+    .from('questions')
+    .update({
+      answer: answer,
+      status: 'answered',
+      answered_at: new Date().toISOString()
+    })
+    .eq('id', q.id)
+    .select()
+    .single();
+
+  btn.disabled = false;
+  btn.textContent = original;
+
+  if (error) {
+    errorBox.textContent = "L'envoi a échoué : " + error.message;
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  Object.assign(q, data);
+  confirmBox.style.display = 'block';
+  renderQuestions();
+});
+    
+</script>
+    
+<!-- ================= MODALE SESSION LIVE ================= -->
+<div id="liveSessionModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Nouvelle session live</h2>
+
+      <button
+        type="button"
+        class="modal-close"
+        onclick="closeLiveSessionModal()"
+        aria-label="Fermer"
+      >
+        ×
+      </button>
+    </div>
+
+    <form id="liveSessionForm">
+
+  <div class="form-group">
+
+    <label for="liveLanguage">Langue</label>
+
+    <select id="liveLanguage" required>
+      <option value="">Choisir une langue</option>
+      <option value="fr">Français</option>
+      <option value="en">Anglais</option>
+      <option value="es">Espagnol</option>
+    </select>
+
+  </div>
+
+  <div class="form-group">
+
+    <label for="liveWeek">Semaine</label>
+
+    <select id="liveWeek" required>
+      <option value="">Sélectionner une semaine</option>
+    </select>
+
+  </div>
+
+      <div class="form-group">
+        <label for="liveTitle">
+          Titre de la session
+        </label>
+
+        <input
+          type="text"
+          id="liveTitle"
+          placeholder="Ex. Conversation en français"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="liveStartsAt">
+          Date et heure
+        </label>
+
+        <input
+          type="datetime-local"
+          id="liveStartsAt"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="liveDuration">
+          Durée
+        </label>
+
+        <select id="liveDuration" required>
+          <option value="30">30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60" selected>1 heure</option>
+          <option value="90">1 h 30</option>
+          <option value="120">2 heures</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="liveMeetUrl">
+          Lien Google Meet
+        </label>
+
+        <input
+          type="url"
+          id="liveMeetUrl"
+          placeholder="https://meet.google.com/..."
+        >
+      </div>
+
+      <div id="liveSessionFormMessage"></div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick="closeLiveSessionModal()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+        >
+          Enregistrer
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+    
+
+<script>
+window.openLiveSessionModal = async function () {
+  const modal = document.getElementById('liveSessionModal');
+
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+
+  await loadLiveSessionWeeks();
+};
+
+  window.closeLiveSessionModal = function () {
+    const modal = document.getElementById('liveSessionModal');
+
+    if (modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+const liveSessionButton = document.getElementById('openLiveSessionButton');
+
+if (liveSessionButton) {
+  liveSessionButton.addEventListener('click', function () {
+    window.openLiveSessionModal();
+  });
+}
+
+async function cancelLiveSession(sessionId) {
+
+  const confirmed = confirm(
+    'Voulez-vous vraiment annuler cette session live ?'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('live_sessions')
+    .update({
+      status: 'cancelled'
+    })
+    .eq('id', sessionId);
+
+  if (error) {
+    console.error(
+      'Erreur annulation session live :',
+      error
+    );
+
+    alert(
+      'Impossible d’annuler la session : ' +
+      error.message
+    );
+
+    return;
+  }
+
+  alert('Session live annulée.');
+
+  if (typeof loadLiveSessions === 'function') {
+    await loadLiveSessions();
+  }
+}
+
+// ---------- Enregistrement session live ----------
+document.getElementById('liveSessionForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const message = document.getElementById('liveSessionFormMessage');
+const language =
+  document.getElementById('liveLanguage').value;
+
+  const weekNumber = Number(
+    document.getElementById('liveWeek').value
+  );
+
+  const title =
+    document.getElementById('liveTitle').value.trim();
+
+  const startsAt =
+    document.getElementById('liveStartsAt').value;
+
+  const durationMinutes =
+    Number(document.getElementById('liveDuration').value);
+
+  const googleMeetUrl =
+    document.getElementById('liveMeetUrl').value.trim();
+
+if (!language || !weekNumber || !title || !startsAt) {
+    message.textContent = 'Veuillez remplir les champs obligatoires.';
+    return;
+  }
+
+  message.textContent = 'Enregistrement...';
+
+  const { data: mission, error: missionError } =
+  await supabaseClient
+    .from('missions')
+    .select('id, week_number, language')
+    .eq('language', language)
+    .eq('week_number', weekNumber)
+    .limit(1)
+    .single();
+    
+  if (missionError || !mission) {
+    console.error(missionError);
+    message.textContent =
+      'Impossible de trouver une mission pour cette semaine.';
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('live_sessions')
+    .insert({
+      mission_id: mission.id,
+      title: title,
+      starts_at: new Date(startsAt).toISOString(),
+      duration_minutes: durationMinutes,
+      google_meet_url: googleMeetUrl || null,
+      created_by: state.user.id
+    });
+
+  if (error) {
+    console.error('Erreur création session live :', error);
+    message.textContent =
+      'Erreur lors de la création : ' + error.message;
+    return;
+  }
+
+  message.textContent = 'Session créée avec succès.';
+
+  document.getElementById('liveSessionForm').reset();
+
+  setTimeout(() => {
+    closeLiveSessionModal();
+  }, 800);
+});
+    
+</script>
+    
+</body>
+</html>

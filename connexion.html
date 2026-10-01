@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Parla by Hitondra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-logo brand">Parla <span>by Hitondra</span></div>
+    <div class="auth-sub">Connectez-vous à votre espace membre</div>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Adresse email</label>
+        <input type="email" id="email" name="email" placeholder="vous@exemple.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+    <div style="text-align:right;margin-top:6px;">
+      <a href="#" id="forgotPasswordLink" style="font-size:13px;">
+    Mot de passe oublié ?
+      </a>
+    </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+        <span id="loginBtnText">Se connecter</span>
+      </button>
+
+      <div id="errorBox" class="error-msg" style="display:none;"></div>
+    </form>
+<div style="text-align:center;margin-top:16px;">
+  <a
+    href="activation-code.html"
+    style="font-size:14px;font-weight:600;color:var(--ink);"
+  >
+    J’ai un code Hitondra
+  </a>
+</div>
+      
+<div id="resetPasswordBox" style="display:none; margin-top:20px;">
+
+  <div class="field">
+    <label for="newPassword">Nouveau mot de passe</label>
+    <input
+      type="password"
+      id="newPassword"
+      placeholder="••••••••"
+      autocomplete="new-password"
+    >
+  </div>
+
+  <div class="field">
+    <label for="confirmPassword">Confirmer le mot de passe</label>
+    <input
+      type="password"
+      id="confirmPassword"
+      placeholder="••••••••"
+      autocomplete="new-password"
+    >
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-primary btn-block"
+    id="resetPasswordBtn"
+  >
+    Définir mon nouveau mot de passe
+  </button>
+
+  <div
+    id="resetPasswordMessage"
+    class="error-msg"
+    style="display:none;"
+  ></div>
+
+</div>
+      
+    <div id="signupPrompt" style="text-align:center;margin-top:20px;">
+  <p class="hint" style="margin-bottom:8px;">
+    Pas encore de compte ?
+  </p>
+  <a href="#" id="showSignupLink" style="font-size:14px;font-weight:600;color:var(--ink);">
+    Créer mon compte
+  </a>
+</div>
+
+<div id="signupBox" style="display:none;margin-top:20px;">
+
+  <div class="field">
+    <label for="signupFirstName">Prénom</label>
+    <input
+      type="text"
+      id="signupFirstName"
+      placeholder="Votre prénom"
+      autocomplete="given-name"
+    >
+  </div>
+
+  <div class="field">
+    <label for="signupLastName">Nom</label>
+    <input
+      type="text"
+      id="signupLastName"
+      placeholder="Votre nom"
+      autocomplete="family-name"
+    >
+  </div>
+
+  <div class="field">
+    <label for="signupEmail">Adresse email</label>
+    <input
+      type="email"
+      id="signupEmail"
+      placeholder="vous@exemple.com"
+      autocomplete="email"
+    >
+  </div>
+
+  <div class="field">
+    <label for="signupPassword">Mot de passe</label>
+    <input
+      type="password"
+      id="signupPassword"
+      placeholder="••••••••"
+      autocomplete="new-password"
+    >
+  </div>
+
+  <div class="field">
+    <label for="signupPasswordConfirm">Confirmer le mot de passe</label>
+    <input
+      type="password"
+      id="signupPasswordConfirm"
+      placeholder="••••••••"
+      autocomplete="new-password"
+    >
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-primary btn-block"
+    id="signupBtn"
+  >
+    Créer mon compte
+  </button>
+
+  <div
+    id="signupMessage"
+    class="error-msg"
+    style="display:none;margin-top:15px;"
+  ></div>
+
+  <div style="text-align:center;margin-top:15px;">
+    <a href="#" id="backToLoginLink" style="font-size:13px;">
+      J’ai déjà un compte
+    </a>
+  </div>
+
+</div>
+  </div>
+</div>
+
+<!-- Librairie Supabase (doit être chargée avant config.js) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+  // Si un utilisateur est déjà connecté, on regarde son rôle
+(async function checkExistingSession() {
+
+  const { data: { session } } =
+    await supabaseClient.auth.getSession();
+
+  if (!session) return;
+
+  const isRecovery =
+    window.location.hash.includes('type=recovery') ||
+    window.location.search.includes('type=recovery');
+
+  const isInvite =
+    window.location.hash.includes('type=invite') ||
+    window.location.search.includes('type=invite');
+
+  if (isRecovery || isInvite) {
+    return;
+  }
+
+    const { data: profile, error } =
+      await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+    if (error || !profile) {
+      console.error(
+        "Impossible de récupérer le rôle :",
+        error
+      );
+      return;
+    }
+
+    const role = (profile.role || '').toLowerCase();
+
+    if (role === 'teacher' || role === 'admin') {
+      window.location.href = "formateur.html";
+    } else {
+      window.location.href = "membre.html";
+    }
+  })();
+
+
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('errorBox');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginBtnText = document.getElementById('loginBtnText');
+
+
+  function setLoading(isLoading) {
+    loginBtn.disabled = isLoading;
+
+    loginBtnText.innerHTML = isLoading
+      ? '<span class="spinner"></span>'
+      : 'Se connecter';
+  }
+
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+  }
+
+const resetPasswordBox =
+  document.getElementById('resetPasswordBox');
+
+const resetPasswordBtn =
+  document.getElementById('resetPasswordBtn');
+
+const resetPasswordMessage =
+  document.getElementById('resetPasswordMessage');
+
+async function checkPasswordRecovery() {
+  const { data: { session } } =
+    await supabaseClient.auth.getSession();
+
+  if (!session) return;
+
+  const isRecovery =
+  window.location.hash.includes('type=recovery') ||
+  window.location.search.includes('type=recovery');
+
+if (!isRecovery) return;
+
+  document.getElementById('loginForm').style.display = 'none';
+  resetPasswordBox.style.display = 'block';
+
+  resetPasswordBtn.addEventListener('click', async function() {
+
+    const newPassword =
+      document.getElementById('newPassword').value;
+
+    const confirmPassword =
+      document.getElementById('confirmPassword').value;
+
+    resetPasswordMessage.style.display = 'none';
+
+    if (!newPassword || !confirmPassword) {
+      resetPasswordMessage.textContent =
+        'Veuillez remplir les deux champs.';
+      resetPasswordMessage.style.display = 'block';
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      resetPasswordMessage.textContent =
+        'Les deux mots de passe ne correspondent pas.';
+      resetPasswordMessage.style.display = 'block';
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      resetPasswordMessage.textContent =
+        'Le mot de passe doit contenir au moins 6 caractères.';
+      resetPasswordMessage.style.display = 'block';
+      return;
+    }
+
+    resetPasswordBtn.disabled = true;
+    resetPasswordBtn.textContent = 'Enregistrement...';
+
+    const { error } =
+      await supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+
+    if (error) {
+      console.error(
+        'Erreur changement mot de passe :',
+        error
+      );
+
+      resetPasswordMessage.textContent =
+        'Impossible de modifier le mot de passe : ' +
+        error.message;
+
+      resetPasswordMessage.style.display = 'block';
+
+      resetPasswordBtn.disabled = false;
+      resetPasswordBtn.textContent =
+        'Définir mon nouveau mot de passe';
+
+      return;
+    }
+
+    resetPasswordMessage.textContent =
+      'Mot de passe modifié avec succès. Vous pouvez maintenant vous connecter.';
+
+    resetPasswordMessage.style.display = 'block';
+
+    await supabaseClient.auth.signOut();
+
+    setTimeout(() => {
+      window.location.href = 'connexion.html';
+    }, 1500);
+  });
+}
+
+checkPasswordRecovery();
+
+document
+  .getElementById('forgotPasswordLink')
+  .addEventListener('click', async function(e) {
+    e.preventDefault();
+
+    const email =
+      document.getElementById('email').value.trim();
+
+    if (!email) {
+      showError(
+        "Veuillez saisir votre adresse email avant de réinitialiser votre mot de passe."
+      );
+      return;
+    }
+
+    const { error } =
+      await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo:
+          window.location.origin + '/connexion.html'
+      });
+
+    if (error) {
+      showError(
+        "Impossible d'envoyer le lien : " +
+        error.message
+      );
+      return;
+    }
+
+    showError(
+      "Un email de réinitialisation vient d'être envoyé."
+    );
+  });
+
+const signupPrompt = document.getElementById('signupPrompt');
+const signupBox = document.getElementById('signupBox');
+const showSignupLink = document.getElementById('showSignupLink');
+const backToLoginLink = document.getElementById('backToLoginLink');
+
+const signupBtn = document.getElementById('signupBtn');
+const signupMessage = document.getElementById('signupMessage');
+
+showSignupLink.addEventListener('click', function(e) {
+  e.preventDefault();
+
+  errorBox.style.display = 'none';
+  form.style.display = 'none';
+  signupPrompt.style.display = 'none';
+  signupBox.style.display = 'block';
+});
+
+backToLoginLink.addEventListener('click', function(e) {
+  e.preventDefault();
+
+  signupBox.style.display = 'none';
+  form.style.display = 'block';
+  signupPrompt.style.display = 'block';
+  signupMessage.style.display = 'none';
+});
+
+signupBtn.addEventListener('click', async function() {
+
+  signupMessage.style.display = 'none';
+
+  const firstName =
+    document.getElementById('signupFirstName').value.trim();
+
+  const lastName =
+    document.getElementById('signupLastName').value.trim();
+
+  const email =
+    document.getElementById('signupEmail').value.trim().toLowerCase();
+
+  const password =
+    document.getElementById('signupPassword').value;
+
+  const passwordConfirm =
+    document.getElementById('signupPasswordConfirm').value;
+
+  if (
+    !firstName ||
+    !lastName ||
+    !email ||
+    !password ||
+    !passwordConfirm
+  ) {
+    signupMessage.textContent =
+      'Veuillez remplir tous les champs.';
+    signupMessage.style.display = 'block';
+    return;
+  }
+
+  if (password.length < 6) {
+    signupMessage.textContent =
+      'Le mot de passe doit contenir au moins 6 caractères.';
+    signupMessage.style.display = 'block';
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    signupMessage.textContent =
+      'Les deux mots de passe ne correspondent pas.';
+    signupMessage.style.display = 'block';
+    return;
+  }
+
+  signupBtn.disabled = true;
+  signupBtn.textContent = 'Création...';
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName
+        }
+      }
+    });
+
+  signupBtn.disabled = false;
+  signupBtn.textContent = 'Créer mon compte';
+
+  if (error) {
+    console.error(
+      'Erreur création compte :',
+      error
+    );
+
+    signupMessage.textContent =
+      'Impossible de créer le compte : ' +
+      error.message;
+
+    signupMessage.style.display = 'block';
+    return;
+  }
+
+  if (!data.session) {
+    signupMessage.textContent =
+      'Le compte a été créé, mais la connexion automatique n’a pas pu être établie.';
+
+    signupMessage.style.display = 'block';
+    return;
+  }
+
+  window.location.href = 'membre.html';
+});
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    errorBox.style.display = 'none';
+
+    const email =
+      document.getElementById('email').value.trim();
+
+    const password =
+      document.getElementById('password').value;
+
+    setLoading(true);
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    setLoading(false);
+
+    if (error) {
+      if (
+        error.message
+          .toLowerCase()
+          .includes('invalid login credentials')
+      ) {
+        showError("Erreur Supabase : " + error.message);
+      } else {
+        showError(
+          "Une erreur est survenue : " +
+          error.message
+        );
+      }
+
+      return;
+    }
+
+
+    if (data && data.user) {
+
+      const { data: profile, error: profileError } =
+        await supabaseClient
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single();
+
+      if (profileError || !profile) {
+        showError(
+          "Impossible de récupérer votre profil."
+        );
+        return;
+      }
+
+      const role =
+        (profile.role || '').toLowerCase();
+
+      if (role === 'teacher' || role === 'admin') {
+        window.location.href = "formateur.html";
+      } else {
+        window.location.href = "membre.html";
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

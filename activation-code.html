@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Hitondra — Parla</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-box">
+
+    <div class="auth-logo brand">
+      Parla
+      <span>
+        by Hitondra
+      </span>
+    </div>
+
+    <div class="auth-sub">
+      Activez votre avantage Hitondra
+    </div>
+
+    <div class="field">
+      <label for="activationCode">Votre code Hitondra</label>
+      <input
+        type="text"
+        id="activationCode"
+        placeholder="Saisissez votre code"
+        autocomplete="off"
+      >
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary btn-block"
+      id="activateCodeBtn"
+    >
+      Activer mon code
+    </button>
+
+    <div
+      id="activationMessage"
+      class="error-msg"
+      style="display:none;margin-top:15px;"
+    ></div>
+
+    <div style="text-align:center;margin-top:20px;">
+      <a href="membre.html" style="font-size:13px;">
+        Retour à mon espace membre
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<script>
+(async function () {
+
+  const message =
+    document.getElementById('activationMessage');
+
+  const activateButton =
+    document.getElementById('activateCodeBtn');
+
+  const codeInput =
+    document.getElementById('activationCode');
+
+  let currentSession = null;
+
+  const {
+    data: sessionData
+  } = await supabaseClient.auth.getSession();
+
+  currentSession = sessionData.session;
+
+  console.log('SESSION INITIALE :', currentSession);
+
+  supabaseClient.auth.onAuthStateChange(function (event, session) {
+
+    console.log('AUTH EVENT :', event, session);
+
+    currentSession = session;
+
+  });
+
+  activateButton.addEventListener('click', async function () {
+
+    console.log('CLIC ACTIVATION DÉTECTÉ');
+
+    const code = codeInput.value.trim();
+
+    message.style.display = 'none';
+
+    if (!code) {
+
+      message.textContent =
+        'Veuillez saisir votre code Hitondra.';
+
+      message.style.display = 'block';
+
+      return;
+    }
+
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    currentSession = session;
+
+    console.log('SESSION AU CLIC :', currentSession);
+
+    if (!currentSession) {
+
+      message.textContent =
+        'Votre session n’est pas disponible. Veuillez vous reconnecter puis réessayer.';
+
+      message.style.display = 'block';
+
+      return;
+    }
+
+    activateButton.disabled = true;
+    activateButton.textContent = 'Vérification...';
+
+    const {
+      data,
+      error
+    } = await supabaseClient.rpc(
+      'activate_parla_registration_code',
+      {
+        input_code: code
+      }
+    );
+
+    activateButton.disabled = false;
+    activateButton.textContent = 'Activer mon code';
+
+    console.log('RÉPONSE RPC :', data);
+    console.log('ERREUR RPC :', error);
+
+    if (error) {
+
+      message.textContent =
+        error.message ||
+        'Impossible d’activer ce code.';
+
+      message.style.display = 'block';
+
+      return;
+    }
+
+    if (data?.offer_code === 'member') {
+
+      message.textContent =
+        'Votre code est validé. Votre accès est maintenant activé.';
+
+    } else {
+
+      message.textContent =
+        'Votre code est validé. Montant à payer : ' +
+        Number(data.price).toLocaleString('fr-FR') +
+        ' Ar.';
+
+    }
+
+    message.style.display = 'block';
+
+  });
+
+})();
+</script>
+
+</body>
+</html>

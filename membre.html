@@ -1,0 +1,3247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace membre — Parla by Hitondra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+<style>
+/* =========================================================
+   EXERCICES — MISE EN PAGE
+   ========================================================= */
+
+#missionCardsContainer .mission-exercise {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 18px;
+  padding: 20px;
+  background: #fafdfc;
+  border: 1px solid #e1f1ec;
+  border-radius: 18px;
+}
+
+/* Question / consigne */
+#missionCardsContainer .mission-exercise > strong {
+  display: block;
+  margin-bottom: 16px;
+  color: #3b5049;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   CHOIX MULTIPLES + VRAI/FAUX + SELECT FROM TEXT
+   ========================================================= */
+
+#missionCardsContainer .mission-options {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  width: 100% !important;
+  margin: 14px 0 18px;
+}
+
+#missionCardsContainer .mission-option {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100% !important;
+  box-sizing: border-box;
+  padding: 13px 15px;
+  margin: 0 !important;
+
+  background: #fff;
+  border: 1px solid #d7e8e2;
+  border-radius: 12px;
+
+  color: #3b5049;
+  line-height: 1.45;
+
+  cursor: pointer;
+}
+
+#missionCardsContainer .mission-option:hover {
+  border-color: #63a891;
+  background: #f6fcfa;
+}
+
+#missionCardsContainer .mission-option input {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+#missionCardsContainer .mission-option span {
+  display: block;
+  min-width: 0;
+  flex: 1;
+}
+
+/* =========================================================
+   FEEDBACK
+   ========================================================= */
+
+#missionCardsContainer .mission-feedback {
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-top: 14px;
+  padding: 13px 15px;
+
+  border-radius: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Bonne réponse */
+#missionCardsContainer .mission-feedback.correct {
+  background: #eaf8ef !important;
+  border: 1px solid #8fd3a5 !important;
+  color: #176b36 !important;
+}
+
+/* Mauvaise réponse */
+#missionCardsContainer .mission-feedback.incorrect {
+  background: #fff0f0 !important;
+  border: 1px solid #e3a0a0 !important;
+  color: #a52828 !important;
+}
+
+/* Réponse ouverte */
+#missionCardsContainer .mission-feedback.neutral {
+  background: #f0faf7 !important;
+  border: 1px solid #d0e8e0 !important;
+  color: #497969 !important;
+}
+
+/* =========================================================
+   BOUTONS
+   ========================================================= */
+
+#missionCardsContainer .mission-check-btn {
+  display: inline-block;
+  margin-top: 4px;
+
+  padding: 10px 17px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: #63a891;
+  color: #fff;
+
+  font-family: inherit;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+#missionCardsContainer .mission-check-btn:hover {
+  background: #558f7c;
+}
+
+/* =========================================================
+   ORDERING
+   ========================================================= */
+
+#missionCardsContainer .ordering-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 14px 0 18px;
+}
+
+#missionCardsContainer .ordering-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 13px 15px;
+
+  background: #fff;
+  border: 1px solid #d7e8e2;
+  border-radius: 11px;
+
+  cursor: grab;
+}
+
+#missionCardsContainer .ordering-item.dragging {
+  opacity: .5;
+}
+
+#missionCardsContainer .ordering-number {
+  font-weight: 700;
+  color: #63a891;
+}
+
+/* =========================================================
+   MATCHING
+   ========================================================= */
+
+#missionCardsContainer .matching-list,
+#missionCardsContainer .categorise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 14px 0 18px;
+}
+
+#missionCardsContainer .matching-row,
+#missionCardsContainer .categorise-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+#missionCardsContainer .matching-left,
+#missionCardsContainer .categorise-item {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #d7e8e2;
+  border-radius: 11px;
+  line-height: 1.45;
+}
+
+#missionCardsContainer .matching-select,
+#missionCardsContainer .categorise-select {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 11px 12px;
+
+  border: 1px solid #d1e5de;
+  border-radius: 11px;
+
+  background: #fff;
+  color: #3b5049;
+}
+
+/* =========================================================
+   SELECT FROM TEXT
+   ========================================================= */
+
+#missionCardsContainer .select-text-content {
+  padding: 16px;
+  margin-bottom: 16px;
+
+  background: #fff;
+  border: 1px solid #e1f1ec;
+  border-radius: 12px;
+
+  line-height: 1.65;
+}
+
+/* =========================================================
+   FILL IN THE BLANK
+   ========================================================= */
+
+#missionCardsContainer .fill-blank-content {
+  line-height: 2.4;
+  margin-bottom: 16px;
+}
+
+#missionCardsContainer .fill-blank-input {
+  width: 160px;
+  max-width: 100%;
+
+  padding: 8px 10px;
+
+  border: 1px solid #d1e5de;
+  border-radius: 9px;
+
+  background: #fff;
+}
+
+/* =========================================================
+   BUILD SENTENCE
+   ========================================================= */
+
+#missionCardsContainer .build-sentence-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+#missionCardsContainer .build-token {
+  padding: 9px 13px;
+
+  background: #fff;
+  border: 1px solid #d7e8e2;
+  border-radius: 10px;
+
+  color: #3b5049;
+
+  cursor: pointer;
+}
+
+#missionCardsContainer .build-token.selected {
+  opacity: .45;
+}
+
+#missionCardsContainer .build-answer {
+  min-height: 52px;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  padding: 12px;
+
+  background: #fff;
+  border: 1px dashed #c7dfd7;
+  border-radius: 12px;
+
+  margin-bottom: 16px;
+}
+
+/* =========================================================
+   RÉPONSE OUVERTE
+   ========================================================= */
+
+#missionCardsContainer .open-response-input {
+  width: 100%;
+  min-height: 120px;
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+  margin-bottom: 14px;
+
+  border: 1px solid #d1e5de;
+  border-radius: 12px;
+
+  background: #fff;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  #missionCardsContainer .matching-row,
+  #missionCardsContainer .categorise-row {
+    grid-template-columns: 1fr;
+  }
+
+  #missionCardsContainer .mission-exercise {
+    padding: 16px;
+  }
+
+}
+
+/* =========================================================
+   CARTES MEMBRE — IMAGE + ANIMATION
+   ========================================================= */
+
+/* Images des activités */
+#missionCardsContainer img {
+  display: block !important;
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 280px !important;
+  object-fit: contain !important;
+  margin: 14px auto 20px !important;
+  border-radius: 18px !important;
+}
+
+/* Une seule carte visible */
+#missionCardsContainer .member-mission-card {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e0eee9;
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgba(8,20,29,.08);
+}
+
+/* Carte active */
+#missionCardsContainer .member-mission-card.is-active {
+  display: block;
+  animation: memberCardEnter .35s ease both;
+}
+
+/* Éléments cachés au départ */
+#missionCardsContainer .member-progressive-element {
+  opacity: 0;
+  transform: translateY(12px);
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  pointer-events: none;
+  transition:
+    opacity .35s ease,
+    transform .35s ease,
+    max-height .45s ease,
+    margin .35s ease;
+}
+
+/* Élément affiché */
+#missionCardsContainer .member-progressive-element.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 2000px;
+  margin-top: initial !important;
+  margin-bottom: initial !important;
+  pointer-events: auto;
+}
+
+@keyframes memberCardEnter {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+#missionCardsContainer .mission-card-title {
+  margin: 0 0 14px;
+  font-family: var(--f-display) !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  color: var(--ink) !important;
+}
+
+#missionCardsContainer .member-card-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+#missionCardsContainer .member-card-navigation button {
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 24px;
+  min-width: 160px;
+  background: #63a891;
+  color: #fff;
+  font-family: var(--f-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+
+#missionCardsContainer .member-card-navigation button:hover:not(:disabled) {
+  background: #538f7b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(8,20,29,.15);
+}
+
+#missionCardsContainer .member-card-navigation button:disabled {
+  background: #e1eeea;
+  color: #8395a1;
+  cursor: default;
+}
+    
+</style>
+    
+</head>
+<body>
+
+<!-- Écran de chargement affiché pendant la vérification de session -->
+<div id="loadingScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <span class="spinner spinner-dark" style="width:26px;height:26px;"></span>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none;">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo brand">Parla</div>
+      <div class="topbar-meta" id="topbarMeta">—</div>
+    </div>
+    <div class="topbar-user">
+      <div class="avatar" id="avatarInitial">?</div>
+      <button class="btn btn-danger-outline btn-sm" id="logoutBtn">Déconnexion</button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+
+    <nav class="side-nav" id="sideNav">
+      <a href="#" data-view="dashboard" class="on"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span> Tableau de bord</a>
+      <a href="#" data-view="mission"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></span> Ma mission</a>
+      <a href="#" data-view="travaux"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span> Mes travaux</a>
+      <a href="#" data-view="questions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg></span> Mes questions</a>
+      <a href="#" data-view="live"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span> Session live</a>
+      <a href="#" data-view="profil"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Mon profil</a>
+    </nav>
+
+    <main class="content">
+
+      <!-- ================= TABLEAU DE BORD ================= -->
+      <section class="view on" id="view-dashboard">
+        <h1 class="view-title" id="dashGreeting">Bonjour !</h1>
+        <p class="view-sub" id="dashSub">—</p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="statMissions">0</div>
+            <div class="stat-lbl">Missions disponibles</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statSubmissions">0</div>
+            <div class="stat-lbl">Travaux soumis</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="statFeedback">0</div>
+            <div class="stat-lbl">Feedback reçus</div>
+          </div>
+        </div>
+
+      <div id="learnerLanguagesDashboardSlot"></div>
+
+<div id="courseEnrollmentSlot"></div>
+
+<div id="levelTestSlot"></div>
+
+<div id="testimonialSlot"></div>
+          
+<div id="dashMissionSlot">
+          <div class="empty-state">Chargement de votre mission…</div>
+        </div>
+      </section>
+
+      <!-- ================= MA MISSION ================= -->
+      <section class="view" id="view-mission">
+        <h1 class="view-title">Ma mission</h1>
+        <p class="view-sub">Votre mission active pour cette semaine.</p>
+        <div id="missionDetailSlot">
+          <div class="empty-state">Chargement…</div>
+        </div>
+      </section>
+
+      <!-- ================= MES TRAVAUX ================= -->
+      <section class="view" id="view-travaux">
+        <h1 class="view-title">Mes travaux</h1>
+        <p class="view-sub">L'historique de vos réponses envoyées.</p>
+        <div id="travauxSlot">
+          <div class="empty-state">Chargement…</div>
+        </div>
+      </section>
+
+      <!-- ================= MES QUESTIONS ================= -->
+      <section class="view" id="view-questions">
+        <h1 class="view-title">Mes questions</h1>
+        <p class="view-sub">Une question ? Votre formateur vous répondra ici.</p>
+
+        <div class="card" style="margin-bottom:22px;">
+          <div class="field">
+            <label for="questionMission">Mission concernée (optionnel)</label>
+            <select id="questionMission" style="width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--sand-stroke);background:var(--sand);">
+              <option value="">— Aucune mission en particulier —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="questionText">Votre question</label>
+            <textarea id="questionText" class="answer-box" style="min-height:100px;" placeholder="Écrivez votre question au formateur..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="sendQuestionBtn">Envoyer</button>
+          <div id="questionErrorBox" class="error-msg" style="display:none;"></div>
+        </div>
+
+        <div id="questionsSlot">
+          <div class="empty-state">Chargement…</div>
+        </div>
+      </section>
+
+      <!-- ================= SESSION LIVE ================= -->
+      <section class="view" id="view-live">
+  <h1 class="view-title">Session live</h1>
+  <p class="view-sub">Prochaine session live</p>
+
+  <div id="learnerLiveSessionsSlot">
+    <div class="empty-state">
+      Les prochaines sessions seront affichées ici.
+    </div>
+  </div>
+</section>
+
+      <!-- ================= MON PROFIL ================= -->
+      <section class="view" id="view-profil">
+        <h1 class="view-title">Mon profil</h1>
+        <p class="view-sub">Vos informations personnelles.</p>
+        <div class="card" id="profilSlot">
+  <div class="empty-state">Chargement…</div>
+</div>
+      </section>
+
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <a href="#" data-view="dashboard" class="on"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span>Accueil</a>
+    <a href="#" data-view="mission"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></span>Mission</a>
+    <a href="#" data-view="travaux"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>Travaux</a>
+    <a href="#" data-view="questions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg></span>Questions</a>
+    <a href="#" data-view="live"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span>Live</a>
+    <a href="#" data-view="profil"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Profil</a>
+  </nav>
+
+</div>
+
+<!-- Librairie Supabase (doit être chargée avant config.js) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  console.log('MEMBRE.HTML CHARGE');
+</script>
+<script src="config.js"></script>
+<script src="mission-renderer.js"></script>
+<script>
+
+    
+/* =========================================================
+   Parla by Hitondra — Espace membre
+   Toutes les données proviennent de Supabase.
+   ========================================================= */
+
+const state = {
+  user: null,
+  profile: null,
+  missions: [],        // missions du même language/level que l'apprenant
+  submissions: [],     // submissions de l'apprenant (avec mission jointe)
+  activeMission: null,  // mission actuellement mise en avant
+  missionCards: [],    // cartes de la mission active
+  enrollment: null     // inscription active à une formation
+};
+
+let currentAttemptGroupId = crypto.randomUUID();
+
+// ---------- Utilitaires ----------
+function escapeHtml(str){
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function formatDate(iso){
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function languageLabel(code){
+  const map = { francais:'Français', anglais:'Anglais', espagnol:'Espagnol',
+                fr:'Français', en:'Anglais', es:'Espagnol' };
+  return map[(code||'').toLowerCase()] || code || '—';
+}
+
+// ---------- Paiement Formation 20h ----------
+
+function formatAmount(amount){
+  return new Intl.NumberFormat('fr-FR').format(
+    Number(amount || 0)
+  ) + ' Ar';
+}
+
+function planLabel(code) {
+  const plans = {
+    basic: 'Essentiel',
+    advanced: 'Pro',
+    expert: 'Expert',
+    bootcamp: 'Bootcamp',
+    member: 'Membre'
+  };
+
+  return plans[code] || code || 'Formation';
+}
+
+function calculateCoursePrice(enrollment) {
+  if (!enrollment) return 0;
+
+  const regularPrice =
+    Number(enrollment.regular_price || 0);
+
+  const discountAmount =
+    Number(enrollment.discount_amount || 0);
+
+  const languageCount =
+    Number(enrollment.language_count || 1);
+
+  const isMember =
+    enrollment.plan_code === 'member';
+
+  const totalPrice =
+    isMember
+      ? regularPrice * languageCount
+      : regularPrice;
+
+  return Math.max(
+    0,
+    totalPrice - discountAmount
+  );
+}
+    
+async function loadPaymentMethods(){
+  const { data, error } = await supabaseClient
+    .from('payment_methods')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement moyens de paiement :', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+function renderPaymentMethods(methods){
+
+  if (!methods.length) {
+    return `
+      <div class="card" style="
+        background:#fff7ed;
+        margin-top:12px;
+        box-shadow:none;
+      ">
+        Aucun moyen de paiement n'est actuellement disponible.
+      </div>
+    `;
+  }
+
+  const mobileMoneyMethods = methods.filter(
+    method => method.method_type === 'mobile_money'
+  );
+
+  const bankMethods = methods.filter(
+    method => method.method_type === 'bank_transfer'
+  );
+
+  let html = '';
+
+  // ---------- Mobile Money ----------
+  if (mobileMoneyMethods.length) {
+
+    html += `
+      <div style="
+        border:1px solid var(--sand-stroke);
+        border-radius:14px;
+        padding:15px;
+        margin-top:12px;
+        background:var(--sand);
+      ">
+
+        <div style="
+          font-weight:700;
+          margin-bottom:8px;
+        ">
+          ${mobileMoneyMethods
+            .map(method => escapeHtml(method.label))
+            .join(' · ')}
+        </div>
+
+        <div style="
+          font-size:14px;
+          line-height:1.6;
+          color:var(--ink-soft);
+        ">
+          Numéro de paiement à demander dans le groupe WhatsApp.
+        </div>
+
+        <a
+          href="https://chat.whatsapp.com/KhsH0xiOLcL0n7X8lhPjAk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style="
+            display:inline-block;
+            margin-top:10px;
+            padding:8px 12px;
+            border:1px solid #22c55e;
+            border-radius:10px;
+            color:#15803d;
+            background:#f0fdf4;
+            font-weight:700;
+            text-decoration:none;
+          "
+        >
+          Groupe WhatsApp →
+        </a>
+
+      </div>
+    `;
+  }
+
+  // ---------- Virement bancaire ----------
+  bankMethods.forEach(method => {
+
+    let details = '';
+
+    if (method.provider) {
+      details += `
+        <div><strong>${escapeHtml(method.provider)}</strong></div>
+      `;
+    }
+
+    if (method.bank_name) {
+      details += `
+        <div>Banque : ${escapeHtml(method.bank_name)}</div>
+      `;
+    }
+
+    if (method.account_name) {
+      details += `
+        <div>Titulaire : ${escapeHtml(method.account_name)}</div>
+      `;
+    }
+
+    if (method.account_number) {
+      details += `
+        <div>Compte : ${escapeHtml(method.account_number)}</div>
+      `;
+    }
+
+    if (method.iban) {
+      details += `
+        <div>IBAN : ${escapeHtml(method.iban)}</div>
+      `;
+    }
+
+    if (method.bic) {
+      details += `
+        <div>BIC : ${escapeHtml(method.bic)}</div>
+      `;
+    }
+
+    html += `
+      <div style="
+        border:1px solid var(--sand-stroke);
+        border-radius:14px;
+        padding:15px;
+        margin-top:12px;
+        background:var(--sand);
+      ">
+
+        <div style="
+          font-weight:700;
+          margin-bottom:8px;
+        ">
+          ${escapeHtml(method.label)}
+        </div>
+
+        <div style="
+          font-size:14px;
+          line-height:1.7;
+        ">
+          ${details}
+        </div>
+
+        ${
+          method.instructions
+            ? `
+              <div style="
+                margin-top:10px;
+                font-size:13px;
+                color:var(--ink-soft);
+              ">
+                ${escapeHtml(method.instructions)}
+              </div>
+            `
+            : ''
+        }
+
+      </div>
+    `;
+  });
+
+  return html;
+}
+
+
+async function submitPayment(enrollmentId) {
+  const referenceInput = document.getElementById('payment-reference');
+  const proofInput = document.getElementById('payment-proof');
+  const message = document.getElementById('payment-message');
+  const button = document.getElementById('payment-submit');
+
+  const reference = referenceInput
+    ? referenceInput.value.trim()
+    : '';
+
+  if (!reference) {
+    message.innerHTML = `
+      <div class="error-msg">
+        Merci de saisir la référence du paiement.
+      </div>
+    `;
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Envoi en cours…';
+
+  try {
+    let proofPath = null;
+
+    if (proofInput && proofInput.files.length > 0) {
+      const file = proofInput.files[0];
+
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'application/pdf'
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(
+          'Format non accepté. Utilisez JPG, PNG, WebP ou PDF.'
+        );
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(
+          'La preuve de paiement ne doit pas dépasser 10 Mo.'
+        );
+      }
+
+      const extension =
+        file.name.includes('.')
+          ? file.name.split('.').pop().toLowerCase()
+          : 'jpg';
+
+      const fileName =
+        `${crypto.randomUUID()}.${extension}`;
+
+      proofPath =
+        `${state.user.id}/${enrollmentId}/${fileName}`;
+
+      const { error: uploadError } =
+        await supabaseClient
+          .storage
+          .from('payment-proofs')
+          .upload(
+            proofPath,
+            file,
+            {
+              upsert: false,
+              contentType: file.type
+            }
+          );
+
+      if (uploadError) {
+        throw uploadError;
+      }
+    }
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        'submit_course_payment',
+        {
+          input_enrollment_id: enrollmentId,
+          input_payment_reference: reference,
+          input_payment_proof_path: proofPath
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Paiement envoyé :', data);
+
+    if (state.enrollment) {
+      state.enrollment.payment_reference = reference;
+      state.enrollment.payment_proof_path = proofPath;
+      state.enrollment.payment_submitted_at =
+        new Date().toISOString();
+      state.enrollment.payment_status = 'pending';
+      state.enrollment.payment_rejection_reason = null;
+    }
+
+    message.innerHTML = `
+      <div style="
+        padding:12px;
+        border-radius:12px;
+        background:#ecfdf5;
+        color:#166534;
+        font-size:14px;
+      ">
+        Votre paiement a bien été envoyé.
+        <br>
+        Il sera vérifié par l'équipe Hitondra.
+      </div>
+    `;
+
+    button.disabled = true;
+    button.textContent = 'Paiement envoyé ✓';
+
+  } catch (error) {
+    console.error(error);
+
+    message.innerHTML = `
+      <div class="error-msg">
+        ${escapeHtml(
+          error.message ||
+          "Impossible d'envoyer le paiement."
+        )}
+      </div>
+    `;
+
+    button.disabled = false;
+    button.textContent = 'Envoyer le paiement';
+  }
+}
+    
+// ---------- Navigation ----------
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  const target = document.getElementById('view-' + name);
+  if (target) target.classList.add('on');
+
+  document.querySelectorAll('#sideNav a, #bottomNav a').forEach(a => {
+    a.classList.toggle('on', a.dataset.view === name);
+  });
+
+  if (name === 'mission') renderMissionView();
+  if (name === 'travaux') renderTravauxView();
+  if (name === 'questions') renderQuestionsView();
+  if (name === 'profil') renderProfilView();
+}
+
+document.querySelectorAll('#sideNav a, #bottomNav a').forEach(a => {
+  a.addEventListener('click', function(e){
+    e.preventDefault();
+    showView(this.dataset.view);
+  });
+});
+
+// ---------- Déconnexion ----------
+document.getElementById('logoutBtn').addEventListener('click', async function(){
+  await supabaseClient.auth.signOut();
+  window.location.href = 'connexion.html';
+});
+
+// ---------- Point d'entrée ----------
+(async function init(){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+  state.user = user;
+
+  // 1) Profil
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    document.getElementById('loadingScreen').innerHTML =
+      '<div class="empty-state">Impossible de charger votre profil. Veuillez réessayer plus tard ou contacter votre formateur.</div>';
+    return;
+  }
+  state.profile = profile;
+
+  // 2) Inscription à la Formation 20h
+  const { data: enrollment, error: enrollmentError } =
+    await supabaseClient
+      .from('course_enrollments')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('course_name', 'Formation 20h')
+      .in('status', ['pending', 'paid', 'active'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+  if (enrollmentError) {
+    console.error('Erreur chargement inscription :', enrollmentError);
+  }
+
+  state.enrollment = enrollment || null;
+
+console.log('ENROLLMENT PAIEMENT :', state.enrollment);
+if (state.enrollment) {
+  console.log(
+    'PLAN =', state.enrollment.plan_code,
+    'PRIX =', state.enrollment.regular_price,
+    'REMISE =', state.enrollment.discount_amount,
+    'LANGUES =', state.enrollment.language_count
+  );
+} else {
+  console.log(
+    'Aucune inscription Formation 20h pour cet apprenant.'
+  );
+}
+
+  // 2) Missions correspondant à la langue + au niveau de l'apprenant
+  const { data: missions } = await supabaseClient
+    .from('missions')
+    .select('*')
+    .eq('language', profile.language)
+    .eq('level', profile.level)
+    .order('week_number', { ascending: true });
+  state.missions = missions || [];
+
+  // 3) Submissions de l'apprenant (avec la mission liée)
+  const { data: submissions } = await supabaseClient
+    .from('submissions')
+    .select('*, missions(id, title, week_number, language, level)')
+    .eq('learner_id', user.id)
+    .order('submitted_at', { ascending: false });
+  state.submissions = submissions || [];
+
+// 4) Prépare les cartes de la mission active
+state.missionCards = [];
+
+ // 5) Détermine la mission active : première mission non terminée.
+const submittedMissionIds = new Set(
+  state.submissions.map(s => s.mission_id)
+);
+
+state.activeMission =
+  state.missions.find(
+    m => !submittedMissionIds.has(m.id)
+  ) || null;
+
+// 6) Charge les cartes de la mission active
+if (state.activeMission) {
+
+  const { data: missionCards, error: missionCardsError } =
+    await supabaseClient
+      .from('mission_cards')
+      .select('*')
+      .eq('mission_id', state.activeMission.id)
+      .order('card_order', { ascending: true });
+    
+console.log('MISSION ID :', state.activeMission.id);
+console.log('INIT MEMBRE OK');
+console.log('CARTES SUPABASE :', missionCards);
+console.log('ERREUR CARTES :', missionCardsError);
+    
+  if (missionCardsError) {
+    console.error(
+      'Erreur chargement des cartes :',
+      missionCardsError
+    );
+
+    state.missionCards = [];
+  } else {
+    state.missionCards = missionCards || [];
+  }
+
+} else {
+
+  state.missionCards = [];
+
+}
+
+  renderTopbar();
+  await renderDashboard();
+  populateQuestionMissionSelect();
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+})();
+
+// ---------- Topbar ----------
+function renderTopbar(){
+  const p = state.profile;
+  const initial = (p.first_name || '?').trim().charAt(0).toUpperCase();
+  document.getElementById('avatarInitial').textContent = initial || '?';
+  document.getElementById('topbarMeta').textContent =
+    `${p.first_name || ''} · ${languageLabel(p.language)} · ${p.level || '—'}`;
+}
+
+// ---------- Tableau de bord ----------
+async function renderDashboard(){
+  const p = state.profile;
+
+  document.getElementById('dashGreeting').textContent = `Bonjour, ${p.first_name || ''} 👋`;
+  document.getElementById('dashSub').textContent =
+    `Langue actuelle : ${languageLabel(p.language)}  ·  Niveau : ${p.level || '—'}`;
+
+  document.getElementById('statMissions').textContent = state.missions.length;
+  document.getElementById('statSubmissions').textContent = state.submissions.length;
+  const feedbackCount = state.submissions.filter(s => s.feedback && s.feedback.trim() !== '').length;
+  document.getElementById('statFeedback').textContent = feedbackCount;
+
+async function loadLearnerLanguagesDashboard() {
+  const slot = document.getElementById('learnerLanguagesDashboardSlot');
+
+  if (!slot || !state.user) return;
+
+  const { data: languages, error } = await supabaseClient
+    .from('learner_languages')
+    .select('*')
+    .eq('user_id', state.user.id)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement langues :', error);
+    slot.innerHTML = `
+      <div class="card">
+        <p class="empty-state">
+          Impossible de charger vos langues.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  const selectedLanguages = (languages || []).map(
+    item => item.language
+  );
+
+  const languageOptions = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' }
+  ];
+
+  slot.innerHTML = `
+    <div class="card">
+      <h2 style="margin-top:0;">Mes langues</h2>
+
+      <p class="muted">
+        Choisissez de 1 à 3 langues.
+      </p>
+
+      <div
+        style="
+          display:grid;
+          gap:10px;
+          margin-top:15px;
+        "
+      >
+        ${languageOptions.map(lang => `
+          <label
+            style="
+              display:flex;
+              align-items:center;
+              gap:10px;
+              cursor:pointer;
+            "
+          >
+            <input
+              type="checkbox"
+              class="learner-language-dashboard-checkbox"
+              value="${lang.value}"
+              ${selectedLanguages.includes(lang.value) ? 'checked' : ''}
+              style="
+                width:18px;
+                height:18px;
+                accent-color:var(--ink);
+              "
+            >
+
+            <span>${lang.label}</span>
+          </label>
+        `).join('')}
+      </div>
+
+      <button
+        type="button"
+        id="saveLearnerLanguagesDashboardBtn"
+        class="btn btn-primary"
+        style="margin-top:16px;"
+      >
+        Enregistrer mes langues
+      </button>
+
+      <p
+        id="learnerLanguagesDashboardMessage"
+        class="muted"
+        style="margin-top:10px;"
+      ></p>
+    </div>
+  `;
+
+  const checkboxes = slot.querySelectorAll(
+    '.learner-language-dashboard-checkbox'
+  );
+
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      const checked = slot.querySelectorAll(
+        '.learner-language-dashboard-checkbox:checked'
+      );
+
+      if (checked.length > 3) {
+        checkbox.checked = false;
+
+        const message = document.getElementById(
+          'learnerLanguagesDashboardMessage'
+        );
+
+        if (message) {
+          message.textContent =
+            'Vous pouvez choisir au maximum 3 langues.';
+        }
+      }
+    });
+  });
+
+  const saveButton = document.getElementById(
+    'saveLearnerLanguagesDashboardBtn'
+  );
+
+  if (saveButton) {
+    saveButton.addEventListener(
+      'click',
+      saveLearnerLanguagesDashboard
+    );
+  }
+}
+
+async function saveLearnerLanguagesDashboard() {
+  const selected = Array.from(
+    document.querySelectorAll(
+      '.learner-language-dashboard-checkbox:checked'
+    )
+  ).map(checkbox => checkbox.value);
+
+console.log(
+  'LANGUES SÉLECTIONNÉES :',
+  selected
+);
+
+  const message = document.getElementById(
+    'learnerLanguagesDashboardMessage'
+  );
+
+  if (selected.length < 1) {
+    if (message) {
+      message.textContent =
+        'Choisissez au moins une langue.';
+    }
+    return;
+  }
+
+  if (selected.length > 3) {
+    if (message) {
+      message.textContent =
+        'Vous pouvez choisir au maximum 3 langues.';
+    }
+    return;
+  }
+
+  const { error: deleteError } =
+    await supabaseClient
+      .from('learner_languages')
+      .delete()
+      .eq('user_id', state.user.id);
+
+  if (deleteError) {
+    console.error(
+      'Erreur suppression langues :',
+      deleteError
+    );
+
+    if (message) {
+      message.textContent =
+        'Impossible d’enregistrer vos langues.';
+    }
+
+    return;
+  }
+
+  const rows = selected.map(language => ({
+    user_id: state.user.id,
+    language,
+    level: null,
+    is_active: true
+  }));
+
+  const { error: insertError } =
+    await supabaseClient
+      .from('learner_languages')
+      .insert(rows);
+
+  if (insertError) {
+    console.error(
+      'Erreur enregistrement langues :',
+      insertError
+    );
+
+    if (message) {
+      message.textContent =
+        'Impossible d’enregistrer vos langues.';
+    }
+
+    return;
+  }
+
+if (state.enrollment?.plan_code === 'member') {
+
+  const {
+    data: updatedEnrollment,
+    error: enrollmentUpdateError
+  } =
+    await supabaseClient.rpc(
+      'sync_member_language_count',
+      {
+        selected_language_count: selected.length
+      }
+    );
+
+  if (enrollmentUpdateError) {
+    console.error(
+      'Erreur synchronisation nombre de langues :',
+      enrollmentUpdateError
+    );
+
+    if (message) {
+      message.textContent =
+        'Impossible de synchroniser le nombre de langues : ' +
+        enrollmentUpdateError.message;
+    }
+
+    return;
+  }
+
+  if (!updatedEnrollment) {
+    console.error(
+      'La synchronisation du nombre de langues a échoué.'
+    );
+
+    if (message) {
+      message.textContent =
+        'Impossible de synchroniser le nombre de langues.';
+    }
+
+    return;
+  }
+
+  state.enrollment =
+    updatedEnrollment;
+}
+    
+  message.textContent =
+  `${selected.length} ${
+    selected.length > 1 ? 'langues' : 'langue'
+  } prises en compte.`;
+  }
+
+await loadLearnerLanguagesDashboard();
+    
+  const enrollmentSlot =
+  document.getElementById('courseEnrollmentSlot');
+
+if (enrollmentSlot) {
+
+  if (!state.enrollment) {
+
+    enrollmentSlot.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+        <h3>Formation 20h</h3>
+
+        <p>
+          Vous n'êtes pas encore inscrit à la Formation 20h.
+        </p>
+
+        <a
+          href="activation-code.html"
+          class="btn btn-primary"
+        >
+          J'ai un code Parla
+        </a>
+      </div>
+    `;
+
+  } else if (state.enrollment.status === 'active') {
+
+    enrollmentSlot.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+
+        <span class="badge badge-done">
+          Formation active
+        </span>
+
+        <h3 style="margin-top:10px;">
+          Formation 20h
+        </h3>
+
+        <p>
+          Votre accès à la Formation 20h est actif.
+        </p>
+
+      </div>
+    `;
+
+  } else {
+
+    const paymentMethods =
+      await loadPaymentMethods();
+
+    const amountDue =
+  calculateCoursePrice(state.enrollment);
+
+    enrollmentSlot.innerHTML = `
+
+      <div class="card" style="margin-bottom:20px;">
+
+        <span class="badge badge-progress">
+          ${
+            state.enrollment.payment_status === 'rejected'
+              ? 'Paiement à corriger'
+              : 'Paiement en attente'
+          }
+        </span>
+
+        <h3 style="margin-top:10px;">
+          Formation 20h
+        </h3>
+
+        <p>
+          Offre :
+          <strong>
+            ${escapeHtml(
+  planLabel(state.enrollment.plan_code)
+)}
+          </strong>
+        </p>
+
+        <div style="
+          font-size:26px;
+          font-weight:700;
+          margin:18px 0;
+        ">
+          ${formatAmount(amountDue)}
+        </div>
+
+
+        ${
+          state.enrollment.payment_status === 'rejected'
+            ? `
+              <div style="
+                padding:12px;
+                border-radius:12px;
+                background:#fef2f2;
+                color:#991b1b;
+                margin-bottom:16px;
+              ">
+
+                <strong>
+                  Votre paiement doit être corrigé.
+                </strong>
+
+                <div style="margin-top:5px;">
+                  ${escapeHtml(
+                    state.enrollment.payment_rejection_reason ||
+                    'Veuillez soumettre à nouveau votre paiement.'
+                  )}
+                </div>
+
+              </div>
+            `
+            : ''
+        }
+
+
+        <h4 style="margin-top:20px;">
+          Comment payer ?
+        </h4>
+
+        <div style="
+          font-size:14px;
+          color:var(--ink-soft);
+          margin-bottom:8px;
+        ">
+          Choisissez l'un des moyens de paiement disponibles :
+        </div>
+
+        ${renderPaymentMethods(paymentMethods)}
+
+
+        <div style="
+          margin-top:22px;
+        ">
+
+          <label
+            for="payment-reference"
+            style="
+              display:block;
+              font-weight:600;
+              margin-bottom:7px;
+            "
+          >
+            Référence du paiement
+          </label>
+
+          <input
+            id="payment-reference"
+            type="text"
+            placeholder="Ex. référence du virement"
+            style="
+              width:100%;
+              box-sizing:border-box;
+              padding:12px 14px;
+              border-radius:12px;
+              border:1px solid var(--sand-stroke);
+              background:#fff;
+            "
+          >
+
+        </div>
+
+
+        <div style="
+          margin-top:16px;
+        ">
+
+          <label
+            for="payment-proof"
+            style="
+              display:block;
+              font-weight:600;
+              margin-bottom:7px;
+            "
+          >
+            Preuve de paiement
+            <span style="
+              font-weight:400;
+              color:var(--ink-soft);
+            ">
+              (facultatif)
+            </span>
+          </label>
+
+          <input
+            id="payment-proof"
+            type="file"
+            accept="image/*,.pdf"
+            style="width:100%;"
+          >
+
+        </div>
+
+
+        <button
+          id="payment-submit"
+          type="button"
+          class="btn btn-primary"
+          style="
+            width:100%;
+            margin-top:18px;
+          "
+          onclick="
+            submitPayment(${state.enrollment.id})
+          "
+        >
+          Envoyer le paiement
+        </button>
+
+
+        <div
+          id="payment-message"
+          style="margin-top:14px;"
+        ></div>
+
+      </div>
+
+    `;
+  }
+}
+  
+await loadMyLevelTest();
+await loadMyTestimonial();
+    
+}
+
+async function loadMyLevelTest() {
+
+  const slot =
+    document.getElementById('levelTestSlot');
+
+  if (!slot || !state.user) return;
+
+  const { data: languages, error: languagesError } =
+    await supabaseClient
+      .from('learner_languages')
+      .select('language')
+      .eq('user_id', state.user.id)
+      .order('created_at', { ascending: true });
+
+  if (languagesError) {
+    console.error(
+      'Erreur chargement langues pour test :',
+      languagesError
+    );
+
+    return;
+  }
+
+  const selectedLanguages =
+    (languages || []).map(
+      item => item.language
+    );
+
+  if (selectedLanguages.length === 0) {
+    slot.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+        <h3>Test de niveau</h3>
+
+        <p style="color:var(--ink-soft);">
+          Sélectionnez d'abord au moins une langue.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  const { data: results, error: resultsError } =
+    await supabaseClient
+      .from('level_test_results')
+      .select('*')
+      .eq('user_id', state.user.id)
+      .in('language', selectedLanguages)
+      .order('completed_at', { ascending: false });
+
+  if (resultsError) {
+    console.error(
+      'Erreur chargement résultats test de niveau :',
+      resultsError
+    );
+
+    slot.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+        <h3>Test de niveau</h3>
+
+        <p style="color:var(--ink-soft);">
+          Évaluez votre niveau dans les langues que vous avez choisies.
+        </p>
+
+        <a
+          href="parla-test-niveau-community.html"
+          class="btn btn-primary"
+        >
+          Faire un test de niveau →
+        </a>
+      </div>
+    `;
+
+    return;
+  }
+
+  const resultsByLanguage = {};
+
+  (results || []).forEach(result => {
+    if (!resultsByLanguage[result.language]) {
+      resultsByLanguage[result.language] = result;
+    }
+  });
+
+  const languageOptions = [
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'Anglais' },
+    { value: 'es', label: 'Espagnol' }
+  ];
+
+  const getLanguageLabel = language => {
+    const option =
+      languageOptions.find(
+        item => item.value === language
+      );
+
+    return option
+      ? option.label
+      : languageLabel(language);
+  };
+
+  slot.innerHTML = `
+    <div class="card" style="margin-bottom:20px;">
+
+      <h3>Test de niveau</h3>
+
+      <p style="
+        color:var(--ink-soft);
+        margin-bottom:18px;
+      ">
+        Évaluez votre niveau dans chacune de vos langues.
+      </p>
+
+      <div style="
+        display:grid;
+        gap:12px;
+      ">
+
+        ${selectedLanguages.map(language => {
+
+          const result =
+            resultsByLanguage[language];
+
+          if (result) {
+            return `
+              <div style="
+                padding:16px;
+                border-radius:14px;
+                background:var(--sand);
+              ">
+
+                <div style="
+                  font-size:14px;
+                  color:var(--ink-soft);
+                ">
+                  ${escapeHtml(
+                    getLanguageLabel(language)
+                  )}
+                </div>
+
+                <div style="
+                  display:flex;
+                  align-items:center;
+                  justify-content:space-between;
+                  gap:12px;
+                  margin-top:5px;
+                ">
+
+                  <div style="
+                    font-size:30px;
+                    font-weight:700;
+                  ">
+                    ${escapeHtml(
+                      result.cefr_level || '—'
+                    )}
+                  </div>
+
+                  <span class="badge badge-done">
+                    ✓ Test effectué
+                  </span>
+
+                </div>
+
+                <div style="
+                  margin-top:5px;
+                  color:var(--ink-soft);
+                  font-size:14px;
+                ">
+                  Score :
+                  ${escapeHtml(result.score)}
+                  /
+                  ${escapeHtml(result.total_questions)}
+                  ·
+                  ${escapeHtml(result.percentage)} %
+                </div>
+
+                <p style="
+                  margin-top:8px;
+                  color:var(--ink-soft);
+                  font-size:13px;
+                ">
+                  Test effectué le
+                  ${formatDate(result.completed_at)}
+                </p>
+
+              </div>
+            `;
+          }
+
+          return `
+            <div style="
+              padding:16px;
+              border-radius:14px;
+              border:1px solid var(--line);
+            ">
+
+              <div style="
+                font-size:14px;
+                color:var(--ink-soft);
+              ">
+                ${escapeHtml(
+                  getLanguageLabel(language)
+                )}
+              </div>
+
+              <p style="
+                margin:8px 0 12px;
+              ">
+                Vous n'avez pas encore effectué
+                votre test de niveau dans cette langue.
+              </p>
+
+              <a
+                href="parla-test-niveau-community.html?language=${encodeURIComponent(language)}"
+                class="btn btn-primary"
+              >
+                Faire le test →
+              </a>
+
+            </div>
+          `;
+
+        }).join('')}
+
+      </div>
+
+    </div>
+  `;
+}
+    
+// ---------- Témoignage membre ----------
+
+async function loadMyTestimonial() {
+  const slot = document.getElementById('testimonialSlot');
+
+  if (!slot || !state.user) return;
+
+  const { data: testimonial, error } = await supabaseClient
+    .from('parla_testimonials')
+    .select('*')
+    .eq('user_id', state.user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erreur chargement témoignage :', error);
+    slot.innerHTML = '';
+    return;
+  }
+
+  if (testimonial) {
+    let statusLabel = 'En attente de validation';
+    let statusClass = 'badge-progress';
+
+    if (testimonial.status === 'approved') {
+      statusLabel = 'Publié sur Parla ✓';
+      statusClass = 'badge-done';
+    }
+
+    if (testimonial.status === 'rejected') {
+      statusLabel = 'Avis non publié';
+      statusClass = 'badge-progress';
+    }
+
+    slot.innerHTML = `
+      <div class="card" style="margin-bottom:20px;">
+
+        <span class="badge ${statusClass}">
+          ${statusLabel}
+        </span>
+
+        <h3 style="margin-top:12px;">
+          Votre avis sur Parla
+        </h3>
+
+        <div style="
+          font-size:22px;
+          letter-spacing:2px;
+          margin:10px 0;
+        ">
+          ${'★'.repeat(Number(testimonial.rating))}
+          <span style="color:#d6d0c5;">
+            ${'★'.repeat(5 - Number(testimonial.rating))}
+          </span>
+        </div>
+
+        <p style="
+          white-space:pre-wrap;
+          color:var(--ink-soft);
+          margin-bottom:0;
+        ">
+          ${escapeHtml(testimonial.comment)}
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  slot.innerHTML = `
+    <div class="card" style="margin-bottom:20px;">
+
+      <h3>
+        ⭐ Comment s’est passée votre expérience avec Parla ?
+      </h3>
+
+      <p style="color:var(--ink-soft);">
+        Votre témoignage pourra être publié sur notre site
+        après validation par l’équipe Hitondra.
+      </p>
+
+      <div style="margin-top:18px;">
+
+        <label style="
+          display:block;
+          font-weight:600;
+          margin-bottom:8px;
+        ">
+          Votre note
+        </label>
+
+        <select
+          id="testimonialRating"
+          style="
+            width:100%;
+            box-sizing:border-box;
+            padding:12px 14px;
+            border-radius:12px;
+            border:1px solid var(--sand-stroke);
+            background:#fff;
+          "
+        >
+          <option value="">Choisissez une note</option>
+          <option value="5">★★★★★ — 5/5</option>
+          <option value="4">★★★★☆ — 4/5</option>
+          <option value="3">★★★☆☆ — 3/5</option>
+          <option value="2">★★☆☆☆ — 2/5</option>
+          <option value="1">★☆☆☆☆ — 1/5</option>
+        </select>
+
+      </div>
+
+      <div style="margin-top:16px;">
+
+        <label
+          for="testimonialComment"
+          style="
+            display:block;
+            font-weight:600;
+            margin-bottom:8px;
+          "
+        >
+          Votre témoignage
+        </label>
+
+        <textarea
+          id="testimonialComment"
+          class="answer-box"
+          style="min-height:120px;"
+          placeholder="Racontez-nous brièvement votre expérience avec Parla..."
+        ></textarea>
+
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="submitTestimonialBtn"
+        style="margin-top:14px;"
+      >
+        Envoyer mon avis
+      </button>
+
+      <div
+        id="testimonialErrorBox"
+        class="error-msg"
+        style="display:none;margin-top:12px;"
+      ></div>
+
+    </div>
+  `;
+
+  document
+    .getElementById('submitTestimonialBtn')
+    .addEventListener('click', submitTestimonial);
+}
+
+
+async function submitTestimonial() {
+  const ratingEl = document.getElementById('testimonialRating');
+  const commentEl = document.getElementById('testimonialComment');
+  const button = document.getElementById('submitTestimonialBtn');
+  const errorBox = document.getElementById('testimonialErrorBox');
+
+  const rating = Number(ratingEl.value);
+  const comment = commentEl.value.trim();
+
+  errorBox.style.display = 'none';
+
+  if (!rating || rating < 1 || rating > 5) {
+    errorBox.textContent = 'Merci de choisir une note.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  if (!comment) {
+    errorBox.textContent = 'Merci d’écrire votre témoignage.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Envoi en cours…';
+
+  const { error } = await supabaseClient
+    .from('parla_testimonials')
+    .insert({
+      user_id: state.user.id,
+      first_name: state.profile.first_name || null,
+      rating: rating,
+      comment: comment,
+      status: 'pending'
+    });
+
+  if (error) {
+    console.error('Erreur envoi témoignage :', error);
+
+    errorBox.textContent =
+      "Impossible d'envoyer votre avis pour le moment.";
+
+    errorBox.style.display = 'block';
+
+    button.disabled = false;
+    button.textContent = 'Envoyer mon avis';
+
+    return;
+  }
+
+  await loadMyLevelTest();
+  await loadMyTestimonial();
+}
+
+// ---------- Ma mission ----------
+function renderMissionView(){
+
+  const slot = document.getElementById('missionDetailSlot');
+  const m = state.activeMission;
+
+  if (!m) {
+    slot.innerHTML =
+      '<div class="empty-state">Aucune mission n\'est disponible pour votre langue et votre niveau pour le moment.</div>';
+    return;
+  }
+
+  const existingSubmission =
+    state.submissions.find(
+      s => s.mission_id === m.id
+    );
+
+  const missionCards =
+    state.missionCards || [];
+
+  console.log('MISSION ACTIVE :', m.id);
+  console.log('CARTES CHARGEES :', missionCards);
+
+  let html = `
+    <div class="card mission-detail-head">
+
+      <div class="mission-tags">
+        <span class="tag">
+          ${languageLabel(m.language)}
+        </span>
+
+        <span class="tag">
+          ${escapeHtml(m.level)}
+        </span>
+
+        <span class="tag">
+          Semaine ${m.week_number ?? '—'}
+        </span>
+
+        <span class="tag">
+          ${
+            m.estimated_minutes
+              ? m.estimated_minutes + ' min'
+              : 'Durée non précisée'
+          }
+        </span>
+      </div>
+
+      <h3 style="
+        font-family:var(--f-display);
+        font-size:21px;
+        margin-bottom:10px;
+      ">
+        ${escapeHtml(m.title)}
+      </h3>
+
+      <p style="
+        color:var(--ink-soft);
+        white-space:pre-wrap;
+      ">
+        ${escapeHtml(m.description || '')}
+      </p>
+
+    </div>
+  `;
+
+  if (missionCards.length) {
+
+    html += `
+      <div id="missionCardsContainer"></div>
+    `;
+
+  } else {
+
+    html += `
+      <div class="empty-state" style="margin-top:20px;">
+        Cette mission ne contient encore aucune activité.
+      </div>
+    `;
+  }
+
+  slot.innerHTML = html;
+
+  const cardsContainer =
+    slot.querySelector('#missionCardsContainer');
+
+  if (!cardsContainer || !missionCards.length) {
+    return;
+  }
+
+  ParlaMissionRenderer.reset();
+
+  /* =====================================================
+     PUCE DE PROGRESSION
+     ===================================================== */
+
+  const progress =
+    document.createElement('div');
+
+  progress.className =
+    'member-card-progress';
+
+  progress.innerHTML =
+    missionCards.map((card, index) => `
+      <span
+        class="member-card-dot ${
+          index === 0 ? 'is-active' : ''
+        }"
+        data-card-index="${index}"
+      ></span>
+    `).join('');
+
+  cardsContainer.appendChild(progress);
+
+
+  /* =====================================================
+     CONTENEUR DES CARTES
+     ===================================================== */
+
+  const cardsWrapper =
+    document.createElement('div');
+
+  cardsWrapper.className =
+    'member-mission-cards';
+
+  cardsContainer.appendChild(cardsWrapper);
+
+
+  /* =====================================================
+     RENDU DES 5 CARTES
+     ===================================================== */
+
+  missionCards.forEach((card, index) => {
+
+    const wrapper =
+      document.createElement('div');
+
+    wrapper.className =
+      `member-mission-card ${
+        index === 0 ? 'is-active' : ''
+      }`;
+
+    const rendererCard = {
+
+      ...card,
+
+      title:
+        card.content?.title ||
+        card.title ||
+        '',
+
+      instruction:
+        card.content?.instruction ||
+        '',
+
+      elements:
+        Array.isArray(card.content?.elements)
+          ? card.content.elements
+          : []
+    };
+
+    wrapper.innerHTML =
+      ParlaMissionRenderer.renderCard(
+        rendererCard,
+        {
+          cardKey:
+            `member_${m.id}_${card.card_order}`
+        }
+      );
+
+
+    /* ===================================================
+       AFFICHAGE PROGRESSIF DES ÉLÉMENTS
+       =================================================== */
+
+    const renderedElements =
+      wrapper.querySelectorAll(
+        '.mission-card-elements > *'
+      );
+
+    renderedElements.forEach(
+      (element, elementIndex) => {
+
+        element.classList.add(
+          'member-progressive-element'
+        );
+
+        if (elementIndex === 0) {
+          element.classList.add(
+            'is-visible'
+          );
+        }
+      }
+    );
+
+
+    cardsWrapper.appendChild(wrapper);
+
+
+    /* ===================================================
+       INTERACTIONS DES EXERCICES
+       =================================================== */
+
+    ParlaMissionRenderer.bindInteractions(
+  wrapper,
+  rendererCard,
+  {
+    onResult: async result => {
+
+console.log("INSERT CARTE — DÉBUT", {
+  mission_id: m.id,
+  learner_id: state.user.id,
+  card_order: card.card_order,
+  element_index: result.elementIndex,
+  exercise_type: result.exerciseType,
+  is_correct: result.isCorrect
+});
+
+  console.log(
+    "RÉSULTAT CARTE :",
+    result
+  );
+
+  try {
+
+  let existingAttempt = null;
+
+if (Number(card.card_order) === 1) {
+
+  const { data, error: checkError } =
+    await supabaseClient
+      .from('mission_card_attempts')
+      .select('id')
+      .eq('mission_id', m.id)
+      .eq('learner_id', state.user.id)
+      .limit(1);
+
+  if (checkError) {
+    throw checkError;
+  }
+
+  existingAttempt = data;
+}
+
+if (existingAttempt && existingAttempt.length > 0) {
+
+  console.log(
+    "MISSION DÉJÀ TENTÉE — NOUVELLE TENTATIVE BLOQUÉE"
+  );
+
+  alert(
+    "Vous avez déjà effectué cette mission. Une seule tentative est autorisée."
+  );
+
+  return;
+}
+
+const { error } =
+  await supabaseClient
+    .from('mission_card_attempts')
+    .insert({
+      mission_id: m.id,
+      learner_id: state.user.id,
+      card_order: card.card_order,
+      element_index: result.elementIndex,
+      exercise_type: result.exerciseType,
+      answer: result.answer ?? null,
+      is_correct: result.isCorrect,
+      attempt_group_id: state.attemptGroupId
+    });
+
+if (error) {
+  throw error;
+}
+
+    if (error) {
+      throw error;
+    }
+
+    console.log(
+      "RÉPONSE ENREGISTRÉE"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "ERREUR ENREGISTREMENT CARTE :",
+      error
+    );
+
+  }
+
+    }
+  }
+);
+
+});
+
+
+  /* =====================================================
+     NAVIGATION
+     ===================================================== */
+
+  let currentCardIndex = 0;
+  let visibleElementIndex = 0;
+
+  const navigation =
+    document.createElement('div');
+
+  navigation.className =
+    'member-card-navigation';
+
+  navigation.innerHTML = `
+    <button
+      type="button"
+      class="member-card-prev"
+    >
+      ← Précédent
+    </button>
+
+    <button
+      type="button"
+      class="member-card-next"
+    >
+      Suivant →
+    </button>
+  `;
+
+  cardsContainer.appendChild(navigation);
+
+
+  /* =====================================================
+     BOUTON ENVOYER LA MISSION
+     ===================================================== */
+
+  const sendMissionButton =
+    document.createElement('button');
+
+  sendMissionButton.type =
+    'button';
+
+  sendMissionButton.id =
+    'sendMissionButton';
+
+  sendMissionButton.className =
+    'btn btn-primary';
+
+  sendMissionButton.textContent =
+    'Envoyer ma mission';
+
+  sendMissionButton.style.cssText = `
+    display:none;
+    margin:24px auto 0;
+  `;
+
+  cardsContainer.appendChild(
+    sendMissionButton
+  );
+
+
+  /* =====================================================
+     RÉFÉRENCES DOM
+     ===================================================== */
+
+  const cardElements =
+    cardsWrapper.querySelectorAll(
+      '.member-mission-card'
+    );
+
+  const dots =
+    progress.querySelectorAll(
+      '.member-card-dot'
+    );
+
+  const previousButton =
+    navigation.querySelector(
+      '.member-card-prev'
+    );
+
+  const nextButton =
+    navigation.querySelector(
+      '.member-card-next'
+    );
+
+
+  /* =====================================================
+     MISE À JOUR DE LA CARTE ACTIVE
+     ===================================================== */
+
+  function updateMissionCard(){
+
+    cardElements.forEach(
+      (card, index) => {
+
+        card.classList.toggle(
+          'is-active',
+          index === currentCardIndex
+        );
+
+      }
+    );
+
+
+    dots.forEach(
+      (dot, index) => {
+
+        dot.classList.toggle(
+          'is-active',
+          index === currentCardIndex
+        );
+
+      }
+    );
+
+
+    previousButton.disabled =
+      currentCardIndex === 0;
+
+
+    const activeCard =
+      cardElements[currentCardIndex];
+
+    const elements =
+      activeCard.querySelectorAll(
+        '.member-progressive-element'
+      );
+
+
+    const allElementsVisible =
+      elements.length === 0 ||
+      visibleElementIndex >=
+      elements.length - 1;
+
+
+    if (
+      currentCardIndex ===
+        cardElements.length - 1 &&
+      allElementsVisible
+    ) {
+
+      nextButton.textContent =
+        'Terminer ✓';
+
+    } else {
+
+      nextButton.textContent =
+        'Suivant →';
+
+    }
+
+  }
+
+
+  /* =====================================================
+     BOUTON PRÉCÉDENT
+     ===================================================== */
+
+  previousButton.addEventListener(
+    'click',
+    () => {
+
+      if (currentCardIndex > 0) {
+
+        currentCardIndex--;
+
+        visibleElementIndex = 0;
+
+        const activeCard =
+          cardElements[currentCardIndex];
+
+        const elements =
+          activeCard.querySelectorAll(
+            '.member-progressive-element'
+          );
+
+        elements.forEach(
+          (element, index) => {
+
+            element.classList.toggle(
+              'is-visible',
+              index === 0
+            );
+
+          }
+        );
+
+        updateMissionCard();
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     BOUTON SUIVANT / TERMINER
+     ===================================================== */
+
+  nextButton.addEventListener(
+    'click',
+    () => {
+
+      const activeCard =
+        cardElements[currentCardIndex];
+
+      const elements =
+        activeCard.querySelectorAll(
+          '.member-progressive-element'
+        );
+
+
+      /* ---------------------------------------------
+         Il reste des éléments à afficher
+         --------------------------------------------- */
+
+      if (
+        visibleElementIndex <
+        elements.length - 1
+      ) {
+
+        visibleElementIndex++;
+
+        elements.forEach(
+          (element, index) => {
+
+            element.classList.toggle(
+              'is-visible',
+              index <= visibleElementIndex
+            );
+
+          }
+        );
+
+        updateMissionCard();
+
+        return;
+      }
+
+
+      /* ---------------------------------------------
+         Passer à la carte suivante
+         --------------------------------------------- */
+
+      if (
+        currentCardIndex <
+        cardElements.length - 1
+      ) {
+
+        currentCardIndex++;
+
+        visibleElementIndex = 0;
+
+        const nextCard =
+          cardElements[currentCardIndex];
+
+        const nextElements =
+          nextCard.querySelectorAll(
+            '.member-progressive-element'
+          );
+
+        nextElements.forEach(
+          (element, index) => {
+
+            element.classList.toggle(
+              'is-visible',
+              index === 0
+            );
+
+          }
+        );
+
+        updateMissionCard();
+
+        return;
+      }
+
+
+      /* ---------------------------------------------
+         DERNIÈRE CARTE → TERMINER
+         --------------------------------------------- */
+
+      sendMissionButton.style.display =
+        'block';
+
+      sendMissionButton.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+
+    }
+  );
+
+
+  /* =====================================================
+     CLIC SUR LES PUCES
+     ===================================================== */
+
+  dots.forEach(
+    (dot, index) => {
+
+      dot.style.cursor =
+        'pointer';
+
+      dot.addEventListener(
+        'click',
+        () => {
+
+          currentCardIndex =
+            index;
+
+          visibleElementIndex =
+            0;
+
+          const selectedCard =
+            cardElements[currentCardIndex];
+
+          const elements =
+            selectedCard.querySelectorAll(
+              '.member-progressive-element'
+            );
+
+          elements.forEach(
+            (element, elementIndex) => {
+
+              element.classList.toggle(
+                'is-visible',
+                elementIndex === 0
+              );
+
+            }
+          );
+
+          updateMissionCard();
+
+        }
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     ENVOI DE LA MISSION
+     ===================================================== */
+
+  if (existingSubmission) {
+
+    sendMissionButton.style.display =
+      'block';
+
+    sendMissionButton.disabled =
+      true;
+
+    sendMissionButton.textContent =
+      'Mission envoyée ✓';
+
+  } else {
+
+    sendMissionButton.addEventListener(
+      'click',
+      async () => {
+
+        sendMissionButton.disabled =
+          true;
+
+        sendMissionButton.textContent =
+          'Envoi en cours…';
+
+        try {
+
+          const { data, error } =
+            await supabaseClient
+              .from('submissions')
+              .insert({
+                mission_id: m.id,
+                learner_id: state.user.id,
+                text_answer: null,
+                file_url: null,
+                status: 'submitted'
+              })
+              .select(
+                '*, missions(id, title, week_number, language, level)'
+              )
+              .single();
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          state.submissions.unshift(
+            data
+          );
+
+
+          renderDashboard();
+          renderMissionView();
+
+
+        } catch (error) {
+
+          console.error(error);
+
+          sendMissionButton.disabled =
+            false;
+
+          sendMissionButton.textContent =
+            'Envoyer ma mission';
+
+          alert(
+            "La mission n'a pas pu être envoyée : " +
+            error.message
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =====================================================
+     ÉTAT INITIAL
+     ===================================================== */
+
+  updateMissionCard();
+
+}
+
+// ---------- Mes travaux ----------
+    
+function renderTravauxView(){
+  const slot = document.getElementById('travauxSlot');
+
+  if (state.submissions.length === 0) {
+    slot.innerHTML = '<div class="empty-state">Vous n\'avez encore envoyé aucun travail.</div>';
+    return;
+  }
+
+  slot.innerHTML = state.submissions.map(s => {
+    const isCorrected = s.status === 'corrected';
+    const missionTitle = s.missions ? s.missions.title : 'Mission';
+    return `
+      <div class="work-item">
+        <div class="work-top">
+          <div>
+            <div class="work-title">${escapeHtml(missionTitle)}</div>
+            <div class="work-date">Envoyé le ${formatDate(s.submitted_at)}</div>
+          </div>
+          <span class="badge ${isCorrected ? 'badge-done' : 'badge-progress'}">
+            ${isCorrected ? 'Corrigé' : 'À corriger'}
+          </span>
+        </div>
+        ${s.feedback ? `
+          <div class="feedback-box" style="margin-top:10px;">
+            <div class="fb-lbl">Feedback du formateur</div>
+            <p style="white-space:pre-wrap;">${escapeHtml(s.feedback)}</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- Mes questions ----------
+function populateQuestionMissionSelect(){
+  const select = document.getElementById('questionMission');
+  state.missions.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = `Semaine ${m.week_number ?? ''} — ${m.title}`;
+    select.appendChild(opt);
+  });
+}
+
+let questionsLoaded = null;
+
+async function renderQuestionsView(){
+  const slot = document.getElementById('questionsSlot');
+  slot.innerHTML = '<div class="empty-state">Chargement…</div>';
+
+  const { data: questions, error } = await supabaseClient
+    .from('questions')
+    .select('*, missions(id, title)')
+    .eq('learner_id', state.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    slot.innerHTML = '<div class="empty-state">Impossible de charger vos questions pour le moment.</div>';
+    return;
+  }
+
+  questionsLoaded = questions || [];
+
+  if (questionsLoaded.length === 0) {
+    slot.innerHTML = '<div class="empty-state">Vous n\'avez posé aucune question pour le moment.</div>';
+    return;
+  }
+
+  slot.innerHTML = questionsLoaded.map(q => {
+    const answered = q.status === 'answered' && q.answer;
+    return `
+      <div class="question-item">
+        ${q.missions ? `<div class="hint" style="margin-bottom:6px;">À propos de : ${escapeHtml(q.missions.title)}</div>` : ''}
+        <div class="q-text">${escapeHtml(q.question)}</div>
+        <span class="badge ${answered ? 'badge-done' : 'badge-open'}">
+          ${answered ? 'Répondu' : 'En attente'}
+        </span>
+        ${answered ? `
+          <div class="q-answer">
+            <div class="fb-lbl">Réponse du formateur</div>
+            <p style="white-space:pre-wrap;">${escapeHtml(q.answer)}</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+    
+document.getElementById('sendQuestionBtn').addEventListener('click', async function(){
+  const btn = this;
+  const errorBox = document.getElementById('questionErrorBox');
+  const textEl = document.getElementById('questionText');
+  const missionSelect = document.getElementById('questionMission');
+
+  const text = textEl.value.trim();
+  errorBox.style.display = 'none';
+
+  if (!text) {
+    errorBox.textContent = 'Merci d\'écrire votre question avant d\'envoyer.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.innerHTML = '<span class="spinner"></span>';
+
+  const payload = {
+    learner_id: state.user.id,
+    question: text,
+    status: 'open'
+  };
+  if (missionSelect.value) payload.mission_id = missionSelect.value;
+
+  const { error } = await supabaseClient.from('questions').insert(payload);
+
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+
+  if (error) {
+    errorBox.textContent = "L'envoi a échoué : " + error.message;
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  textEl.value = '';
+  missionSelect.value = '';
+  renderQuestionsView();
+});
+
+// ---------- Mon profil ----------
+async function renderProfilView(){
+  const p = state.profile;
+  const slot = document.getElementById('profilSlot');
+
+  const { data: result, error } = await supabaseClient
+    .from('level_test_results')
+    .select('cefr_level, language, completed_at')
+    .eq('user_id', state.user.id)
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erreur chargement niveau :', error);
+  }
+
+  const level = result && result.cefr_level
+    ? result.cefr_level
+    : (p.level || '—');
+
+  slot.innerHTML = `
+    <div class="profile-row">
+      <span class="k">Prénom</span>
+      <span class="v">${escapeHtml(p.first_name || '—')}</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="k">Nom</span>
+      <span class="v">${escapeHtml(p.last_name || '—')}</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="k">Téléphone</span>
+      <span class="v">${escapeHtml(p.phone || 'Non renseigné')}</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="k">Langue</span>
+      <span class="v">${languageLabel(p.language)}</span>
+    </div>
+
+    <div class="profile-row">
+      <span class="k">Niveau</span>
+      <span class="v">${escapeHtml(level)}</span>
+    </div>
+  `;
+}
+    
+// ---------- Sessions live apprenant ----------
+async function loadLearnerLiveSessions() {
+  const slot = document.getElementById('learnerLiveSessionsSlot');
+
+  if (!slot) return;
+
+  const { data: { session } } =
+  await supabaseClient.auth.getSession();
+
+if (!session) {
+  console.error('Aucune session utilisateur.');
+  slot.innerHTML =
+    '<div class="error-msg">Aucune session utilisateur détectée.</div>';
+  return;
+}
+
+const { data: profile, error: profileError } =
+  await supabaseClient
+    .from('profiles')
+    .select('language')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profileError || !profile) {
+    console.error('Erreur récupération langue apprenant :', profileError);
+    return;
+  }
+
+  const learnerLanguage =
+    (profile.language || '').trim().toLowerCase();
+
+  const { data: sessions, error } =
+    await supabaseClient
+      .from('live_sessions')
+      .select(`
+        id,
+        title,
+        starts_at,
+        duration_minutes,
+        google_meet_url,
+        missions (
+          language,
+          week_number
+        )
+      `)
+      .order('starts_at', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement sessions live :', error);
+    slot.innerHTML =
+      '<div class="error-msg">Impossible de charger les sessions live.</div>';
+    return;
+  }
+
+  const filteredSessions = (sessions || []).filter(session =>
+    (session.missions?.language || '').trim().toLowerCase() ===
+    learnerLanguage
+  );
+
+ if (filteredSessions.length === 0) {
+  slot.innerHTML = `
+    <div class="empty-state">
+      Aucune session live n'est actuellement prévue pour votre langue.
+    </div>
+  `;
+  return;
+}
+
+slot.innerHTML = filteredSessions.map(session => {
+
+  const startsAt = session.starts_at
+    ? new Date(session.starts_at)
+    : null;
+
+  const dateLabel = startsAt
+    ? startsAt.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+    : 'Date non précisée';
+
+  const timeLabel = startsAt
+    ? startsAt.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '';
+
+  return `
+    <div class="card" style="margin-top:16px;">
+
+      <span class="badge badge-progress">
+        Session live
+      </span>
+
+      <h3 style="
+        margin-top:12px;
+        margin-bottom:8px;
+      ">
+        ${escapeHtml(session.title || 'Session live')}
+      </h3>
+
+      <p style="color:var(--ink-soft);">
+        ${escapeHtml(dateLabel)}
+        ${timeLabel ? ` · ${escapeHtml(timeLabel)}` : ''}
+      </p>
+
+      ${
+        session.duration_minutes
+          ? `
+            <p style="color:var(--ink-soft);">
+              Durée : ${escapeHtml(session.duration_minutes)} min
+            </p>
+          `
+          : ''
+      }
+
+      ${
+        session.google_meet_url
+          ? `
+            <a
+              href="${escapeHtml(session.google_meet_url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary"
+              style="margin-top:10px;"
+            >
+              Rejoindre Google Meet
+            </a>
+          `
+          : ''
+      }
+
+    </div>
+  `;
+}).join('');
+
+if (filteredSessions.length === 0) {
+  slot.innerHTML = `
+    <div class="empty-state">
+      Aucune session live n'est actuellement prévue pour votre langue.
+    </div>
+  `;
+  return;
+}
+
+slot.innerHTML = filteredSessions.map(session => {
+
+  const startsAt = session.starts_at
+    ? new Date(session.starts_at)
+    : null;
+
+  const dateLabel = startsAt
+    ? startsAt.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+    : 'Date non précisée';
+
+  const timeLabel = startsAt
+    ? startsAt.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '';
+
+  return `
+    <div class="card" style="margin-top:16px;">
+
+      <span class="badge badge-progress">
+        Session live
+      </span>
+
+      <h3 style="
+        margin-top:12px;
+        margin-bottom:8px;
+      ">
+        ${escapeHtml(session.title || 'Session live')}
+      </h3>
+
+      <p style="color:var(--ink-soft);">
+        ${escapeHtml(dateLabel)}
+        ${timeLabel ? ` · ${escapeHtml(timeLabel)}` : ''}
+      </p>
+
+      ${
+        session.duration_minutes
+          ? `
+            <p style="color:var(--ink-soft);">
+              Durée : ${escapeHtml(session.duration_minutes)} min
+            </p>
+          `
+          : ''
+      }
+
+      ${
+        session.google_meet_url
+          ? `
+            <a
+              href="${escapeHtml(session.google_meet_url)}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary"
+              style="margin-top:10px;"
+            >
+              Rejoindre Google Meet
+            </a>
+          `
+          : ''
+      }
+
+    </div>
+  `;
+}).join('');
+
+}
+    
+</script>
+</body>
+</html>

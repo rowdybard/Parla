@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Témoignages — Parla Admin</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--f-body);
+    }
+
+    .admin-wrap {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 230px;
+      background: var(--green-deep);
+      color: white;
+      padding: 24px 16px;
+      box-sizing: border-box;
+    }
+
+    .sidebar-logo {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: rgba(255,255,255,.12);
+    }
+
+    .main {
+      flex: 1;
+      padding: 35px;
+      box-sizing: border-box;
+    }
+
+    .page-title {
+      margin-bottom: 25px;
+    }
+
+    .page-title h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .page-title p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .testimonial-list {
+      display: grid;
+      gap: 18px;
+      max-width: 900px;
+    }
+
+    .testimonial-card {
+      background: var(--white);
+      border: 1px solid var(--sand-stroke);
+      border-radius: var(--r);
+      padding: 22px;
+    }
+
+    .testimonial-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+
+    .testimonial-name {
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+
+    .testimonial-stars {
+      color: var(--green);
+      letter-spacing: 2px;
+    }
+
+    .testimonial-comment {
+      margin: 0 0 18px;
+      line-height: 1.7;
+      color: var(--ink-soft);
+    }
+
+    .testimonial-date {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .testimonial-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-testimonial {
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-approve {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-reject {
+      background: #e0eae7;
+      color: var(--ink);
+    }
+
+    .empty {
+      background: var(--white);
+      border: 1px solid var(--sand-stroke);
+      border-radius: var(--r);
+      padding: 30px;
+      color: var(--muted);
+    }
+
+    .count {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: var(--green-light);
+      color: var(--green-dark);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 700px) {
+      .admin-wrap {
+        display: block;
+      }
+
+      .sidebar {
+        width: 100%;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .sidebar-nav a {
+        margin: 0;
+      }
+
+      .main {
+        padding: 20px;
+      }
+
+      .testimonial-top {
+        display: block;
+      }
+
+      .testimonial-stars {
+        margin-top: 8px;
+      }
+    }
+  
+/* ===== Parla design ===== */
+.sidebar{background:radial-gradient(rgba(150,214,190,.12) 1px,transparent 1.4px) 0 0/20px 20px,var(--night)!important;border-right:1px solid var(--night-line);color:var(--night-paper)!important}
+.sidebar-logo{font-family:var(--f-display);font-weight:800;letter-spacing:-.04em;font-size:24px}
+.sidebar-nav a{display:flex!important;align-items:center;gap:10px;color:var(--night-mist)!important;border-radius:12px!important}
+.sidebar-nav a:hover{background:rgba(255,255,255,.06)!important;color:var(--night-paper)!important}
+.sidebar-nav a.active{background:var(--night-2)!important;color:var(--night-paper)!important;border:1px solid var(--night-line)}
+.sidebar-nav a.active .icon{color:var(--vanilla)}
+.page-title p{font-weight:400}
+.page-title,h1{font-family:var(--f-display);font-weight:700;letter-spacing:-.035em}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="admin-wrap">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      Parla Admin
+    </div>
+
+    <nav class="sidebar-nav">
+
+  <a href="formateur.html"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg></span> Tableau de bord
+  </a>
+
+  <a href="formateur.html#missions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7"/></svg></span> Missions
+  </a>
+
+  <a href="formateur.html#questions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h.01"/></svg></span> Questions
+  </a>
+
+  <a href="formateur.html#live-sessions"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span> Sessions
+  </a>
+
+  <a href="admin-paiements.html"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></span> Paiement
+  </a>
+
+  <a href="temoignage.html" class="active"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></span> Témoignages
+  </a>
+
+</nav>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="page-title">
+      <h1>Témoignages</h1>
+      <p>Validez les témoignages des membres avant leur affichage sur la landing page.</p>
+    </div>
+
+    <div id="testimonialList" class="testimonial-list">
+      <div class="empty">
+        Chargement des témoignages…
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<script>
+(async function () {
+
+  const list = document.getElementById('testimonialList');
+  const count = document.getElementById('testimonialCount');
+
+  async function checkAdmin() {
+
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabaseClient.auth.getSession();
+
+  console.log('Session admin :', session);
+  console.log('Erreur session :', sessionError);
+
+  if (!session) {
+    window.location.href = 'connexion.html';
+    return false;
+  }
+
+  const {
+    data: role,
+    error: roleError
+  } = await supabaseClient.rpc('current_user_role');
+
+  console.log('Rôle retourné :', role);
+  console.log('Erreur rôle :', roleError);
+
+  if (roleError) {
+    console.error(
+      'Erreur vérification rôle :',
+      roleError
+    );
+
+    alert(
+      'Impossible de vérifier votre rôle administrateur : ' +
+      roleError.message
+    );
+
+    return false;
+  }
+
+  if (role !== 'admin') {
+    alert('Accès réservé aux administrateurs.');
+    return false;
+  }
+
+  return true;
+}
+
+  async function loadTestimonials() {
+
+    list.innerHTML = `
+      <div class="empty">
+        Chargement des témoignages…
+      </div>
+    `;
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from('parla_testimonials')
+      .select(`
+        id,
+        first_name,
+        rating,
+        comment,
+        status,
+        created_at
+      `)
+      .eq('status', 'pending')
+      .order('created_at', {
+        ascending: true
+      });
+
+    if (error) {
+
+      console.error(error);
+
+      list.innerHTML = `
+        <div class="empty">
+          Impossible de charger les témoignages.
+        </div>
+      `;
+
+      return;
+    }
+
+    const testimonials = data || [];
+
+    count.textContent = testimonials.length;
+
+    if (testimonials.length === 0) {
+
+      list.innerHTML = `
+        <div class="empty">
+          Aucun témoignage en attente de validation.
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML = testimonials.map(function (testimonial) {
+
+      const rating = Math.max(
+        0,
+        Math.min(
+          5,
+          Number(testimonial.rating || 0)
+        )
+      );
+
+      const stars =
+        '★'.repeat(rating) +
+        '☆'.repeat(5 - rating);
+
+      const date = testimonial.created_at
+        ? new Date(testimonial.created_at).toLocaleDateString('fr-FR')
+        : '';
+
+      return `
+        <article class="testimonial-card" id="testimonial-${testimonial.id}">
+
+          <div class="testimonial-top">
+
+            <div class="testimonial-name">
+              ${escapeHtml(
+                testimonial.first_name || 'Membre Parla'
+              )}
+            </div>
+
+            <div class="testimonial-stars">
+              ${stars}
+            </div>
+
+          </div>
+
+          <p class="testimonial-comment">
+            ${escapeHtml(
+              testimonial.comment || ''
+            )}
+          </p>
+
+          <div class="testimonial-date">
+            ${date}
+          </div>
+
+          <div class="testimonial-actions">
+
+            <button
+              class="btn-testimonial btn-approve"
+              onclick="approveTestimonial(${testimonial.id})"
+            >
+              Valider
+            </button>
+
+            <button
+              class="btn-testimonial btn-reject"
+              onclick="rejectTestimonial(${testimonial.id})"
+            >
+              Refuser
+            </button>
+
+          </div>
+
+        </article>
+      `;
+
+    }).join('');
+  }
+
+
+  window.approveTestimonial = async function (id) {
+
+    const {
+      error
+    } = await supabaseClient
+      .from('parla_testimonials')
+      .update({
+        status: 'approved'
+      })
+      .eq('id', id);
+
+    if (error) {
+
+      console.error(error);
+
+      alert('Impossible de valider ce témoignage.');
+
+      return;
+    }
+
+    document.getElementById(
+      'testimonial-' + id
+    )?.remove();
+
+    updateCount();
+
+  };
+
+
+  window.rejectTestimonial = async function (id) {
+
+    const {
+      error
+    } = await supabaseClient
+      .from('parla_testimonials')
+      .update({
+        status: 'rejected'
+      })
+      .eq('id', id);
+
+    if (error) {
+
+      console.error(error);
+
+      alert('Impossible de refuser ce témoignage.');
+
+      return;
+    }
+
+    document.getElementById(
+      'testimonial-' + id
+    )?.remove();
+
+    updateCount();
+
+  };
+
+
+  function updateCount() {
+
+    const remaining =
+      list.querySelectorAll('.testimonial-card').length;
+
+    count.textContent = remaining;
+
+    if (remaining === 0) {
+
+      list.innerHTML = `
+        <div class="empty">
+          Aucun témoignage en attente de validation.
+        </div>
+      `;
+    }
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  const isAdmin = await checkAdmin();
+
+  if (!isAdmin) return;
+
+  await loadTestimonials();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Admin · Paiements Parla</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+:root{--f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;--f-accent:"Instrument Serif","Iowan Old Style",Georgia,serif;--f-body:"Figtree","Helvetica Neue",Arial,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+--night:#08141d;--night-2:#0e2130;--night-line:#1f3a4c;--night-mist:#9db3c2;--night-paper:#eef4f2;--lagoon:#3fd3a2;--vanilla:#ffc46b;}
+
+    :root {
+      --ink: #0b1a24;
+      --ink-soft: #5c6e7b;
+      --green: #1f6b4f;
+      --green-dark: #15533c;
+      --green-soft: #eef7f1;
+
+      --sand: #eef4f2;
+      --sand-soft: #f8fafa;
+      --sand-stroke: #d5e2df;
+
+      --white: #ffffff;
+
+      --orange: #b45309;
+      --orange-soft: #fff7ed;
+
+      --red: #b42318;
+      --red-soft: #fff1f0;
+
+      --shadow: 0 8px 24px rgba(23, 32, 27, 0.07);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--sand-soft);
+      color: var(--ink);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 60px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand span {
+      color: var(--green);
+    }
+
+    .logout-btn {
+      border: 1px solid var(--sand-stroke);
+      background: var(--white);
+      color: var(--ink);
+      padding: 9px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .logout-btn:hover {
+      background: var(--sand);
+    }
+
+    .hero {
+      background: var(--white);
+      border: 1px solid var(--sand-stroke);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    .status {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.info {
+      background: var(--green-soft);
+      color: var(--green-dark);
+    }
+
+    .status.error {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .status.warning {
+      background: var(--orange-soft);
+      color: var(--orange);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--ink-soft);
+    }
+
+    .empty {
+      background: var(--white);
+      border: 1px solid var(--sand-stroke);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--ink-soft);
+      box-shadow: var(--shadow);
+    }
+
+    .payments {
+      display: grid;
+      gap: 18px;
+    }
+
+    .payment-card {
+      background: var(--white);
+      border: 1px solid var(--sand-stroke);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .payment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .payment-title {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .payment-subtitle {
+      margin-top: 5px;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--orange-soft);
+      color: var(--orange);
+      white-space: nowrap;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .detail {
+      background: var(--sand-soft);
+      border: 1px solid var(--sand-stroke);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .reference {
+      background: var(--green-soft);
+      border: 1px solid #d8eadf;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+
+    .reference-label {
+      font-size: 12px;
+      color: var(--green-dark);
+      margin-bottom: 5px;
+    }
+
+    .reference-value {
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .proof {
+      margin-bottom: 18px;
+    }
+
+    .proof a {
+      display: inline-block;
+      color: var(--green);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .proof a:hover {
+      text-decoration: underline;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-validate {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-validate:hover:not(:disabled) {
+      background: var(--green-dark);
+    }
+
+    .btn-reject {
+      background: var(--red-soft);
+      color: var(--red);
+      border: 1px solid #f2c8c4;
+    }
+
+    .btn-reject:hover:not(:disabled) {
+      background: #ffe5e2;
+    }
+
+    .btn-refresh {
+      background: var(--sand);
+      color: var(--ink);
+      border: 1px solid var(--sand-stroke);
+    }
+
+    .btn-refresh:hover:not(:disabled) {
+      background: #e0eae7;
+    }
+
+    .count {
+      margin-bottom: 14px;
+      color: var(--ink-soft);
+      font-size: 14px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.42);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(500px, 100%);
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+    }
+
+    .modal p {
+      margin: 0 0 16px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    .modal textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border: 1px solid var(--sand-stroke);
+      border-radius: 10px;
+      padding: 12px;
+      font: inherit;
+      outline: none;
+    }
+
+    .modal textarea:focus {
+      border-color: var(--green);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        width: min(100% - 20px, 1100px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .hero h1 {
+        font-size: 24px;
+      }
+
+      .details {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-header {
+        flex-direction: column;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  
+/* ===== Parla design ===== */
+body{font-family:var(--f-body);background:var(--sand);-webkit-font-smoothing:antialiased}
+.page{position:relative}
+.topbar{color:var(--night-paper);background:radial-gradient(50% 140% at 85% 0%,rgba(63,211,162,.18),transparent 70%),radial-gradient(rgba(150,214,190,.14) 1px,transparent 1.4px) 0 0/22px 22px,var(--night);margin-top:-32px!important;padding-top:20px;padding-bottom:20px;border-bottom:1px solid var(--night-line);margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important;padding-left:max(16px,calc(50vw - 50%))!important;padding-right:max(16px,calc(50vw - 50%))!important;}
+html,body{overflow-x:hidden}
+.brand{font-family:var(--f-display);color:var(--night-paper);letter-spacing:-.04em}
+.brand span{color:var(--vanilla)!important;font-family:var(--f-accent);font-style:italic;font-weight:400}
+.topbar button,.topbar .btn,.topbar a{background:transparent!important;color:var(--night-paper)!important;border:1px solid var(--night-line)!important;border-radius:999px!important}
+.topbar button:hover,.topbar .btn:hover,.topbar a:hover{border-color:var(--vanilla)!important;color:var(--vanilla)!important}
+h1,h2,h3{font-family:var(--f-display);letter-spacing:-.03em}
+button{font-family:inherit}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <main class="page">
+
+    <div class="topbar">
+      <div class="brand">
+        Parla <span>Admin</span>
+      </div>
+
+      <button
+        class="logout-btn"
+        id="logout-btn"
+        type="button"
+      >
+        Se déconnecter
+      </button>
+    </div>
+
+    <section class="hero">
+
+      <h1>Validation des paiements</h1>
+
+      <p>
+        Vérifiez les paiements reçus avant d'activer l'accès aux formations.
+      </p>
+
+      <div
+        id="status"
+        class="status"
+      ></div>
+
+    </section>
+
+    <div
+      id="loading"
+      class="loading"
+    >
+      Chargement des paiements…
+    </div>
+
+    <div
+      id="content"
+      style="display:none;"
+    >
+
+      <div
+        class="count"
+        id="payment-count"
+      ></div>
+
+      <div
+        id="payments"
+        class="payments"
+      ></div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal rejet -->
+
+  <div
+    id="reject-modal"
+    class="modal-backdrop"
+  >
+
+    <div class="modal">
+
+      <h2>Rejeter le paiement</h2>
+
+      <p>
+        Indiquez la raison du rejet. Elle sera enregistrée avec le paiement.
+      </p>
+
+      <textarea
+        id="reject-reason"
+        placeholder="Ex. Référence introuvable, montant incorrect…"
+      ></textarea>
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="btn btn-refresh"
+          id="cancel-reject"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-reject"
+          id="confirm-reject"
+        >
+          Rejeter le paiement
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+<script>
+
+  // =========================================================
+  // CONFIGURATION SUPABASE
+  // =========================================================
+
+  const SUPABASE_URL =
+    'https://ksihdowudyadlkhvybnj.supabase.co';
+
+  const SUPABASE_ANON_KEY =
+    'sb_publishable_uI77bn8PKuFBVKRZLo86Sg_2k9-aF53';
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+
+  // =========================================================
+  // ELEMENTS
+  // =========================================================
+
+  const loadingEl =
+    document.getElementById('loading');
+
+  const contentEl =
+    document.getElementById('content');
+
+  const paymentsEl =
+    document.getElementById('payments');
+
+  const countEl =
+    document.getElementById('payment-count');
+
+  const statusEl =
+    document.getElementById('status');
+
+  const logoutBtn =
+    document.getElementById('logout-btn');
+
+  const rejectModal =
+    document.getElementById('reject-modal');
+
+  const rejectReasonEl =
+    document.getElementById('reject-reason');
+
+  const cancelRejectBtn =
+    document.getElementById('cancel-reject');
+
+  const confirmRejectBtn =
+    document.getElementById('confirm-reject');
+
+
+  let currentRejectEnrollmentId = null;
+
+
+  // =========================================================
+  // UTILITAIRES
+  // =========================================================
+
+  function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  }
+
+
+  function formatAmount(value) {
+
+    const amount =
+      Number(value || 0);
+
+    return new Intl.NumberFormat(
+      'fr-FR'
+    ).format(amount) + ' Ar';
+
+  }
+
+
+  function formatDate(value) {
+
+    if (!value) {
+      return '—';
+    }
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return '—';
+    }
+
+    return date.toLocaleString(
+      'fr-FR',
+      {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }
+    );
+
+  }
+
+
+  function showStatus(
+    message,
+    type = 'info'
+  ) {
+
+    statusEl.textContent =
+      message;
+
+    statusEl.className =
+      'status show ' + type;
+
+  }
+
+
+  function hideStatus() {
+
+    statusEl.textContent = '';
+
+    statusEl.className =
+      'status';
+
+  }
+
+
+  // =========================================================
+  // VERIFICATION SESSION + ADMIN
+  // =========================================================
+
+  async function checkAdmin() {
+
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabaseClient.auth.getSession();
+
+  console.log('Session admin :', session);
+  console.log('Erreur session :', sessionError);
+
+  if (!session) {
+    window.location.href = 'connexion.html';
+    return false;
+  }
+
+  const {
+    data: role,
+    error: roleError
+  } = await supabaseClient.rpc('current_user_role');
+
+  console.log('Rôle retourné :', role);
+  console.log('Erreur current_user_role :', roleError);
+
+  if (roleError) {
+    console.error(
+      'Erreur rôle utilisateur :',
+      roleError
+    );
+
+    showStatus(
+      'Impossible de vérifier votre rôle administrateur : ' +
+      roleError.message,
+      'error'
+    );
+
+    loadingEl.style.display = 'none';
+
+    return false;
+  }
+
+  if (role !== 'admin') {
+    showStatus(
+      'Accès refusé : cette page est réservée aux administrateurs.',
+      'error'
+    );
+
+    loadingEl.style.display = 'none';
+
+    return false;
+  }
+
+  return true;
+}
+
+  // =========================================================
+  // CHARGEMENT DES PAIEMENTS
+  // =========================================================
+
+ async function loadPayments() {
+
+  loadingEl.style.display = 'block';
+  contentEl.style.display = 'none';
+  hideStatus();
+
+  console.log('Chargement des paiements admin...');
+
+  const {
+    data: {
+      session
+    }
+  } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    console.error('Aucune session admin.');
+    window.location.href = 'connexion.html';
+    return;
+  }
+
+  console.log('Admin connecté :', session.user.email);
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from('course_enrollments')
+    .select(`
+      id,
+      user_id,
+      course_name,
+      plan_code,
+      regular_price,
+      discount_amount,
+      amount_paid,
+      status,
+      payment_status,
+      payment_reference,
+      payment_submitted_at,
+      payment_proof_path,
+payment_rejection_reason,
+language_count,
+created_at
+    `)
+    .eq('payment_status', 'pending')
+    .order('payment_submitted_at', {
+      ascending: true,
+      nullsFirst: false
+    });
+
+  console.log('Paiements récupérés :', data);
+  console.log('Erreur :', error);
+
+  if (error) {
+
+    console.error(
+      'Erreur Supabase chargement paiements :',
+      error
+    );
+
+    loadingEl.style.display = 'none';
+
+    showStatus(
+      'Erreur lors du chargement : ' + error.message,
+      'error'
+    );
+
+    return;
+  }
+
+  const payments = data || [];
+
+  // Récupérer les profils correspondant aux user_id
+  const userIds = [
+    ...new Set(
+      payments
+        .map(payment => payment.user_id)
+        .filter(Boolean)
+    )
+  ];
+
+  let profiles = [];
+
+  if (userIds.length) {
+
+    const {
+      data: profileData,
+      error: profileError
+    } = await supabaseClient
+      .from('profiles')
+      .select(`
+        id,
+        first_name,
+        last_name
+      `)
+      .in('id', userIds);
+
+    if (profileError) {
+
+      console.error(
+        'Erreur chargement profils :',
+        profileError
+      );
+
+    } else {
+
+      profiles = profileData || [];
+    }
+  }
+
+  // Associer chaque profil à son paiement
+  const profilesById = {};
+
+  profiles.forEach(profile => {
+    profilesById[profile.id] = profile;
+  });
+
+  payments.forEach(payment => {
+    payment.profile = profilesById[payment.user_id] || null;
+  });
+
+  console.log('Paiements avec profils :', payments);
+
+  loadingEl.style.display = 'none';
+  contentEl.style.display = 'block';
+
+  countEl.textContent =
+    payments.length === 0
+      ? 'Aucun paiement en attente.'
+      : `${payments.length} paiement${payments.length > 1 ? 's' : ''} en attente.`;
+
+  renderPayments(payments);
+}
+
+
+  // =========================================================
+  // AFFICHAGE
+  // =========================================================
+
+  function renderPayments(
+    payments
+  ) {
+
+    if (!payments.length) {
+
+      paymentsEl.innerHTML = `
+        <div class="empty">
+
+          <strong>
+            Aucun paiement à valider
+          </strong>
+
+          <div style="margin-top:8px;">
+            Les nouveaux paiements apparaîtront ici
+            lorsqu'un membre aura envoyé sa référence.
+          </div>
+
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    paymentsEl.innerHTML =
+      payments
+        .map(
+          payment =>
+            renderPaymentCard(
+              payment
+            )
+        )
+        .join('');
+
+  }
+
+
+  function renderPaymentCard(
+    payment
+  ) {
+
+    const amountDue =
+      Number(
+        payment.regular_price || 0
+      )
+      -
+      Number(
+        payment.discount_amount || 0
+      );
+
+
+    const planLabels = {
+
+      basic:
+        'Essentiel',
+
+      advanced:
+        'Pro',
+
+      expert:
+        'Expert',
+
+      bootcamp:
+        'Bootcamp',
+
+      member:
+        'Membres'
+
+    };
+
+
+    const planName =
+      planLabels[
+        payment.plan_code
+      ]
+      ||
+      payment.plan_code
+      ||
+      'Formation';
+
+
+    return `
+
+      <article
+        class="payment-card"
+        id="payment-${payment.id}"
+      >
+
+        <div class="payment-header">
+
+          <div>
+
+            <h2 class="payment-title">
+              ${escapeHtml(planName)}
+            </h2>
+
+            <div class="payment-subtitle">
+              Inscription #${escapeHtml(payment.id)}
+            </div>
+
+          </div>
+
+          <span class="badge">
+            Paiement à vérifier
+          </span>
+
+        </div>
+
+
+        <div class="details">
+
+          <div class="detail">
+
+            <div class="detail-label">
+              Plan
+            </div>
+
+            <div class="detail-value">
+              ${escapeHtml(planName)}
+            </div>
+
+          </div>
+
+          <div class="detail">
+
+  <div class="detail-label">
+    Nombre de langues
+  </div>
+
+  <div class="detail-value">
+    ${escapeHtml(payment.language_count || 1)}
+    langue${Number(payment.language_count || 1) > 1 ? 's' : ''}
+  </div>
+
+</div>
+
+
+          <div class="detail">
+
+            <div class="detail-label">
+              Montant à payer
+            </div>
+
+            <div class="detail-value">
+              ${formatAmount(amountDue)}
+            </div>
+
+          </div>
+
+
+          <div class="detail">
+
+  <div class="detail-label">
+    Utilisateur
+  </div>
+
+  <div class="detail-value">
+    ${
+      payment.profile
+        ? `${escapeHtml(payment.profile.first_name || '')} ${escapeHtml(payment.profile.last_name || '')}`.trim()
+        : 'Nom non disponible'
+    }
+  </div>
+
+</div>
+
+
+          <div class="detail">
+
+            <div class="detail-label">
+              Date de soumission
+            </div>
+
+            <div class="detail-value">
+              ${formatDate(payment.payment_submitted_at)}
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="reference">
+
+          <div class="reference-label">
+            Référence du paiement
+          </div>
+
+          <div class="reference-value">
+            ${escapeHtml(payment.payment_reference)}
+          </div>
+
+        </div>
+
+
+        ${
+          payment.payment_proof_path
+            ? `
+              <div class="proof">
+
+                <a
+                  href="#"
+                  onclick="openPaymentProof('${escapeHtml(payment.payment_proof_path)}'); return false;"
+                >
+                  Voir la preuve de paiement →
+                </a>
+
+              </div>
+            `
+            : `
+              <div
+                class="proof"
+                style="color:var(--ink-soft);font-size:14px;"
+              >
+                Aucune preuve de paiement jointe.
+              </div>
+            `
+        }
+
+
+        <div class="actions">
+
+          <button
+            type="button"
+            class="btn btn-validate"
+            onclick="validatePayment(${payment.id})"
+          >
+            ✓ Valider le paiement
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-reject"
+            onclick="openRejectModal(${payment.id})"
+          >
+            Rejeter
+          </button>
+
+        </div>
+
+      </article>
+
+    `;
+
+  }
+
+
+  // =========================================================
+  // PREUVE DE PAIEMENT
+  // =========================================================
+
+  async function openPaymentProof(
+    path
+  ) {
+
+    if (!path) {
+      return;
+    }
+
+
+    showStatus(
+      'Génération du lien sécurisé…',
+      'info'
+    );
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .storage
+        .from('payment-proofs')
+        .createSignedUrl(
+          path,
+          300
+        );
+
+
+    if (error) {
+
+      console.error(
+        'Erreur preuve paiement :',
+        error
+      );
+
+      showStatus(
+        'Impossible d’ouvrir la preuve de paiement.',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    hideStatus();
+
+
+    if (data?.signedUrl) {
+
+      window.open(
+        data.signedUrl,
+        '_blank',
+        'noopener,noreferrer'
+      );
+
+    }
+
+  }
+
+
+  // =========================================================
+  // VALIDATION
+  // =========================================================
+
+  async function validatePayment(
+    enrollmentId
+  ) {
+
+    const confirmed =
+      window.confirm(
+        'Confirmer la validation de ce paiement ?\n\nL’accès à la formation sera activé.'
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    const button =
+      document.querySelector(
+        `#payment-${enrollmentId} .btn-validate`
+      );
+
+
+    if (button) {
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        'Validation…';
+
+    }
+
+
+    hideStatus();
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .rpc(
+          'validate_course_payment',
+          {
+            input_enrollment_id:
+              enrollmentId
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        'Erreur validation paiement :',
+        error
+      );
+
+
+      if (button) {
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          '✓ Valider le paiement';
+
+      }
+
+
+      showStatus(
+        error.message ||
+        'Impossible de valider le paiement.',
+        'error'
+      );
+
+      return;
+
+    }
+
+
+    showStatus(
+      'Paiement validé. L’accès à la formation a été activé.',
+      'info'
+    );
+
+
+    const card =
+      document.getElementById(
+        `payment-${enrollmentId}`
+      );
+
+
+    if (card) {
+
+      card.remove();
+
+    }
+
+
+    updateCountAfterAction();
+
+  }
+
+
+  // =========================================================
+  // REJET
+  // =========================================================
+
+  function openRejectModal(
+    enrollmentId
+  ) {
+
+    currentRejectEnrollmentId =
+      enrollmentId;
+
+    rejectReasonEl.value =
+      '';
+
+    rejectModal.classList.add(
+      'show'
+    );
+
+    setTimeout(
+      () => rejectReasonEl.focus(),
+      50
+    );
+
+  }
+
+
+  function closeRejectModal() {
+
+    currentRejectEnrollmentId =
+      null;
+
+    rejectReasonEl.value =
+      '';
+
+    rejectModal.classList.remove(
+      'show'
+    );
+
+  }
+
+
+  cancelRejectBtn.addEventListener(
+    'click',
+    closeRejectModal
+  );
+
+
+  rejectModal.addEventListener(
+    'click',
+    event => {
+
+      if (
+        event.target ===
+        rejectModal
+      ) {
+
+        closeRejectModal();
+
+      }
+
+    }
+  );
+
+
+  confirmRejectBtn.addEventListener(
+    'click',
+    async () => {
+
+      const enrollmentId =
+        currentRejectEnrollmentId;
+
+
+      if (!enrollmentId) {
+        return;
+      }
+
+
+      const reason =
+        rejectReasonEl.value.trim();
+
+
+      if (!reason) {
+
+        alert(
+          'Veuillez indiquer la raison du rejet.'
+        );
+
+        rejectReasonEl.focus();
+
+        return;
+
+      }
+
+
+      confirmRejectBtn.disabled =
+        true;
+
+      confirmRejectBtn.textContent =
+        'Rejet…';
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .rpc(
+            'reject_course_payment',
+            {
+              input_enrollment_id:
+                enrollmentId,
+
+              input_reason:
+                reason
+            }
+          );
+
+
+      if (error) {
+
+        console.error(
+          'Erreur rejet paiement :',
+          error
+        );
+
+
+        confirmRejectBtn.disabled =
+          false;
+
+        confirmRejectBtn.textContent =
+          'Rejeter le paiement';
+
+
+        showStatus(
+          error.message ||
+          'Impossible de rejeter le paiement.',
+          'error'
+        );
+
+        return;
+
+      }
+
+
+      closeRejectModal();
+
+
+      showStatus(
+        'Paiement rejeté.',
+        'warning'
+      );
+
+
+      const card =
+        document.getElementById(
+          `payment-${enrollmentId}`
+        );
+
+
+      if (card) {
+
+        card.remove();
+
+      }
+
+
+      updateCountAfterAction();
+
+    }
+  );
+
+
+  // =========================================================
+  // COMPTEUR
+  // =========================================================
+
+  function updateCountAfterAction() {
+
+    const cards =
+      paymentsEl.querySelectorAll(
+        '.payment-card'
+      );
+
+
+    const count =
+      cards.length;
+
+
+    countEl.textContent =
+      count === 0
+        ? 'Aucun paiement en attente.'
+        : `${count} paiement${count > 1 ? 's' : ''} en attente.`;
+
+
+    if (count === 0) {
+
+      paymentsEl.innerHTML = `
+
+        <div class="empty">
+
+          <strong>
+            Aucun paiement à valider
+          </strong>
+
+          <div style="margin-top:8px;">
+            Tous les paiements en attente ont été traités.
+          </div>
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
+
+  // =========================================================
+  // DECONNEXION
+  // =========================================================
+
+  logoutBtn.addEventListener(
+    'click',
+    async () => {
+
+      await supabaseClient
+        .auth
+        .signOut();
+
+      window.location.href =
+        'connexion.html';
+
+    }
+  );
+
+
+  // =========================================================
+  // INITIALISATION
+  // =========================================================
+
+  async function init() {
+
+  const isAdmin =
+    await checkAdmin();
+
+  if (!isAdmin) {
+    return;
+  }
+
+  await loadPayments();
+
+}
+
+
+  init();
+
+</script>
+
+</body>
+</html>

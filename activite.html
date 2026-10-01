@@ -1,0 +1,4611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Activité — Parla by Hitondra</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root {
+      --purple: #73d6b5;
+      --purple-dark: #45c99d;
+      --bg: #f6fbf9;
+      --card: #ffffff;
+      --text: #202a27;
+      --muted: #6e8291;
+      --border: #e4efeb;
+      --green: #2e9d68;
+      --red: #d94b4b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--f-body);
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .page {
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 30px 22px 60px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-family: var(--f-display);
+      font-size: 30px;
+      color: var(--purple);
+    }
+
+    .back-link {
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .page-title {
+      margin: 0 0 8px;
+      font-family: var(--f-display);
+      font-size: 34px;
+    }
+
+    .page-subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(8, 20, 29, 0.05);
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 auto;
+}
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--purple);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--purple-dark);
+    }
+
+    .btn-secondary {
+      background: #edf8f4;
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: #fff0f0;
+      color: var(--red);
+    }
+
+    .btn-small {
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .mission-selector {
+      margin-bottom: 30px;
+    }
+
+    .cards-layout {
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 22px;
+    }
+
+    .card-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-tab {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card-tab:hover {
+      border-color: var(--purple);
+    }
+
+    .card-tab.active {
+      background: #f1fbf8;
+      border-color: var(--purple);
+    }
+
+    .card-tab-number {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .card-tab-title {
+      font-weight: 700;
+    }
+
+    .editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .editor-header h2 {
+      margin: 0;
+      font-family: var(--f-display);
+      font-size: 26px;
+    }
+
+    .elements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .element {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fcfefd;
+    }
+
+    .element-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .element-label {
+      font-weight: 700;
+    }
+
+    .element-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .element-content {
+      display: grid;
+      gap: 10px;
+    }
+
+    .add-element-box {
+      margin-top: 20px;
+      padding: 18px;
+      border: 1px dashed #c9e8de;
+      border-radius: 16px;
+      background: #fafefd;
+    }
+
+    .add-element-row {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .add-element-row .field {
+      flex: 1;
+      margin: 0;
+    }
+
+    .bottom-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .status.success {
+      display: block;
+      background: #edf9f2;
+      color: #23734b;
+    }
+
+    .status.error {
+      display: block;
+      background: #fff0f0;
+      color: #a63838;
+    }
+
+    .preview-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 20, 29, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .preview-overlay.on {
+      display: flex;
+    }
+
+    .preview-box {
+      width: min(720px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      position: relative;
+    }
+
+    .preview-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      border: 0;
+      background: #eef6f3;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .preview-title {
+      font-family: var(--f-display);
+      font-size: 30px;
+      margin: 0 0 8px;
+    }
+
+    .preview-instruction {
+      color: var(--muted);
+      margin-bottom: 25px;
+    }
+
+    .preview-element {
+      padding: 18px;
+      border-radius: 16px;
+      background: #f6fdfb;
+      margin-bottom: 14px;
+    }
+
+    .preview-element.hidden {
+      display: none;
+    }
+
+    .preview-progress {
+      text-align: center;
+      color: var(--muted);
+      margin: 20px 0 10px;
+    }
+
+    .preview-next {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .empty {
+      padding: 35px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .media-preview {
+      max-width: 100%;
+      border-radius: 12px;
+    }
+
+    iframe {
+      width: 100%;
+      min-height: 360px;
+      border: 0;
+      border-radius: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .cards-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .card-nav {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .card-tab {
+        text-align: center;
+      }
+
+      .card-tab-title {
+        font-size: 12px;
+      }
+
+      .add-element-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+
+/* =========================
+   PRÉVISUALISATION FORMATEUR
+   ========================= */
+
+#previewOverlay .preview-box {
+  text-align: left;
+}
+
+#previewOverlay #previewElements {
+  width: 100%;
+  text-align: left;
+}
+
+#previewOverlay .preview-element {
+  width: 100%;
+  text-align: left;
+}
+
+/* Bloc de chaque exercice */
+#previewOverlay .mission-exercise {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 0 24px 0;
+  padding: 22px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid #e0ebe7;
+  border-radius: 14px;
+
+  text-align: left;
+}
+
+/* Question / consigne */
+#previewOverlay .mission-exercise > strong {
+  display: block;
+  margin-bottom: 16px;
+
+  color: #1f2428;
+  font-size: 16px;
+  line-height: 1.5;
+
+  text-align: left;
+}
+
+/* Choix */
+#previewOverlay .mission-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+
+  width: 100%;
+}
+
+#previewOverlay .mission-option {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+
+  border: 1px solid #e0ebe7;
+  border-radius: 9px;
+  background: #f9fcfb;
+
+  text-align: left;
+}
+
+/* =========================
+   BOUTON CHECK ANSWER
+   ========================= */
+
+#previewOverlay .mission-check-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 18px;
+  padding: 11px 18px;
+
+  background: #1f6850 !important;
+  color: #ffffff !important;
+
+  border: none !important;
+  border-radius: 9px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+#previewOverlay .mission-check-btn:hover {
+  background: #174e3c !important;
+}
+
+/* =========================
+   FEEDBACK
+   ========================= */
+
+#previewOverlay .mission-feedback {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-top: 14px;
+  padding: 12px 14px;
+
+  border-radius: 9px;
+
+  text-align: left;
+  font-weight: 600;
+}
+
+#previewOverlay .mission-feedback.correct {
+  background: #eaf7ee !important;
+  border: 1px solid #b8dfc4 !important;
+  color: #176b35 !important;
+}
+
+#previewOverlay .mission-feedback.incorrect {
+  background: #fff0f0 !important;
+  border: 1px solid #efbcbc !important;
+  color: #a12626 !important;
+}
+
+/* =========================
+   CLASSEMENT
+   ========================= */
+
+#previewOverlay .ordering-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  width: 100%;
+}
+
+#previewOverlay .ordering-item {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* =========================
+   CONSTRUCTION DE PHRASE
+   ========================= */
+
+#previewOverlay .build-sentence-list,
+#previewOverlay .build-answer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+
+  width: 100%;
+  text-align: left;
+}
+      
+  
+/* ===== Parla design ===== */
+html,body{overflow-x:hidden}
+.page>.topbar{position:static;margin-top:-30px!important;padding-top:16px!important;padding-bottom:16px!important;border-bottom:1px solid var(--night-line);margin-left:calc(50% - 50vw)!important;margin-right:calc(50% - 50vw)!important;padding-left:max(16px,calc(50vw - 50%))!important;padding-right:max(16px,calc(50vw - 50%))!important;}
+.page>.topbar .brand{color:var(--night-paper);font-weight:800;letter-spacing:-.04em;font-size:24px}
+.page>.topbar .back-link{color:var(--night-mist)}
+.page>.topbar .back-link:hover{color:var(--vanilla)}
+.page-title{font-weight:700;letter-spacing:-.035em}
+/* ===== Colour per card: the 5 stages of a mission, from the Parla palette ===== */
+:root{--s1:#e8a63a;--s2:#2fbf8f;--s3:#1D9E75;--s4:#0F6E56;--s5:#2c5d7c;--stage:var(--s1)}
+.cards-layout:has(.card-tab:nth-child(2).active){--stage:var(--s2)}
+.cards-layout:has(.card-tab:nth-child(3).active){--stage:var(--s3)}
+.cards-layout:has(.card-tab:nth-child(4).active){--stage:var(--s4)}
+.cards-layout:has(.card-tab:nth-child(5).active){--stage:var(--s5)}
+.card-tab:nth-child(1){--c:var(--s1)}.card-tab:nth-child(2){--c:var(--s2)}.card-tab:nth-child(3){--c:var(--s3)}.card-tab:nth-child(4){--c:var(--s4)}.card-tab:nth-child(5){--c:var(--s5)}
+
+body{background:radial-gradient(70% 40% at 100% 0%,color-mix(in srgb,var(--s2) 9%,transparent),transparent 70%),radial-gradient(60% 40% at 0% 30%,color-mix(in srgb,var(--s1) 8%,transparent),transparent 70%),#f4f7f6}
+.page>.topbar{background:radial-gradient(rgba(150,214,190,.14) 1px,transparent 1.4px) 0 0/20px 20px,var(--night);border-bottom:0!important;position:relative}
+.page>.topbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--s1) 0 20%,var(--s2) 20% 40%,var(--s3) 40% 60%,var(--s4) 60% 80%,var(--s5) 80%)}
+.page-title em{font-family:var(--f-accent);font-style:italic;font-weight:400;letter-spacing:-.01em;background:linear-gradient(90deg,var(--s1),var(--s5) 35%,var(--s4) 70%,var(--s2));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+
+.panel{border-color:#e1e9e6}
+.mission-selector.panel,.panel.mission-selector{background:#fff}
+
+.card-tab{position:relative;display:grid;grid-template-columns:30px 1fr;column-gap:12px;align-items:center;border-color:#e1e9e6;background:#fff;padding:12px 14px;transition:border-color .2s,background .2s,transform .2s}
+.card-tab::before{content:counter(stage);counter-increment:stage;grid-row:span 2;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--c);background:color-mix(in srgb,var(--c) 14%,#fff)}
+.card-nav{counter-reset:stage}
+.card-tab-number{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 70%,#0b1a24);margin:0}
+.card-tab-title{font-family:var(--f-display);letter-spacing:-.01em}
+.card-tab:hover{border-color:var(--c);transform:translateX(2px)}
+.card-tab.active{background:color-mix(in srgb,var(--c) 11%,#fff);border-color:var(--c)}
+.card-tab.active::before{background:var(--c);color:#fff}
+
+.cards-layout>.panel{background:linear-gradient(180deg,color-mix(in srgb,var(--stage) 10%,#fff) 0,#fff 150px);border-color:color-mix(in srgb,var(--stage) 35%,#e1e9e6);transition:border-color .3s}
+.editor-header h2{color:#0b1a24}
+input:focus,textarea:focus,select:focus{border-color:var(--stage)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--stage) 18%,transparent)}
+.btn{border-radius:999px}
+.btn-primary{background:var(--stage)!important;color:#fff!important}
+.btn-primary:hover{background:color-mix(in srgb,var(--stage) 82%,#0b1a24)!important}
+.btn-secondary{background:color-mix(in srgb,var(--stage) 12%,#fff);color:#0b1a24}
+.btn-secondary:hover{background:color-mix(in srgb,var(--stage) 20%,#fff)}
+.element{background:#fff;border-color:color-mix(in srgb,var(--stage) 28%,#e1e9e6)}
+.element-label{color:color-mix(in srgb,var(--stage) 75%,#0b1a24)}
+.add-element-box{border-color:color-mix(in srgb,var(--stage) 45%,#fff);background:color-mix(in srgb,var(--stage) 5%,#fff)}
+.preview-box{border-top:6px solid var(--s3)}
+.preview-element{background:color-mix(in srgb,var(--s2) 7%,#fff)}
+.cards-layout{grid-template-columns:236px minmax(0,1fr)!important}
+.card-tab-title{font-size:15px;overflow-wrap:anywhere;min-width:0}
+.card-tab>div{min-width:0}
+.page{position:relative;z-index:1}
+@media (max-width:800px){.cards-layout{grid-template-columns:1fr!important}.card-nav{display:flex!important;overflow-x:auto;gap:8px;padding-bottom:4px;scroll-snap-type:x mandatory}.card-tab{flex:0 0 auto;scroll-snap-align:start;text-align:left!important}.card-tab-title{white-space:nowrap;overflow-wrap:normal}.card-tab:hover{transform:none}}
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <div class="topbar">
+    <div class="brand">Parla</div>
+    <a href="formateur.html" class="back-link">← Retour à l'espace formateur</a>
+  </div>
+
+  <h1 class="page-title">Construire une <em>activité</em></h1>
+
+  <p class="page-subtitle">
+    Créez les 5 cartes pédagogiques de votre mission avec des éléments qui apparaissent progressivement.
+  </p>
+
+  <div class="panel mission-selector">
+
+    <div class="field">
+      <label for="missionSelect">Mission</label>
+
+      <select id="missionSelect">
+        <option value="">Sélectionnez une mission…</option>
+      </select>
+    </div>
+
+    <div id="missionInfo" style="display:none;"></div>
+
+  </div>
+
+  <div id="editorArea" style="display:none;">
+
+    <div class="cards-layout">
+
+      <div class="card-nav" id="cardNavigation"></div>
+
+      <div class="panel">
+
+        <div class="editor-header">
+          <h2 id="editorCardTitle">Carte 1</h2>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="previewBtn">
+             Prévisualiser
+            
+        </div>
+
+        <div class="field">
+          <label for="cardTitle">Titre de la carte</label>
+          <input
+            type="text"
+            id="cardTitle"
+            placeholder="Ex. Repérage">
+        </div>
+
+        <div class="field">
+          <label for="cardInstruction">Consigne / introduction</label>
+          <textarea
+            id="cardInstruction"
+            placeholder="Ex. Observez les expressions utilisées dans le document."></textarea>
+        </div>
+
+        <div>
+          <strong>Éléments progressifs</strong>
+
+          <div id="elementsList" class="elements-list"></div>
+        </div>
+
+        <div class="add-element-box">
+
+          <strong>Ajouter un élément</strong>
+
+          <div class="add-element-row">
+
+            <div class="field">
+              <label for="elementType">Type</label>
+
+<select id="elementType">
+  <option value="text">Texte</option>
+  <option value="explanation">Explication</option>
+  <option value="image">Image</option>
+  <option value="audio">Audio</option>
+  <option value="youtube">Vidéo YouTube</option>
+
+  <option value="multiple_choice">Choix multiple</option>
+  <option value="true_false">Vrai / Faux</option>
+  <option value="ordering">Classement</option>
+  <option value="matching">Association</option>
+  <option value="categorise">Catégorisation</option>
+  <option value="select_from_text">Sélection dans le texte</option>
+  <option value="fill_blank">Texte à trous</option>
+  <option value="build_sentence">Construction de phrase</option>
+  <option value="open_response">Réponse libre</option>
+</select>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="addElementBtn">
+              + Ajouter une puce
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="bottom-actions">
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="previewBtnBottom">
+            👁 Prévisualiser
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="saveBtn">
+            💾 Enregistrer les 5 cartes
+          </button>
+
+        </div>
+
+        <div id="statusBox" class="status"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- PREVIEW -->
+
+<div class="preview-overlay" id="previewOverlay">
+
+  <div class="preview-box">
+
+    <button
+      type="button"
+      class="preview-close"
+      id="previewClose">
+      ✕
+    </button>
+
+    <h2 class="preview-title" id="previewTitle"></h2>
+
+    <div
+      class="preview-instruction"
+      id="previewInstruction">
+    </div>
+
+    <div id="previewElements"></div>
+
+    <div
+      class="preview-progress"
+      id="previewProgress">
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary preview-next"
+      id="previewNext">
+      Continuer →
+    </button>
+
+  </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="mission-renderer.js"></script>
+    
+<script>
+
+const CARD_TYPES = {
+  mise_en_route: "Mise en route",
+  comprehension: "Compréhension",
+  reperage: "Repérage",
+  conceptualisation: "Conceptualisation",
+  systematisation: "Systématisation"
+};
+
+const state = {
+  user: null,
+  profile: null,
+  missions: [],
+  selectedMission: null,
+  activeCard: 1,
+
+  cards: [1, 2, 3, 4, 5].map(order => ({
+    order,
+    title: CARD_TYPES[
+      [
+        "mise_en_route",
+        "comprehension",
+        "reperage",
+        "conceptualisation",
+        "systematisation"
+      ][order - 1]
+    ],
+    instruction: "",
+    elements: []
+  })),
+
+  previewIndex: 0,
+previewOrdering: {}
+};
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function getLanguageLabel(language) {
+
+  const value = String(language || "").trim().toLowerCase();
+
+  if (value === "français" || value === "fr") return "Français";
+  if (value === "anglais" || value === "en") return "Anglais";
+  if (value === "espagnol" || value === "es") return "Espagnol";
+
+  return language || "";
+}
+
+
+function getCardType(order) {
+
+  return [
+    "mise_en_route",
+    "comprehension",
+    "reperage",
+    "conceptualisation",
+    "systematisation"
+  ][order - 1];
+
+}
+
+
+async function init() {
+
+  const {
+    data: {
+      user
+    }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+
+    window.location.href = "connexion.html";
+    return;
+
+  }
+
+  state.user = user;
+
+  const {
+    data: profile,
+    error: profileError
+  } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+
+    alert("Impossible de charger votre profil.");
+    return;
+
+  }
+
+  state.profile = profile;
+
+  const allowed =
+    profile.role === "teacher" ||
+    profile.role === "formateur" ||
+    profile.role === "admin";
+
+  if (!allowed) {
+
+    alert("Accès réservé aux formateurs.");
+    window.location.href = "membre.html";
+    return;
+
+  }
+
+  await loadMissions();
+
+}
+
+
+async function loadMissions() {
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("missions")
+    .select("*")
+    .order("week_number", {
+      ascending: true
+    })
+    .order("id", {
+      ascending: true
+    });
+
+console.log("ACTIVITE — missions reçues :", data);
+console.log("ACTIVITE — erreur missions :", error);
+console.log("ACTIVITE — profil :", state.profile);
+    
+  if (error) {
+
+    console.error(error);
+
+    showStatus(
+      "Impossible de charger les missions.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  const teacherLanguage =
+    String(state.profile.language || "")
+      .trim()
+      .toLowerCase();
+
+  if (state.profile.role === "admin") {
+
+    state.missions = data || [];
+
+  } else {
+
+    state.missions = (data || []).filter(mission =>
+      String(mission.language || "")
+        .trim()
+        .toLowerCase() === teacherLanguage
+    );
+
+  }
+
+  renderMissionSelect();
+
+  const params = new URLSearchParams(window.location.search);
+  const missionIdFromUrl = Number(params.get("mission_id"));
+
+  if (missionIdFromUrl) {
+    const missionSelect = document.getElementById("missionSelect");
+
+    const missionExists = state.missions.some(
+      mission => Number(mission.id) === missionIdFromUrl
+    );
+
+    if (missionExists) {
+      missionSelect.value = String(missionIdFromUrl);
+      missionSelect.dispatchEvent(new Event("change"));
+    }
+  }
+
+  console.log(
+    "ACTIVITE — select après rendu :",
+    document.getElementById("missionSelect").innerHTML
+  );
+    
+}
+
+
+function renderMissionSelect() {
+
+  const select =
+    document.getElementById("missionSelect");
+
+  select.innerHTML =
+    `<option value="">Sélectionnez une mission…</option>`;
+
+  state.missions.forEach(mission => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = mission.id;
+
+    option.textContent =
+      `${mission.title} · ${getLanguageLabel(mission.language)} · ${mission.level || "—"} · Semaine ${mission.week_number || "—"}`;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+async function loadMissionCards(missionId) {
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("mission_cards")
+    .select("*")
+    .eq("mission_id", missionId)
+    .order("card_order", {
+      ascending: true
+    });
+
+  if (error) {
+
+    console.error(error);
+
+    showStatus(
+      "Impossible de charger les cartes.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  state.cards =
+    [1, 2, 3, 4, 5].map(order => {
+
+      const existing =
+        (data || []).find(
+          card => card.card_order === order
+        );
+
+      if (!existing) {
+
+        return {
+          order,
+          title: CARD_TYPES[
+            getCardType(order)
+          ],
+          instruction: "",
+          elements: []
+        };
+
+      }
+
+      const content =
+        existing.content || {};
+
+      return {
+        order,
+        title:
+          content.title ||
+          CARD_TYPES[getCardType(order)],
+
+        instruction:
+          content.instruction || "",
+
+        elements:
+          Array.isArray(content.elements)
+            ? content.elements
+            : []
+      };
+
+    });
+
+  state.activeCard = 1;
+
+  renderCardNavigation();
+  renderActiveCard();
+
+}
+
+
+function renderCardNavigation() {
+
+  const nav =
+    document.getElementById("cardNavigation");
+
+  nav.innerHTML = "";
+
+  state.cards.forEach(card => {
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className =
+      "card-tab" +
+      (card.order === state.activeCard
+        ? " active"
+        : "");
+
+    button.innerHTML = `
+      <div class="card-tab-number">
+        Carte ${card.order}
+      </div>
+
+      <div class="card-tab-title">
+        ${escapeHtml(card.title || CARD_TYPES[getCardType(card.order)])}
+      </div>
+    `;
+
+    button.addEventListener("click", () => {
+
+      saveCurrentEditorToState();
+
+      state.activeCard = card.order;
+
+      renderCardNavigation();
+      renderActiveCard();
+
+    });
+
+    nav.appendChild(button);
+
+  });
+
+}
+
+
+function renderActiveCard() {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  document.getElementById("editorCardTitle").textContent =
+    `Carte ${card.order} — ${CARD_TYPES[getCardType(card.order)]}`;
+
+  document.getElementById("cardTitle").value =
+    card.title || "";
+
+  document.getElementById("cardInstruction").value =
+    card.instruction || "";
+
+  renderElements();
+
+}
+
+
+function saveCurrentEditorToState() {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  card.title =
+    document.getElementById("cardTitle").value.trim();
+
+  card.instruction =
+    document.getElementById("cardInstruction").value.trim();
+
+}
+
+function addElement() {
+  saveCurrentEditorToState();
+
+  const type =
+    document.getElementById("elementType").value;
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element = {
+    type
+  };
+
+  if (
+    type === "text" ||
+    type === "explanation"
+  ) {
+    element.content = "";
+
+  } else if (type === "image") {
+    element.url = "";
+    element.alt = "";
+
+  } else if (
+    type === "audio" ||
+    type === "youtube"
+  ) {
+    element.url = "";
+
+  } else if (type === "true_false") {
+    element.statement = "";
+    element.correct = true;
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "multiple_choice") {
+    element.question = "";
+    element.options = [
+      { id: "a", text: "" },
+      { id: "b", text: "" },
+      { id: "c", text: "" },
+      { id: "d", text: "" }
+    ];
+    element.correct = [];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "ordering") {
+    element.question = "";
+    element.items = [
+      { id: "a", text: "" },
+      { id: "b", text: "" },
+      { id: "c", text: "" },
+      { id: "d", text: "" }
+    ];
+    element.correct_order = [
+      "a",
+      "b",
+      "c",
+      "d"
+    ];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "matching") {
+    element.question = "";
+    element.pairs = [
+      { id: "a", left: "", right: "" },
+      { id: "b", left: "", right: "" },
+      { id: "c", left: "", right: "" },
+      { id: "d", left: "", right: "" }
+    ];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "categorise") {
+    element.question = "";
+    element.categories = [
+      { id: "cat1", name: "" },
+      { id: "cat2", name: "" },
+      { id: "cat3", name: "" }
+    ];
+    element.items = [
+      { id: "a", text: "", categoryId: "cat1" },
+      { id: "b", text: "", categoryId: "cat1" },
+      { id: "c", text: "", categoryId: "cat2" },
+      { id: "d", text: "", categoryId: "cat3" }
+    ];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "select_from_text") {
+    element.question = "";
+    element.text = "";
+    element.options = [
+      { id: "a", text: "" },
+      { id: "b", text: "" },
+      { id: "c", text: "" },
+      { id: "d", text: "" }
+    ];
+    element.correct = [];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "fill_blank") {
+    element.question = "";
+    element.text = "";
+    element.blanks = [
+  { id:"1", answer:"", alternatives:"" }
+];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+} else if (type === "build_sentence") {
+    element.question = "";
+    element.tokens = [
+      { id: "a", text: "" },
+      { id:   "b", text: "" },
+      { id: "c", text: "" },
+      { id: "d", text: "" }
+    ];
+    element.correct_order = [
+      "a",
+      "b",
+      "c",
+      "d"
+    ];
+    element.feedback_correct = "";
+    element.feedback_incorrect = "";
+
+  } else if (type === "open_response") {
+    element.question = "";
+    element.model_answer = "";
+    element.feedback_correct = "";
+
+  } else {
+    element.question = "";
+  }
+
+  card.elements.push(element);
+
+  renderElements();
+}
+
+    function renderElements() {
+
+  const container =
+    document.getElementById("elementsList");
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  container.innerHTML = "";
+
+  if (!card.elements.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        Aucune puce pour le moment.<br>
+        Cliquez sur « + Ajouter une puce ».
+      </div>
+    `;
+
+    return;
+
+  }
+
+  card.elements.forEach((element, index) => {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className = "element";
+
+    wrapper.innerHTML = `
+      <div class="element-top">
+
+        <div class="element-label">
+          ${index + 1}. ${getElementTypeLabel(element.type)}
+        </div>
+
+        <div class="element-actions">
+
+          <button
+            type="button"
+            class="btn btn-secondary btn-small"
+            data-action="up">
+            ↑
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary btn-small"
+            data-action="down">
+            ↓
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-danger btn-small"
+            data-action="delete">
+            Supprimer
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="element-content">
+        ${renderElementEditor(element, index)}
+      </div>
+    `;
+
+    wrapper
+      .querySelector('[data-action="up"]')
+      .addEventListener("click", () => moveElement(index, -1));
+
+    wrapper
+      .querySelector('[data-action="down"]')
+      .addEventListener("click", () => moveElement(index, 1));
+
+    wrapper
+      .querySelector('[data-action="delete"]')
+      .addEventListener("click", () => deleteElement(index));
+
+    container.appendChild(wrapper);
+
+  });
+
+}
+
+
+function getElementTypeLabel(type) {
+
+  const labels = {
+    text: "Texte",
+    explanation: "Explication",
+    image: "Image",
+    audio: "Audio",
+    youtube: "Vidéo YouTube",
+
+    multiple_choice: "Choix multiple",
+    true_false: "Vrai / Faux",
+    ordering: "Classement",
+    matching: "Association",
+    categorise: "Catégorisation",
+    select_from_text: "Sélection dans le texte",
+    fill_blank: "Texte à trous",
+    build_sentence: "Construction de phrase",
+    open_response: "Réponse libre"
+  };
+
+  return labels[type] || type;
+
+}
+
+
+function renderElementEditor(element, index) {
+
+   if (
+    element.type === "text" ||
+    element.type === "explanation"
+  ) {
+    const placeholder =
+      element.type === "text"
+        ? "Texte"
+        : "Explication";
+
+    return `
+      <div style="margin-bottom:12px;">
+
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:6px;
+          margin-bottom:8px;
+          flex-wrap:wrap;
+        ">
+
+          <span style="
+            font-size:13px;
+            color:#6e8291;
+            margin-right:4px;
+          ">
+            Couleur :
+          </span>
+
+ <button
+  type="button"
+  onmousedown="event.preventDefault()"
+  onclick="applyEditorColor('#3d7ea6')"
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:##3d7ea6;
+              cursor:pointer;
+            "
+            title="Noir">
+          </button>
+
+          <button
+            type="button"
+            onmousedown="event.preventDefault()"
+            onclick="applyEditorColor('#63a891')"
+            style="
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:#63a891;
+              cursor:pointer;
+            "
+            title="Rouge">
+          </button>
+
+          <button
+            type="button"
+            onmousedown="event.preventDefault()"
+            onclick="applyEditorColor('#e9c46a')"
+            style="
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:#e9c46a;
+              cursor:pointer;
+            "
+            title="Bleu">
+          </button>
+
+          <button
+            type="button"
+            onmousedown="event.preventDefault()"
+            onclick="applyEditorColor('#f4a261')"
+            style="
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:#f4a261;
+              cursor:pointer;
+            "
+            title="Vert">
+          </button>
+
+          <button
+            type="button"
+            onmousedown="event.preventDefault()"
+            onclick="applyEditorColor('#e76f51')"
+            style="
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:#e76f51;
+              cursor:pointer;
+            "
+            title="Orange">
+          </button>
+
+          <button
+            type="button"
+            onmousedown="event.preventDefault()"
+            onclick="applyEditorColor('#337d6b')"
+            style="
+              width:28px;
+              height:28px;
+              padding:0;
+              border:1px solid #c5cdd3;
+              border-radius:6px;
+              background:#337d6b;
+              cursor:pointer;
+            "
+            title="Violet">
+          </button>
+
+        </div>
+
+        <div
+          contenteditable="true"
+          data-field="content"
+          data-index="${index}"
+          data-rich-content="true"
+          style="
+            min-height:120px;
+            padding:12px;
+            border:1px solid #d8dee2;
+            border-radius:8px;
+            background:white;
+            white-space:pre-wrap;
+            outline:none;
+          "
+        >${element.content || ""}</div>
+
+        <div style="
+          margin-top:6px;
+          font-size:12px;
+          color:#6e8291;
+        ">
+          ${placeholder}
+        </div>
+
+      </div>
+    `;
+  }
+
+  if (element.type === "image") {
+    return `
+      <input
+        type="url"
+        placeholder="URL de l'image"
+        value="${escapeHtml(element.url || "")}"
+        data-field="url"
+        data-index="${index}">
+
+      <textarea
+        placeholder="Texte alternatif"
+        data-field="alt"
+        data-index="${index}">${escapeHtml(element.alt || "")}</textarea>
+    `;
+  }
+
+  if (element.type === "audio") {
+    return `
+      <input
+        type="url"
+        placeholder="URL du fichier audio"
+        value="${escapeHtml(element.url || "")}"
+        data-field="url"
+        data-index="${index}">
+    `;
+  }
+
+  if (element.type === "youtube") {
+    return `
+      <input
+        type="url"
+        placeholder="URL YouTube"
+        value="${escapeHtml(element.url || "")}"
+        data-field="url"
+        data-index="${index}">
+    `;
+  }
+
+  if (element.type === "true_false") {
+    return `
+      <div class="field">
+        <label>Question / affirmation</label>
+        <textarea
+          placeholder="The speakers work in the same team."
+          data-field="statement"
+          data-index="${index}">${escapeHtml(element.statement || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Bonne réponse</label>
+        <select data-field="correct" data-index="${index}">
+          <option value="true" ${element.correct === true ? "selected" : ""}>True</option>
+          <option value="false" ${element.correct === false ? "selected" : ""}>False</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Feedback si correct</label>
+        <textarea
+          placeholder="Explain why the answer is correct."
+          data-field="feedback_correct"
+          data-index="${index}">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si incorrect</label>
+        <textarea
+          placeholder="Explain what the learner should notice."
+          data-field="feedback_incorrect"
+          data-index="${index}">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+  if (element.type === "multiple_choice") {
+
+    if (!Array.isArray(element.options) || !element.options.length) {
+      element.options = [
+        { id: "a", text: "" },
+        { id: "b", text: "" },
+        { id: "c", text: "" },
+        { id: "d", text: "" }
+      ];
+    }
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    return `
+      <div class="field">
+        <label>Question</label>
+        <textarea
+          placeholder="Apart from what you heard in the audio, which questions could you ask a colleague?"
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Réponses — plusieurs réponses peuvent être correctes</label>
+
+        <div style="
+          display:flex;
+          flex-direction:column;
+          align-items:flex-start;
+          width:100%;
+        ">
+
+          ${element.options.map((option, optionIndex) => `
+            <div style="
+              display:grid;
+              grid-template-columns:24px minmax(0,1fr) auto;
+              align-items:center;
+              gap:8px;
+              width:100%;
+              margin-bottom:8px;
+            ">
+
+              <strong>
+                ${String.fromCharCode(65 + optionIndex)}.
+              </strong>
+
+              <input
+                type="text"
+                placeholder="Answer ${optionIndex + 1}"
+                value="${escapeHtml(option.text || "")}"
+                data-mcq-option-text="${index}"
+                data-option-id="${escapeHtml(option.id)}"
+                style="
+                  width:100%;
+                  min-width:0;
+                  margin:0;
+                ">
+
+              <label style="
+                display:flex;
+                align-items:center;
+                justify-content:flex-start;
+                gap:5px;
+                white-space:nowrap;
+                font-size:13px;
+                width:auto;
+                margin:0;
+                padding:0;
+              ">
+
+                <input
+                  type="checkbox"
+                  ${element.correct.includes(option.id) ? "checked" : ""}
+                  data-mcq-correct="${index}"
+                  data-option-id="${escapeHtml(option.id)}">
+
+                <span>Correcte</span>
+
+              </label>
+
+            </div>
+          `).join("")}
+
+                </div>
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          onclick="addMultipleChoiceOption(${index})">
+          + Ajouter une réponse
+        </button>
+
+      </div>
+
+      <div class="field">
+        <label>Feedback si toutes les réponses correctes sont sélectionnées</label>
+        <textarea
+          placeholder="Explain why this combination fits the situation."
+          data-field="feedback_correct"
+          data-index="${index}">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si la sélection est incorrecte</label>
+        <textarea
+          placeholder="Explain what the learner should reconsider."
+          data-field="feedback_incorrect"
+          data-index="${index}">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+if (element.type === "ordering") {
+
+  if (!Array.isArray(element.items) || !element.items.length) {
+    element.items = [
+      { id: "a", text: "" },
+      { id: "b", text: "" },
+      { id: "c", text: "" },
+      { id: "d", text: "" }
+    ];
+  }
+
+  if (!Array.isArray(element.correct_order)) {
+    element.correct_order = element.items.map(item => item.id);
+  }
+
+  return `
+    <div class="field">
+      <label>Consigne</label>
+      <textarea
+        placeholder="Put the questions in the order they appear in the conversation."
+        data-field="question"
+        data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Éléments — leur ordre ici est l'ordre correct</label>
+
+      ${element.items.map((item, itemIndex) => `
+        <div style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+          margin-bottom:8px;
+        ">
+
+          <strong style="min-width:24px;">
+            ${itemIndex + 1}.
+          </strong>
+
+          <input
+            type="text"
+            value="${escapeHtml(item.text || "")}"
+            placeholder="Phrase ${itemIndex + 1}"
+            data-ordering-item-text="${index}"
+            data-item-id="${escapeHtml(item.id)}">
+
+          <button
+            type="button"
+            class="btn btn-danger btn-small"
+            onclick="deleteOrderingItem(${index}, '${escapeHtml(item.id)}')">
+            Supprimer
+          </button>
+
+        </div>
+      `).join("")}
+
+<button
+  type="button"
+  class="btn btn-secondary btn-small"
+  onclick="addOrderingItem(${index})">
+  + Ajouter un élément
+</button>
+    </div>
+
+    <div class="field">
+      <label>Feedback si correct</label>
+      <textarea
+        data-field="feedback_correct"
+        data-index="${index}"
+        placeholder="Explain the logic of the sequence.">${escapeHtml(element.feedback_correct || "")}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Feedback si incorrect</label>
+      <textarea
+        data-field="feedback_incorrect"
+        data-index="${index}"
+        placeholder="Explain what the learner should notice about the sequence.">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+    </div>
+  `;
+}
+
+  if (element.type === "matching") {
+
+    if (!Array.isArray(element.pairs) || !element.pairs.length) {
+      element.pairs = [
+        { id: "a", left: "", right: "" },
+        { id: "b", left: "", right: "" },
+        { id: "c", left: "", right: "" },
+        { id: "d", left: "", right: "" }
+      ];
+    }
+
+    return `
+      <div class="field">
+        <label>Consigne</label>
+        <textarea
+          placeholder="Match each question with the information it asks for."
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Associations correctes</label>
+
+        ${element.pairs.map((pair, pairIndex) => `
+          <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:8px;
+            margin-bottom:8px;
+          ">
+
+            <input
+              type="text"
+              placeholder="Élément gauche ${pairIndex + 1}"
+              value="${escapeHtml(pair.left || "")}"
+              data-matching-left="${index}"
+              data-pair-id="${escapeHtml(pair.id)}">
+
+            <input
+              type="text"
+              placeholder="Élément droit ${pairIndex + 1}"
+              value="${escapeHtml(pair.right || "")}"
+              data-matching-right="${index}"
+              data-pair-id="${escapeHtml(pair.id)}">
+
+          </div>
+        `).join("")}
+      <button
+        type="button"
+        class="btn btn-secondary btn-small"
+        onclick="addMatchingPair(${index})">
+        + Ajouter une association
+      </button>
+      
+      </div>
+
+      <div class="field">
+        <label>Feedback si correct</label>
+        <textarea
+          data-field="feedback_correct"
+          data-index="${index}"
+          placeholder="Reinforce the relationship between the two elements.">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si incorrect</label>
+        <textarea
+          data-field="feedback_incorrect"
+          data-index="${index}"
+          placeholder="Explain what information each expression asks for.">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+  if (element.type === "categorise") {
+
+    if (!Array.isArray(element.categories) || !element.categories.length) {
+      element.categories = [
+        { id: "cat1", name: "" },
+        { id: "cat2", name: "" },
+        { id: "cat3", name: "" }
+      ];
+    }
+
+    if (!Array.isArray(element.items) || !element.items.length) {
+      element.items = [
+        { id: "a", text: "", categoryId: "cat1" },
+        { id: "b", text: "", categoryId: "cat1" },
+        { id: "c", text: "", categoryId: "cat2" },
+        { id: "d", text: "", categoryId: "cat3" }
+      ];
+    }
+
+    return `
+      <div class="field">
+        <label>Consigne</label>
+        <textarea
+          placeholder="What are you trying to do with each expression?"
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Catégories</label>
+
+                ${element.categories.map(category => `
+          <input
+            type="text"
+            value="${escapeHtml(category.name || "")}"
+            placeholder="Category"
+            data-category-name="${index}"
+            data-category-id="${escapeHtml(category.id)}"
+            style="margin-bottom:8px;">
+        `).join("")}
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          onclick="addCategoriseCategory(${index})">
+          + Ajouter une catégorie
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Éléments à catégoriser</label>
+
+               ${element.items.map((item, itemIndex) => `
+          <div style="
+            display:grid;
+            grid-template-columns:minmax(0,1fr) 180px;
+            gap:8px;
+            margin-bottom:8px;
+          ">
+
+            <input
+              type="text"
+              value="${escapeHtml(item.text || "")}"
+              placeholder="Expression ${itemIndex + 1}"
+              data-category-item-text="${index}"
+              data-item-id="${escapeHtml(item.id)}">
+
+            <select
+              data-category-item-category="${index}"
+              data-item-id="${escapeHtml(item.id)}">
+
+              ${element.categories.map(category => `
+                <option
+                  value="${escapeHtml(category.id)}"
+                  ${item.categoryId === category.id ? "selected" : ""}>
+                  ${escapeHtml(category.name || "Category")}
+                </option>
+              `).join("")}
+
+            </select>
+
+          </div>
+        `).join("")}
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          onclick="addCategoriseItem(${index})">
+          + Ajouter un élément
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Feedback si correct</label>
+        <textarea
+          data-field="feedback_correct"
+          data-index="${index}"
+          placeholder="Explain what the categories represent.">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si incorrect</label>
+        <textarea
+          data-field="feedback_incorrect"
+          data-index="${index}"
+          placeholder="Explain how to identify the function of each expression.">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+  if (element.type === "select_from_text") {
+
+    if (!Array.isArray(element.options)) {
+      element.options = [];
+    }
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    return `
+      <div class="field">
+        <label>Consigne</label>
+        <textarea
+          placeholder="Which questions can you hear in the conversation?"
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Texte / contexte</label>
+        <textarea
+          placeholder="Add the relevant text or context here."
+          data-field="text"
+          data-index="${index}">${escapeHtml(element.text || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Éléments sélectionnables</label>
+
+        ${element.options.map((option, optionIndex) => `
+          <div style="
+            display:flex;
+            gap:8px;
+            align-items:center;
+            margin-bottom:8px;
+          ">
+
+            <input
+              type="text"
+              value="${escapeHtml(option.text || "")}"
+              placeholder="Option ${optionIndex + 1}"
+              data-select-option-text="${index}"
+              data-option-id="${escapeHtml(option.id)}"
+              style="flex:1;">
+
+            <label style="
+              display:flex;
+              align-items:center;
+              gap:5px;
+              white-space:nowrap;
+            ">
+              <input
+                type="checkbox"
+                ${element.correct.includes(option.id) ? "checked" : ""}
+                data-select-option-correct="${index}"
+                data-option-id="${escapeHtml(option.id)}">
+              Correcte
+            </label>
+
+          </div>
+        `).join("")}
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          onclick="addSelectTextOption(${index})">
+          + Ajouter une option
+        </button>
+      </div>
+
+      <div class="field">
+        <label>Feedback si correct</label>
+        <textarea
+          data-field="feedback_correct"
+          data-index="${index}"
+          placeholder="Explain what the selected items show.">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si incorrect</label>
+        <textarea
+          data-field="feedback_incorrect"
+          data-index="${index}"
+          placeholder="Tell the learner what to listen for or notice in the text.">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+  if (element.type === "fill_blank") {
+
+    if (!Array.isArray(element.blanks)) {
+      element.blanks = [
+        { id: "a", answer: "", alternatives: "" }
+      ];
+    }
+
+    return `
+      <div class="field">
+        <label>Consigne</label>
+        <textarea
+          placeholder="Complete the questions with the correct words."
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Phrase avec {{1}}, {{2}}, etc.</label>
+        <textarea
+          placeholder="Which team {{1}} you work with? How long {{2}} you worked here?"
+          data-field="text"
+          data-index="${index}">${escapeHtml(element.text || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Réponses attendues</label>
+
+        ${element.blanks.map((blank, blankIndex) => `
+          <div style="
+            display:grid;
+            grid-template-columns:40px 1fr 1fr;
+            gap:8px;
+            margin-bottom:8px;
+          ">
+
+            <strong style="padding:12px 0;">
+              ${blankIndex + 1}.
+            </strong>
+
+            <input
+              type="text"
+              value="${escapeHtml(blank.answer || "")}"
+              placeholder="Correct answer"
+              data-blank-answer="${index}"
+              data-blank-id="${escapeHtml(blank.id)}">
+
+            <input
+              type="text"
+              value="${escapeHtml(blank.alternatives || "")}"
+              placeholder="Alternative answers, comma separated"
+              data-blank-alternatives="${index}"
+              data-blank-id="${escapeHtml(blank.id)}">
+
+          </div>
+               `).join("")}
+
+        <button
+          type="button"
+          class="btn btn-secondary btn-small"
+          onclick="addFillBlank(${index})">
+          + Ajouter un trou
+        </button>
+
+        <p style="color:#6e8291;font-size:13px;">
+          Utilise {{1}}, {{2}}, {{3}}… dans la phrase.
+        </p>
+      </div>
+
+      <div class="field">
+        <label>Feedback si correct</label>
+        <textarea
+          data-field="feedback_correct"
+          data-index="${index}">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback si incorrect</label>
+        <textarea
+          data-field="feedback_incorrect"
+          data-index="${index}">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+      </div>
+    `;
+  }
+
+  if (element.type === "build_sentence") {
+
+  if (!Array.isArray(element.tokens)) {
+    element.tokens = [];
+  }
+
+  element.tokens.forEach(token => {
+    if (!token.id) {
+      token.id =
+        `token_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+  });
+
+  element.correct_order =
+    element.tokens.map(token => token.id);
+
+  return `
+    <div class="field">
+      <label>Consigne</label>
+
+      <textarea
+        placeholder="Put the words in the correct order."
+        data-field="question"
+        data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Mots dans l'ordre correct</label>
+
+      ${element.tokens.map((token, tokenIndex) => `
+        <div style="
+          display:flex;
+          gap:8px;
+          align-items:center;
+          margin-bottom:8px;
+        ">
+
+          <strong style="min-width:24px;">
+            ${tokenIndex + 1}.
+          </strong>
+
+          <input
+            type="text"
+            value="${escapeHtml(token.text || "")}"
+            placeholder="Word ${tokenIndex + 1}"
+            data-build-token-text="${index}"
+            data-token-id="${escapeHtml(token.id)}">
+
+        </div>
+      `).join("")}
+
+      <button
+        type="button"
+        class="btn btn-secondary btn-small"
+        onclick="addBuildSentenceToken(${index})">
+        + Ajouter un mot
+      </button>
+    </div>
+
+    <div class="field">
+      <label>Feedback si correct</label>
+
+      <textarea
+        data-field="feedback_correct"
+        data-index="${index}">${escapeHtml(element.feedback_correct || "")}</textarea>
+    </div>
+
+    <div class="field">
+      <label>Feedback si incorrect</label>
+
+      <textarea
+        data-field="feedback_incorrect"
+        data-index="${index}">${escapeHtml(element.feedback_incorrect || "")}</textarea>
+    </div>
+  `;
+}
+
+  if (element.type === "open_response") {
+
+    return `
+      <div class="field">
+        <label>Question / tâche</label>
+        <textarea
+          placeholder="Your colleague tells you what they do. Ask a natural follow-up question."
+          data-field="question"
+          data-index="${index}">${escapeHtml(element.question || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Réponse modèle / exemples acceptables</label>
+        <textarea
+          placeholder="Example: What are you working on at the moment?"
+          data-field="model_answer"
+          data-index="${index}">${escapeHtml(element.model_answer || "")}</textarea>
+      </div>
+
+      <div class="field">
+        <label>Feedback pédagogique</label>
+        <textarea
+          placeholder="Give the learner guidance about what makes an answer effective."
+          data-field="feedback_correct"
+          data-index="${index}">${escapeHtml(element.feedback_correct || "")}</textarea>
+      </div>
+    `;
+  }
+
+  return "";
+}
+  
+
+function syncElementFields(event) {
+
+  const input = event?.target;
+
+  if (!input) return;
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  if (input.matches("[data-field]")) {
+
+    const index =
+      Number(input.dataset.index);
+
+    const field =
+      input.dataset.field;
+
+    const element =
+      card.elements[index];
+
+    if (!element) return;
+
+    if (field === "correct") {
+
+  element.correct =
+    input.value === "true";
+
+} else {
+
+  element[field] =
+    input.dataset.richContent === "true"
+      ? input.innerHTML
+      : input.value;
+
+}
+
+    return;
+  }
+
+  if (input.matches("[data-mcq-option-text]")) {
+
+    const index =
+      Number(input.dataset.mcqOptionText);
+
+    const optionId =
+      input.dataset.optionId;
+
+    const element =
+      card.elements[index];
+
+    if (!element || !Array.isArray(element.options)) {
+      return;
+    }
+
+    const option =
+      element.options.find(
+        option => option.id === optionId
+      );
+
+    if (option) {
+      option.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-mcq-correct]")) {
+
+    const index =
+      Number(input.dataset.mcqCorrect);
+
+    const optionId =
+      input.dataset.optionId;
+
+    const element =
+      card.elements[index];
+
+    if (!element) return;
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    if (input.checked) {
+
+      if (!element.correct.includes(optionId)) {
+        element.correct.push(optionId);
+      }
+
+    } else {
+
+      element.correct =
+        element.correct.filter(
+          id => id !== optionId
+        );
+
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-ordering-item-text]")) {
+
+    const index =
+      Number(input.dataset.orderingItemText);
+
+    const itemId =
+      input.dataset.itemId;
+
+    const element =
+      card.elements[index];
+
+    if (!element || !Array.isArray(element.items)) {
+      return;
+    }
+
+    const item =
+      element.items.find(
+        item => item.id === itemId
+      );
+
+    if (!item) return;
+
+    item.text = input.value;
+
+    element.correct_order =
+      element.items.map(
+        item => item.id
+      );
+
+    return;
+  }
+
+  if (input.matches("[data-matching-left]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.matchingLeft)
+      ];
+
+    if (!element) return;
+
+    const pair =
+      element.pairs.find(
+        pair => pair.id === input.dataset.pairId
+      );
+
+    if (pair) pair.left = input.value;
+
+    return;
+  }
+
+  if (input.matches("[data-matching-right]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.matchingRight)
+      ];
+
+    if (!element) return;
+
+    const pair =
+      element.pairs.find(
+        pair => pair.id === input.dataset.pairId
+      );
+
+    if (pair) pair.right = input.value;
+
+    return;
+  }
+
+  if (input.matches("[data-category-name]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryName)
+      ];
+
+    if (!element) return;
+
+    const category =
+      element.categories.find(
+        category =>
+          category.id === input.dataset.categoryId
+      );
+
+    if (category) {
+      category.name = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-category-item-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryItemText)
+      ];
+
+    if (!element) return;
+
+    const item =
+      element.items.find(
+        item =>
+          item.id === input.dataset.itemId
+      );
+
+    if (item) {
+      item.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-category-item-category]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryItemCategory)
+      ];
+
+    if (!element) return;
+
+    const item =
+      element.items.find(
+        item =>
+          item.id === input.dataset.itemId
+      );
+
+    if (item) {
+      item.categoryId = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-select-option-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.selectOptionText)
+      ];
+
+    if (!element) return;
+
+    const option =
+      element.options.find(
+        option =>
+          option.id === input.dataset.optionId
+      );
+
+    if (option) {
+      option.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-select-option-correct]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.selectOptionCorrect)
+      ];
+
+    if (!element) return;
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    const optionId =
+      input.dataset.optionId;
+
+    if (input.checked) {
+
+      if (!element.correct.includes(optionId)) {
+        element.correct.push(optionId);
+      }
+
+    } else {
+
+      element.correct =
+        element.correct.filter(
+          id => id !== optionId
+        );
+
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-blank-answer]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.blankAnswer)
+      ];
+
+    if (!element) return;
+
+    const blank =
+      element.blanks.find(
+        blank =>
+          blank.id === input.dataset.blankId
+      );
+
+    if (blank) {
+      blank.answer = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-blank-alternatives]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.blankAlternatives)
+      ];
+
+    if (!element) return;
+
+    const blank =
+      element.blanks.find(
+        blank =>
+          blank.id === input.dataset.blankId
+      );
+
+    if (blank) {
+      blank.alternatives = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-build-token-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.buildTokenText)
+      ];
+
+    if (!element) return;
+
+    const token =
+      element.tokens.find(
+        token =>
+          token.id === input.dataset.tokenId
+      );
+
+    if (!token) return;
+
+    token.text = input.value;
+
+    element.correct_order =
+      element.tokens.map(
+        token => token.id
+      );
+
+    return;
+  }
+}
+
+let savedEditorSelection = null;
+
+document.addEventListener("selectionchange", () => {
+
+  const selection = window.getSelection();
+
+  if (!selection || selection.rangeCount === 0) {
+    return;
+  }
+
+  const range = selection.getRangeAt(0);
+
+  const node =
+    range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentElement
+      : range.commonAncestorContainer;
+
+  if (
+    node &&
+    node.closest &&
+    node.closest('[contenteditable="true"]')
+  ) {
+    savedEditorSelection = range.cloneRange();
+  }
+});
+function applyEditorColor(color) {
+
+  if (!savedEditorSelection) {
+    return;
+  }
+
+  const selection = window.getSelection();
+
+  selection.removeAllRanges();
+  selection.addRange(savedEditorSelection);
+
+  document.execCommand(
+    "foreColor",
+    false,
+    color
+  );
+
+  selection.removeAllRanges();
+}
+    
+function syncElementFields(event) {
+
+  const input = event?.target;
+
+  if (!input) return;
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  if (input.matches("[data-field]")) {
+
+    const index =
+      Number(input.dataset.index);
+
+    const field =
+      input.dataset.field;
+
+    const element =
+      card.elements[index];
+
+    if (!element) return;
+
+   if (field === "correct") {
+
+  element.correct =
+    input.value === "true";
+
+} else {
+
+  element[field] =
+    input.dataset.richContent === "true"
+      ? input.innerHTML
+      : input.value;
+
+}
+    return;
+  }
+
+  if (input.matches("[data-mcq-option-text]")) {
+
+    const index =
+      Number(input.dataset.mcqOptionText);
+
+    const optionId =
+      input.dataset.optionId;
+
+    const element =
+      card.elements[index];
+
+    if (!element || !Array.isArray(element.options)) {
+      return;
+    }
+
+    const option =
+      element.options.find(
+        option => option.id === optionId
+      );
+
+    if (option) {
+      option.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-mcq-correct]")) {
+
+    const index =
+      Number(input.dataset.mcqCorrect);
+
+    const optionId =
+      input.dataset.optionId;
+
+    const element =
+      card.elements[index];
+
+    if (!element) return;
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    if (input.checked) {
+
+      if (!element.correct.includes(optionId)) {
+        element.correct.push(optionId);
+      }
+
+    } else {
+
+      element.correct =
+        element.correct.filter(
+          id => id !== optionId
+        );
+
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-ordering-item-text]")) {
+
+    const index =
+      Number(input.dataset.orderingItemText);
+
+    const itemId =
+      input.dataset.itemId;
+
+    const element =
+      card.elements[index];
+
+    if (!element || !Array.isArray(element.items)) {
+      return;
+    }
+
+    const item =
+      element.items.find(
+        item => item.id === itemId
+      );
+
+    if (!item) return;
+
+    item.text = input.value;
+
+    element.correct_order =
+      element.items.map(
+        item => item.id
+      );
+
+    return;
+  }
+
+  if (input.matches("[data-matching-left]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.matchingLeft)
+      ];
+
+    if (!element) return;
+
+    const pair =
+      element.pairs.find(
+        pair => pair.id === input.dataset.pairId
+      );
+
+    if (pair) pair.left = input.value;
+
+    return;
+  }
+
+  if (input.matches("[data-matching-right]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.matchingRight)
+      ];
+
+    if (!element) return;
+
+    const pair =
+      element.pairs.find(
+        pair => pair.id === input.dataset.pairId
+      );
+
+    if (pair) pair.right = input.value;
+
+    return;
+  }
+
+  if (input.matches("[data-category-name]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryName)
+      ];
+
+    if (!element) return;
+
+    const category =
+      element.categories.find(
+        category =>
+          category.id === input.dataset.categoryId
+      );
+
+    if (category) {
+      category.name = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-category-item-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryItemText)
+      ];
+
+    if (!element) return;
+
+    const item =
+      element.items.find(
+        item =>
+          item.id === input.dataset.itemId
+      );
+
+    if (item) {
+      item.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-category-item-category]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.categoryItemCategory)
+      ];
+
+    if (!element) return;
+
+    const item =
+      element.items.find(
+        item =>
+          item.id === input.dataset.itemId
+      );
+
+    if (item) {
+      item.categoryId = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-select-option-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.selectOptionText)
+      ];
+
+    if (!element) return;
+
+    const option =
+      element.options.find(
+        option =>
+          option.id === input.dataset.optionId
+      );
+
+    if (option) {
+      option.text = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-select-option-correct]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.selectOptionCorrect)
+      ];
+
+    if (!element) return;
+
+    if (!Array.isArray(element.correct)) {
+      element.correct = [];
+    }
+
+    const optionId =
+      input.dataset.optionId;
+
+    if (input.checked) {
+
+      if (!element.correct.includes(optionId)) {
+        element.correct.push(optionId);
+      }
+
+    } else {
+
+      element.correct =
+        element.correct.filter(
+          id => id !== optionId
+        );
+
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-blank-answer]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.blankAnswer)
+      ];
+
+    if (!element) return;
+
+    const blank =
+      element.blanks.find(
+        blank =>
+          blank.id === input.dataset.blankId
+      );
+
+    if (blank) {
+      blank.answer = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-blank-alternatives]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.blankAlternatives)
+      ];
+
+    if (!element) return;
+
+    const blank =
+      element.blanks.find(
+        blank =>
+          blank.id === input.dataset.blankId
+      );
+
+    if (blank) {
+      blank.alternatives = input.value;
+    }
+
+    return;
+  }
+
+  if (input.matches("[data-build-token-text]")) {
+
+    const element =
+      card.elements[
+        Number(input.dataset.buildTokenText)
+      ];
+
+    if (!element) return;
+
+    const token =
+      element.tokens.find(
+        token =>
+          token.id === input.dataset.tokenId
+      );
+
+    if (!token) return;
+
+    token.text = input.value;
+
+    element.correct_order =
+      element.tokens.map(
+        token => token.id
+      );
+
+    return;
+  }
+}
+
+
+function moveElement(index, direction) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const newIndex =
+    index + direction;
+
+  if (
+    newIndex < 0 ||
+    newIndex >= card.elements.length
+  ) {
+    return;
+  }
+
+  [
+    card.elements[index],
+    card.elements[newIndex]
+  ] = [
+    card.elements[newIndex],
+    card.elements[index]
+  ];
+
+  renderElements();
+
+}
+
+function addOrderingItem(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element =
+    card.elements[index];
+
+  if (
+    !element ||
+    element.type !== "ordering"
+  ) {
+    return;
+  }
+
+  const id =
+    `item_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+  element.items.push({
+    id,
+    text: ""
+  });
+
+  element.correct_order =
+    element.items.map(
+      item => item.id
+    );
+
+  renderElements();
+}
+
+
+function deleteOrderingItem(index, itemId) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element =
+    card.elements[index];
+
+  if (
+    !element ||
+    element.type !== "ordering"
+  ) {
+    return;
+  }
+
+  if (element.items.length <= 1) {
+    return;
+  }
+
+  element.items =
+    element.items.filter(
+      item => item.id !== itemId
+    );
+
+  element.correct_order =
+    element.items.map(
+      item => item.id
+    );
+
+  renderElements();
+}
+
+function addCategoriseCategory(index) {
+  const card = state.cards.find(c => c.order === state.activeCard);
+  if (!card) return;
+
+  const element = card.elements[index];
+  if (!element || element.type !== "categorise") return;
+
+  if (!Array.isArray(element.categories)) {
+    element.categories = [];
+  }
+
+  const id = `cat_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  element.categories.push({
+    id,
+    name: ""
+  });
+
+  renderElements();
+}
+
+function addCategoriseItem(index) {
+  const card = state.cards.find(c => c.order === state.activeCard);
+  if (!card) return;
+
+  const element = card.elements[index];
+  if (!element || element.type !== "categorise") return;
+
+  if (!Array.isArray(element.items)) {
+    element.items = [];
+  }
+
+  const id = `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  element.items.push({
+    id,
+    text: "",
+    categoryId: element.categories?.[0]?.id || ""
+  });
+
+  renderElements();
+}
+
+
+function addCategoriseItem(index) {
+  const card = state.cards.find(
+    c => c.order === state.activeCard
+  );
+
+  if (!card) return;
+
+  const element = card.elements[index];
+
+  if (!element || element.type !== "categorise") {
+    return;
+  }
+
+  if (!Array.isArray(element.items)) {
+    element.items = [];
+  }
+
+  const id =
+    `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  element.items.push({
+    id,
+    text: "",
+    categoryId:
+      element.categories.length
+        ? element.categories[0].id
+        : ""
+  });
+
+  renderElements();
+}
+
+function addMultipleChoiceOption(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element =
+    card.elements[index];
+
+  if (
+    !element ||
+    element.type !== "multiple_choice"
+  ) {
+    return;
+  }
+
+  if (!Array.isArray(element.options)) {
+    element.options = [];
+  }
+
+  const id =
+    `option_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+  element.options.push({
+    id,
+    text: ""
+  });
+
+  renderElements();
+}
+    
+function addMatchingPair(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element =
+    card.elements[index];
+
+  if (
+    !element ||
+    element.type !== "matching"
+  ) {
+    return;
+  }
+
+  const id =
+    `pair_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  element.pairs.push({
+    id,
+    left: "",
+    right: ""
+  });
+
+  renderElements();
+}
+
+function addFillBlank(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element =
+    card.elements[index];
+
+  if (
+    !element ||
+    element.type !== "fill_blank"
+  ) {
+    return;
+  }
+
+  const nextId =
+    String(
+      (element.blanks || []).length + 1
+    );
+
+  element.blanks.push({
+    id: nextId,
+    answer: "",
+    alternatives: ""
+  });
+
+  renderElements();
+}
+
+function addSelectTextOption(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element = card.elements[index];
+
+  if (!element || element.type !== "select_from_text") {
+    return;
+  }
+
+  const letters = "abcdefghijklmnopqrstuvwxyz";
+
+  element.options.push({
+    id: letters[element.options.length] || `option_${Date.now()}`,
+    text: ""
+  });
+
+  renderElements();
+}
+
+
+function addBuildSentenceToken(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const element = card.elements[index];
+
+  if (!element || element.type !== "build_sentence") {
+    return;
+  }
+
+  const letters = "abcdefghijklmnopqrstuvwxyz";
+
+  element.tokens.push({
+    id: letters[element.tokens.length] ||
+       `token_${Date.now()}`,
+    text: ""
+  });
+
+  element.correct_order =
+    element.tokens.map(
+      token => token.id
+    );
+
+  renderElements();
+}
+
+
+function deleteElement(index) {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+card.elements.splice(index, 1);
+
+renderElements();
+
+}
+
+
+async function saveCards() {
+
+  /*
+   * Sauvegarder les champs de la carte
+   * actuellement ouverte.
+   */
+  saveCurrentEditorToState();
+
+  /*
+   * Vérifier qu'une mission est sélectionnée.
+   */
+  if (!state.selectedMission) {
+
+    showStatus(
+      "Sélectionnez d'abord une mission.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  /*
+   * Afficher dans la console exactement
+   * ce que contient notre état avant
+   * l'envoi vers Supabase.
+   */
+  console.log(
+    "ACTIVITE — données avant sauvegarde :",
+    JSON.parse(
+      JSON.stringify(state.cards)
+    )
+  );
+
+  /*
+   * Construire les lignes à envoyer
+   * dans mission_cards.
+   */
+  const rows =
+    state.cards.map(card => ({
+
+      mission_id:
+        state.selectedMission.id,
+
+      card_order:
+        card.order,
+
+      card_type:
+        getCardType(card.order),
+
+      title:
+        card.title ||
+        CARD_TYPES[
+          getCardType(card.order)
+        ],
+
+      content: {
+
+        title:
+          card.title ||
+          CARD_TYPES[
+            getCardType(card.order)
+          ],
+
+        instruction:
+          card.instruction || "",
+
+        elements:
+          card.elements.map(
+            (element, index) => ({
+
+              ...element,
+
+              order:
+                index + 1
+
+            })
+          )
+
+      }
+
+    }));
+
+  /*
+   * Afficher exactement ce qui va
+   * être envoyé à Supabase.
+   */
+  console.log(
+    "ACTIVITE — rows envoyées à Supabase :",
+    JSON.parse(
+      JSON.stringify(rows)
+    )
+  );
+
+  /*
+   * Sauvegarde Supabase.
+   */
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("mission_cards")
+    .upsert(
+      rows,
+      {
+        onConflict:
+          "mission_id,card_order"
+      }
+    )
+    .select();
+
+  /*
+   * Afficher la réponse Supabase.
+   */
+  console.log(
+    "ACTIVITE — réponse Supabase :",
+    data
+  );
+
+  console.log(
+    "ACTIVITE — erreur Supabase :",
+    error
+  );
+
+  /*
+   * Gestion de l'erreur.
+   */
+  if (error) {
+
+    console.error(
+      "ACTIVITE — sauvegarde impossible :",
+      error
+    );
+
+    showStatus(
+      "Erreur lors de l'enregistrement : " +
+      error.message,
+      "error"
+    );
+
+    return;
+
+  }
+
+  /*
+   * Tout s'est bien passé.
+   */
+  showStatus(
+    "Les 5 cartes ont été enregistrées ✓",
+    "success"
+  );
+
+}
+
+
+function openPreview() {
+
+  saveCurrentEditorToState();
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  state.previewIndex = 0;
+  state.previewOrdering = {};
+
+  document.getElementById("previewTitle").textContent =
+    card.title ||
+    CARD_TYPES[getCardType(card.order)];
+
+  document.getElementById("previewInstruction").textContent =
+    card.instruction || "";
+
+  renderPreview();
+
+  document
+    .getElementById("previewOverlay")
+    .classList.add("on");
+
+}
+
+
+function renderPreview() {
+
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  const container =
+    document.getElementById("previewElements");
+
+  if (!card || !container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  const visibleElements =
+    card.elements.slice(
+      0,
+      state.previewIndex + 1
+    );
+
+  visibleElements.forEach((element, index) => {
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "preview-element";
+
+    div.innerHTML =
+      ParlaMissionRenderer.renderElement(
+        element,
+        {
+          cardKey: state.activeCard,
+          elementIndex: index
+        }
+      );
+
+    container.appendChild(div);
+
+  });
+
+  ParlaMissionRenderer.bindInteractions(
+    container,
+    card
+  );
+
+  document.getElementById("previewProgress").textContent =
+    card.elements.length
+      ? `${Math.min(
+          state.previewIndex + 1,
+          card.elements.length
+        )} / ${card.elements.length}`
+      : "Aucun élément";
+
+  const next =
+    document.getElementById("previewNext");
+
+  if (
+    !card.elements.length ||
+    state.previewIndex >= card.elements.length - 1
+  ) {
+    next.style.display = "none";
+  } else {
+    next.style.display = "block";
+  }
+
+}
+
+
+function renderPreviewElement(element) {
+  const card =
+    state.cards.find(
+      c => c.order === state.activeCard
+    );
+
+  const elementIndex =
+    card
+      ? card.elements.indexOf(element)
+      : 0;
+
+  return ParlaMissionRenderer.renderElement(
+    element,
+    {
+      cardKey: state.activeCard,
+      elementIndex
+    }
+  );
+}
+    
+function checkPreviewOrdering(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  if (!previewElement) return;
+
+  const card =
+    state.cards.find(
+      card => card.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const elementIndex =
+    Number(button.dataset.elementIndex);
+
+  const activity =
+    card.elements[elementIndex];
+
+  if (
+    !activity ||
+    activity.type !== "ordering"
+  ) {
+    return;
+  }
+
+  const items =
+    previewElement.querySelectorAll(
+      ".ordering-item"
+    );
+
+  const userOrder =
+    Array.from(items).map(
+      item =>
+        item.dataset.orderingId
+    );
+
+  const correctOrder =
+    Array.isArray(activity.correct_order)
+      ? activity.correct_order
+      : [];
+
+  const isCorrect =
+    userOrder.length === correctOrder.length &&
+    userOrder.every(
+      (id, index) =>
+        id === correctOrder[index]
+    );
+
+  const feedback =
+    previewElement.querySelector(
+      ".ordering-feedback"
+    );
+
+  if (!feedback) return;
+
+if (isCorrect) {
+
+  feedback.textContent =
+    activity.feedback_correct ||
+    "Correct!";
+
+  feedback.classList.remove(
+    "feedback-incorrect"
+  );
+
+  feedback.classList.add(
+    "feedback-correct"
+  );
+
+} else {
+
+  feedback.textContent =
+    activity.feedback_incorrect ||
+    "Not quite. Try again.";
+
+  feedback.classList.remove(
+    "feedback-correct"
+  );
+
+  feedback.classList.add(
+    "feedback-incorrect"
+  );
+
+}
+
+}
+
+function checkPreviewMCQ(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  if (!previewElement) return;
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!card) return;
+
+  const elementIndex =
+    Number(button.dataset.elementIndex);
+
+  const mcq =
+    card.elements[elementIndex];
+
+  if (
+    !mcq ||
+    mcq.type !== "multiple_choice"
+  ) {
+    return;
+  }
+
+  const selected =
+    Array.from(
+      previewElement.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      )
+    ).map(
+      input => input.value
+    );
+
+  const feedback =
+    previewElement.querySelector(
+      ".mcq-feedback"
+    );
+
+  if (!feedback) return;
+
+  if (!selected.length) {
+
+    feedback.textContent =
+      "Select the questions that would naturally help you start or develop the conversation.";
+
+    feedback.style.color =
+      "var(--red)";
+
+    return;
+  }
+
+  const correctAnswers =
+    Array.isArray(mcq.correct)
+      ? [...mcq.correct].sort()
+      : [];
+
+  const userAnswers =
+    [...selected].sort();
+
+  const isCorrect =
+    correctAnswers.length === userAnswers.length &&
+    correctAnswers.every(
+      (id, index) =>
+        id === userAnswers[index]
+    );
+
+  if (isCorrect) {
+
+    feedback.textContent =
+      mcq.feedback_correct ||
+      "Your selection fits the situation.";
+
+    feedback.style.color =
+      "var(--green)";
+
+  } else {
+
+    feedback.textContent =
+      mcq.feedback_incorrect ||
+      "Look at the situation again and think about which questions would naturally help you get to know a colleague.";
+
+    feedback.style.color =
+      "var(--red)";
+  }
+}
+    
+function checkPreviewTrueFalse(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  if (!previewElement) return;
+
+  const card =
+    state.cards.find(
+      card => card.order === state.activeCard
+    );
+
+  if (!card) return;
+
+  const elementIndex =
+    Number(button.dataset.elementIndex);
+
+  const activity =
+    card.elements[elementIndex];
+
+  if (
+    !activity ||
+    activity.type !== "true_false"
+  ) {
+    return;
+  }
+
+  const selected =
+    previewElement.querySelector(
+      'input[type="radio"]:checked'
+    );
+
+  const feedback =
+  previewElement.querySelector(
+    ".tf-feedback"
+  );
+
+  if (!feedback) return;
+
+  if (!selected) {
+
+    feedback.textContent =
+      "Please select an answer.";
+
+    feedback.style.color =
+      "var(--red)";
+
+    return;
+  }
+
+  const userAnswer =
+    selected.value === "true";
+
+  const isCorrect =
+  userAnswer ===
+  Boolean(activity.correct);
+
+  if (isCorrect) {
+
+    feedback.textContent =
+      activity.feedback_correct ||
+      "Correct!";
+
+    feedback.style.color =
+      "var(--green)";
+
+  } else {
+
+    feedback.textContent =
+      activity.feedback_incorrect ||
+      "Not quite. Try again.";
+
+    feedback.style.color =
+      "var(--red)";
+
+  }
+
+} 
+
+function checkPreviewMatching(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const selects =
+    previewElement.querySelectorAll(
+      ".matching-select"
+    );
+
+  const correct =
+    selects.length === element.pairs.length &&
+    Array.from(selects).every(select => {
+
+      const pair =
+        element.pairs.find(
+          pair =>
+            pair.id === select.dataset.pairId
+        );
+
+      return pair &&
+        select.value === pair.id;
+
+    });
+
+  const feedback =
+    previewElement.querySelector(
+      ".matching-feedback"
+    );
+
+  if (!feedback) return;
+
+  feedback.textContent =
+    correct
+      ? (
+          element.feedback_correct ||
+          "Exactly. Each question matches the type of information it asks for."
+        )
+      : (
+          element.feedback_incorrect ||
+          "Look at the information each question is asking for. Focus on words such as ‘which’, ‘what’ and ‘how long’."
+        );
+
+  feedback.style.color =
+    correct
+      ? "var(--green)"
+      : "var(--red)";
+}
+
+
+function checkPreviewCategorise(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const selects =
+    previewElement.querySelectorAll(
+      ".categorise-select"
+    );
+
+  const correct =
+    selects.length === element.items.length &&
+    Array.from(selects).every(select => {
+
+      const item =
+        element.items.find(
+          item =>
+            item.id === select.dataset.itemId
+        );
+
+      return item &&
+        select.value === item.categoryId;
+
+    });
+
+  const feedback =
+    previewElement.querySelector(
+      ".categorise-feedback"
+    );
+
+  if (!feedback) return;
+
+  feedback.textContent =
+    correct
+      ? (
+          element.feedback_correct ||
+          "Exactly. Each expression has been grouped according to its conversational purpose."
+        )
+      : (
+          element.feedback_incorrect ||
+          "Think about what each expression is doing in the conversation: asking for information, showing interest, following up, or giving the other person a turn."
+        );
+
+  feedback.style.color =
+    correct
+      ? "var(--green)"
+      : "var(--red)";
+}
+
+
+function checkPreviewSelectFromText(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const selected =
+    Array.from(
+      previewElement.querySelectorAll(
+        'input[type="checkbox"]:checked'
+      )
+    ).map(
+      input => input.value
+    )
+    .sort();
+
+  const correct =
+    Array.isArray(element.correct)
+      ? [...element.correct].sort()
+      : [];
+
+  const isCorrect =
+    selected.length === correct.length &&
+    selected.every(
+      (id, index) =>
+        id === correct[index]
+    );
+
+  const feedback =
+    previewElement.querySelector(
+      ".select-text-feedback"
+    );
+
+  if (!feedback) return;
+
+  feedback.textContent =
+    isCorrect
+      ? (
+          element.feedback_correct ||
+          "Exactly. These are the expressions that appear in the text or conversation."
+        )
+      : (
+          element.feedback_incorrect ||
+          "Go back to the text and look carefully for the exact questions or expressions used."
+        );
+
+  feedback.style.color =
+    isCorrect
+      ? "var(--green)"
+      : "var(--red)";
+}
+
+
+function checkPreviewFillBlank(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const inputs =
+    previewElement.querySelectorAll(
+      ".fill-blank-input"
+    );
+
+  let allCorrect = true;
+
+  inputs.forEach(input => {
+
+    const blank =
+      element.blanks.find(
+        blank =>
+          blank.id === input.dataset.blankId
+      );
+
+    if (!blank) return;
+
+    const userAnswer =
+      input.value.trim().toLowerCase();
+
+    const accepted = [
+      blank.answer,
+      ...(blank.alternatives || "")
+        .split(",")
+        .map(answer => answer.trim())
+        .filter(Boolean)
+    ]
+      .map(answer => answer.toLowerCase());
+
+    if (!accepted.includes(userAnswer)) {
+      allCorrect = false;
+    }
+
+  });
+
+  const feedback =
+    previewElement.querySelector(
+      ".fill-blank-feedback"
+    );
+
+  if (!feedback) return;
+
+  feedback.textContent =
+    allCorrect
+      ? (
+          element.feedback_correct ||
+          "Exactly. The completed sentence uses the correct structure."
+        )
+      : (
+          element.feedback_incorrect ||
+          "Look at the structure of the sentence carefully and check the words around each blank."
+        );
+
+  feedback.style.color =
+    allCorrect
+      ? "var(--green)"
+      : "var(--red)";
+}
+
+
+function checkPreviewBuildSentence(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const tokens =
+    Array.from(
+      previewElement.querySelectorAll(
+        ".build-answer .build-token"
+      )
+    ).map(
+      token =>
+        token.dataset.tokenId
+    );
+
+  const correctOrder =
+    Array.isArray(element.correct_order)
+      ? element.correct_order
+      : [];
+
+console.log("BUILD SENTENCE CHECK", {
+  tokens,
+  correctOrder,
+  elementTokens: element.tokens
+});
+
+  const isCorrect =
+    tokens.length === correctOrder.length &&
+    tokens.every(
+      (id, index) =>
+        id === correctOrder[index]
+    );
+
+  const feedback =
+    previewElement.querySelector(
+      ".build-feedback"
+    );
+
+  if (!feedback) return;
+
+  feedback.textContent =
+    isCorrect
+      ? (
+          element.feedback_correct ||
+          "Exactly. The words are in the correct order and form a natural sentence."
+        )
+      : (
+          element.feedback_incorrect ||
+          "Look at the question structure carefully. Check the position of the auxiliary, subject and main verb."
+        );
+
+  feedback.style.color =
+    isCorrect
+      ? "var(--green)"
+      : "var(--red)";
+}
+
+
+function checkPreviewOpenResponse(button) {
+
+  const previewElement =
+    button.closest(".preview-element");
+
+  const card =
+    state.cards[state.activeCard - 1];
+
+  if (!previewElement || !card) return;
+
+  const element =
+    card.elements[
+      Number(button.dataset.elementIndex)
+    ];
+
+  if (!element) return;
+
+  const input =
+    previewElement.querySelector(
+      ".open-response-input"
+    );
+
+  const feedback =
+    previewElement.querySelector(
+      ".open-response-feedback"
+    );
+
+  if (!input || !feedback) return;
+
+  if (!input.value.trim()) {
+
+    feedback.textContent =
+      "Write your own answer first. Then compare it with the example.";
+
+    feedback.style.color =
+      "var(--red)";
+
+    return;
+  }
+
+  feedback.innerHTML = `
+    <div style="margin-bottom:8px;">
+      ${escapeHtml(
+        element.feedback_correct ||
+        "Compare your answer with the example and check whether your question sounds natural in this context."
+      )}
+    </div>
+
+    <div style="
+      padding:12px;
+      background:white;
+      border-radius:8px;
+      border:1px solid #d8dee2;
+    ">
+      <strong>Possible answer:</strong><br>
+      ${escapeHtml(element.model_answer || "")}
+    </div>
+  `;
+
+  feedback.style.color =
+    "var(--text)";
+}
+    
+
+function convertYoutubeUrl(url) {
+
+  if (!url) return "";
+
+  try {
+
+    const parsed =
+      new URL(url);
+
+    if (
+      parsed.hostname.includes("youtube.com")
+    ) {
+
+      const videoId =
+        parsed.searchParams.get("v");
+
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+
+    }
+
+    if (
+      parsed.hostname === "youtu.be"
+    ) {
+
+      const videoId =
+        parsed.pathname.replace("/", "");
+
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+
+    }
+
+  } catch (error) {
+
+    return "";
+
+  }
+
+  return "";
+
+}
+
+
+function showStatus(message, type) {
+
+  const box =
+    document.getElementById("statusBox");
+
+  box.textContent = message;
+
+  box.className =
+    `status ${type}`;
+
+}
+
+
+document
+  .getElementById("missionSelect")
+  .addEventListener("change", async function() {
+
+    const missionId =
+      Number(this.value);
+
+    if (!missionId) {
+
+      document
+        .getElementById("editorArea")
+        .style.display = "none";
+
+      state.selectedMission = null;
+
+      return;
+
+    }
+
+    state.selectedMission =
+      state.missions.find(
+        mission => mission.id === missionId
+      );
+
+    if (!state.selectedMission) return;
+
+    const info =
+      document.getElementById("missionInfo");
+
+    info.style.display = "block";
+
+    info.innerHTML = `
+      <div style="
+        padding:14px;
+        border-radius:12px;
+        background:#f7fdfb;
+        color:#495761;
+      ">
+        <strong>${escapeHtml(state.selectedMission.title)}</strong>
+        · ${escapeHtml(getLanguageLabel(state.selectedMission.language))}
+        · ${escapeHtml(state.selectedMission.level || "—")}
+        · Semaine ${escapeHtml(state.selectedMission.week_number || "—")}
+      </div>
+    `;
+
+    await loadMissionCards(missionId);
+
+    document
+      .getElementById("editorArea")
+      .style.display = "block";
+
+    document
+      .getElementById("statusBox")
+      .className = "status";
+
+  });
+
+
+document
+  .getElementById("addElementBtn")
+  .addEventListener("click", addElement);
+
+
+document
+  .getElementById("saveBtn")
+  .addEventListener("click", saveCards);
+
+
+document
+  .getElementById("previewBtn")
+  .addEventListener("click", openPreview);
+
+document
+  .getElementById("previewBtnBottom")
+  .addEventListener("click", openPreview);
+
+
+document
+  .getElementById("previewClose")
+  .addEventListener("click", () => {
+
+    document
+      .getElementById("previewOverlay")
+      .classList.remove("on");
+
+  });
+    
+document
+  .getElementById("previewNext")
+  .addEventListener("click", () => {
+
+    const card =
+      state.cards.find(
+        c => c.order === state.activeCard
+      );
+
+    if (!card) return;
+
+    if (
+      state.previewIndex <
+      card.elements.length - 1
+    ) {
+
+      state.previewIndex++;
+
+      renderPreview();
+
+    }
+
+  });
+
+
+document
+  .getElementById("elementsList")
+  .addEventListener("input", syncElementFields);
+
+document
+  .getElementById("elementsList")
+  .addEventListener("change", syncElementFields);
+
+
+init();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parla — Test de niveau</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;--f-accent:"Instrument Serif","Iowan Old Style",Georgia,serif;--f-body:"Figtree","Helvetica Neue",Arial,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+--night:#08141d;--night-2:#0e2130;--night-line:#1f3a4c;--night-mist:#9db3c2;--night-paper:#eef4f2;--lagoon:#3fd3a2;--vanilla:#ffc46b;}
+:root{
+  --cream:#e7efed;--cream-dark:#d6e2df;
+  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-mid:#9FE1CB;
+  --ink:#161b1e;--muted:#657885;--white:#fafcfb;--stroke:#D8D0BC;
+  --red-light:#FAECE7;--red:#D85A30;--r:14px;--rs:8px;
+  --amber:#C98A2B;--amber-light:#FBF1DE;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--f-body);background:var(--cream);color:var(--ink);min-height:100vh;}
+.topbar{background:var(--ink);padding:14px 5vw;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--f-display);font-size:18px;color:white;}
+.logo sup{font-size:9px;color:#9FE1CB;font-family:var(--f-body);font-weight:400;vertical-align:super;}
+.hero{background:var(--ink);padding:40px 5vw 50px;text-align:center;}
+.hero h1{font-family:var(--f-display);font-size:clamp(1.8rem,4vw,2.6rem);color:white;margin-bottom:.75rem;}
+.hero h1 em{color:var(--green-mid);font-style:italic;}
+.hero-sub{font-size:15px;color:#9eacb6;max-width:500px;margin:0 auto 1.5rem;line-height:1.7;}
+.hero-meta{display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;}
+.hm{font-size:13px;color:#667a88;display:flex;align-items:center;gap:6px;}
+.hm-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.container{max-width:680px;margin:0 auto;padding:2rem 5vw 4rem;}
+.screen{display:none;}
+.screen.active{display:block;}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--stroke);padding:1.75rem;margin-bottom:1rem;}
+.pick-label{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:1rem;}
+.lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.lang-opt{padding:1.25rem 1rem;border-radius:var(--rs);border:1.5px solid var(--stroke);background:var(--cream);cursor:pointer;text-align:center;font-family:var(--f-body);transition:all .15s;}
+.lang-opt:hover{border-color:var(--green);}
+.lang-opt.active{background:var(--ink);color:white;border-color:var(--ink);}
+.lang-opt .flag{font-size:1.8rem;display:block;margin-bottom:.4rem;}
+.lang-opt .lname{font-size:13px;font-weight:500;}
+.prog-bar{height:5px;background:var(--cream-dark);border-radius:3px;margin-bottom:.75rem;}
+.prog-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s;}
+.prog-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:1.25rem;}
+.lvl-tag{font-size:11px;font-weight:500;padding:2px 10px;border-radius:20px;background:var(--green-light);color:var(--green-dark);}
+.q-reading{background:var(--cream);border-left:3px solid var(--green);border-radius:0 var(--rs) var(--rs) 0;padding:12px 16px;font-size:14px;line-height:1.75;margin-bottom:1.25rem;}
+.q-text{font-size:16px;font-weight:500;line-height:1.5;margin-bottom:1.25rem;}
+.q-type-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;}
+.options{display:flex;flex-direction:column;gap:9px;}
+.opt{padding:12px 16px;border-radius:var(--rs);border:1.5px solid var(--stroke);background:var(--cream);cursor:pointer;font-size:14px;text-align:left;font-family:var(--f-body);line-height:1.5;transition:all .15s;}
+.opt:hover{border-color:var(--green);background:var(--green-light);}
+.opt.correct{border-color:var(--green-dark)!important;background:var(--green-light)!important;color:var(--green-dark)!important;pointer-events:none;}
+.opt.wrong{border-color:var(--red)!important;background:var(--red-light)!important;color:var(--red)!important;pointer-events:none;}
+.opt.disabled{pointer-events:none;opacity:.6;}
+.feedback{border-radius:var(--rs);padding:10px 14px;font-size:13px;line-height:1.6;margin-top:1rem;display:none;}
+.feedback.ok{background:var(--green-light);color:var(--green-dark);display:block;}
+.feedback.ko{background:var(--red-light);color:var(--red);display:block;}
+.oral-text{font-size:15px;font-weight:500;line-height:1.6;margin-bottom:1rem;}
+.mic-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--ink);color:white;border:none;border-radius:30px;font-family:var(--f-body);font-size:14px;cursor:pointer;margin-bottom:.75rem;}
+.mic-btn.rec{background:#D85A30;}
+.transcript{min-height:60px;background:var(--cream);border:1.5px solid var(--stroke);border-radius:var(--rs);padding:12px;font-size:14px;color:var(--muted);margin-bottom:.5rem;}
+.textarea{width:100%;padding:12px;border:1.5px solid var(--stroke);border-radius:var(--rs);font-family:var(--f-body);font-size:14px;resize:vertical;min-height:80px;background:var(--cream);color:var(--ink);margin-top:.5rem;}
+.textarea:focus{outline:none;border-color:var(--green);}
+.oral-note{font-size:12px;color:var(--muted);}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-family:var(--f-body);font-size:15px;font-weight:500;cursor:pointer;margin-top:1rem;transition:background .15s;}
+.btn-ink{background:var(--ink);color:var(--cream);}
+.btn-ink:hover{background:var(--green-dark);color:white;}
+.btn-green{background:var(--green);color:white;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--stroke);}
+.btn-outline:hover{border-color:var(--ink);}
+.hidden{display:none;}
+.adv-badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 12px;border-radius:20px;background:var(--amber-light);color:var(--amber);margin-bottom:.75rem;}
+.adv-task-text{font-size:15px;font-weight:500;line-height:1.65;margin-bottom:1rem;white-space:pre-line;}
+.pending-box{background:var(--amber-light);border-left:3px solid var(--amber);border-radius:0 var(--rs) var(--rs) 0;padding:1rem 1.25rem;margin-bottom:1.5rem;}
+.pending-title{font-size:13px;font-weight:500;margin-bottom:4px;color:var(--amber);}
+.pending-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.result-level{font-family:var(--f-display);font-size:4rem;font-weight:700;color:var(--green-dark);text-align:center;line-height:1;}
+.result-name{font-size:18px;font-weight:500;text-align:center;margin:.5rem 0 .25rem;}
+.result-score{font-size:14px;color:var(--muted);text-align:center;margin-bottom:1.5rem;}
+.result-desc{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:1.5rem;}
+.plan-box{background:var(--cream);border-left:3px solid var(--green);border-radius:0 var(--rs) var(--rs) 0;padding:1rem 1.25rem;margin-bottom:1.5rem;}
+.plan-title{font-size:13px;font-weight:500;margin-bottom:4px;}
+.plan-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.wa-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:#25D366;color:white;border:none;border-radius:var(--r);font-family:var(--f-body);font-size:15px;font-weight:500;cursor:pointer;text-decoration:none;margin-bottom:10px;}
+.wa-btn:hover{background:#128C7E;}
+.canal-box{background:var(--ink);border-radius:var(--r);padding:1.5rem;margin-top:1rem;text-align:center;}
+.canal-box p{font-size:12px;color:#667a88;margin-bottom:1rem;line-height:1.5;}
+.canal-box a{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;background:#25D366;color:white;border-radius:30px;text-decoration:none;font-size:14px;font-weight:500;font-family:var(--f-body);}
+.fl{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase;}
+input,select{width:100%;padding:11px 14px;border:1.5px solid var(--stroke);border-radius:var(--rs);font-family:var(--f-body);font-size:14px;color:var(--ink);background:var(--cream);-webkit-appearance:none;transition:border-color .15s;margin-bottom:1rem;}
+input:focus,select:focus{outline:none;border-color:var(--green);}
+footer{background:var(--ink);padding:2rem 5vw;text-align:center;color:#3a464e;font-size:12px;margin-top:4rem;}
+.f-logo{font-family:var(--f-display);font-size:1.1rem;color:white;margin-bottom:.25rem;}
+
+/* ===== Parla night theme (matches the landing page) ===== */
+body{background:var(--night);color:var(--night-paper);-webkit-font-smoothing:antialiased;color-scheme:dark}
+.topbar{background:transparent;position:relative;z-index:1}
+.logo{font-weight:800;letter-spacing:-.04em;font-size:22px}
+.logo sup{font-family:var(--f-mono);color:var(--night-mist);font-size:10px;letter-spacing:.06em;margin-left:4px}
+.hero{background:radial-gradient(60% 80% at 50% 0%,rgba(63,211,162,.16),transparent 70%),radial-gradient(rgba(150,214,190,.16) 1px,transparent 1.4px) 0 0/22px 22px,var(--night);margin-top:-56px;padding-top:96px;border-bottom:1px solid var(--night-line)}
+.hero h1{font-weight:800;letter-spacing:-.045em;line-height:1;font-size:clamp(2.2rem,6vw,4rem);text-wrap:balance}
+.hero h1 em{font-family:var(--f-accent);font-weight:400;color:var(--vanilla);letter-spacing:-.01em}
+.hero-sub{color:var(--night-mist)}
+.hm{color:var(--night-mist);font-family:var(--f-mono);font-size:11.5px;letter-spacing:.04em}
+.hm-dot{background:var(--vanilla)}
+.card{background:var(--night-2);border-color:var(--night-line)}
+.pick-label,.q-type-label,.fl{font-family:var(--f-mono);color:var(--lagoon);letter-spacing:.12em}
+.lang-opt{background:var(--night);border-color:var(--night-line);color:var(--night-paper)}
+.lang-opt:hover{border-color:var(--lagoon)}
+.lang-opt.active{background:var(--vanilla);color:var(--night);border-color:var(--vanilla)}
+.prog-bar{background:var(--night-line)}
+.prog-fill{background:linear-gradient(90deg,var(--lagoon),var(--vanilla))}
+.prog-meta,.oral-note,.result-score,.result-desc,.pending-desc,.plan-desc{color:var(--night-mist)}
+.lvl-tag{background:rgba(63,211,162,.14);color:var(--lagoon);font-family:var(--f-mono)}
+.q-reading,.plan-box{background:var(--night);border-left-color:var(--lagoon)}
+.q-text,.oral-text,.adv-task-text{color:var(--night-paper)}
+.opt{background:var(--night);border-color:var(--night-line);color:var(--night-paper)}
+.opt:hover{border-color:var(--lagoon);background:rgba(63,211,162,.08)}
+.opt.correct{border-color:var(--lagoon)!important;background:rgba(63,211,162,.14)!important;color:var(--lagoon)!important}
+.opt.wrong{border-color:#ff8a70!important;background:rgba(255,138,112,.12)!important;color:#ffb4a6!important}
+.feedback.ok{background:rgba(63,211,162,.14);color:var(--lagoon)}
+.feedback.ko{background:rgba(255,138,112,.12);color:#ffb4a6}
+.mic-btn{background:var(--vanilla);color:var(--night);font-weight:600}
+.mic-btn.rec{background:#ff8a70;color:var(--night)}
+.transcript,.textarea,input,select{background:var(--night);border-color:var(--night-line);color:var(--night-paper)}
+.textarea:focus,input:focus,select:focus{border-color:var(--lagoon)}
+.btn{border-radius:999px;font-weight:600}
+.btn-ink{background:var(--vanilla);color:var(--night)}
+.btn-ink:hover{background:#ffd28c;color:var(--night)}
+.btn-green{background:var(--lagoon);color:var(--night)}
+.btn-green:hover{background:#6ee0bb}
+.btn-outline{color:var(--night-paper);border-color:var(--night-line)}
+.btn-outline:hover{border-color:var(--lagoon);color:var(--lagoon)}
+.adv-badge{background:rgba(255,196,107,.14);color:var(--vanilla);font-family:var(--f-mono)}
+.pending-box{background:rgba(255,196,107,.08);border-left-color:var(--vanilla)}
+.pending-title{color:var(--vanilla)}
+.result-level{color:var(--vanilla);font-weight:800;letter-spacing:-.05em;font-size:5.5rem}
+.result-name{font-family:var(--f-display);font-weight:700;letter-spacing:-.02em}
+.wa-btn,.canal-box a{border-radius:999px;font-weight:600}
+.canal-box{background:var(--night);border:1px solid var(--night-line)}
+.canal-box p{color:var(--night-mist)}
+footer{background:var(--night);border-top:1px solid var(--night-line);color:var(--night-mist)}
+.f-logo{font-weight:800;letter-spacing:-.04em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Parla <sup>by Hitondra</sup></div>
+</div>
+
+<div class="hero">
+  <h1>Quel est votre niveau <em>réel</em> ?</h1>
+  <p class="hero-sub">Test CECRL · Niveau de base immédiat · Défis avancés B1 à C2 validés par un formateur</p>
+  <div class="hero-meta">
+    <div class="hm"><div class="hm-dot"></div> Gratuit</div>
+    <div class="hm"><div class="hm-dot"></div> 5-10 minutes</div>
+    <div class="hm"><div class="hm-dot"></div> A0 vers C2</div>
+    <div class="hm"><div class="hm-dot"></div> Expression orale incluse</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ECRAN 1 : choix langue -->
+  <div class="screen active" id="s-start">
+    <div class="card">
+      <div class="pick-label">Choisissez la langue à tester</div>
+      <div class="lang-grid">
+        <div class="lang-opt" onclick="pickLang('fr', this)"><span class="flag">🇫🇷</span><span class="lname">Français</span></div>
+        <div class="lang-opt" onclick="pickLang('en', this)"><span class="flag">🇬🇧</span><span class="lname">English</span></div>
+        <div class="lang-opt" onclick="pickLang('es', this)"><span class="flag">🇪🇸</span><span class="lname">Español</span></div>
+      </div>
+    </div>
+    <button class="btn btn-ink hidden" id="btnStart" onclick="startTest()">Commencer le test →</button>
+  </div>
+
+  <!-- ECRAN 2 : questions -->
+  <div class="screen" id="s-quiz">
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-meta"><span id="qNum">1 / 14</span><span class="lvl-tag" id="lvlTag">A0</span></div>
+    <div class="card" id="qCard">
+      <!-- rempli dynamiquement -->
+    </div>
+  </div>
+
+  <!-- ECRAN 2b : proposition défis avancés -->
+  <div class="screen" id="s-adv-intro">
+    <div class="card">
+      <div class="adv-badge">Étape optionnelle</div>
+      <div style="font-family:var(--f-display);font-size:1.4rem;margin-bottom:.5rem;">Votre niveau de base est confirmé.</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.65;" id="advIntroText">Vous semblez à l'aise sur les bases. Voulez-vous tenter les niveaux avancés (B1 à C2) ? Ce sont de vraies mises en situation (email, avis, expression orale) : un formateur Hitondra lira vos réponses et confirmera votre niveau réel sous 48h.</div>
+      <button class="btn btn-ink" onclick="startAdvanced()">Tenter les niveaux avancés →</button>
+      <button class="btn btn-outline" onclick="skipAdvanced()">Non merci, voir mon résultat</button>
+    </div>
+  </div>
+
+  <!-- ECRAN 2c : tâches avancées -->
+  <div class="screen" id="s-adv">
+    <div class="prog-bar"><div class="prog-fill" id="advProgFill" style="width:0%"></div></div>
+    <div class="prog-meta"><span id="advNum">1 / 4</span><span class="lvl-tag" id="advLvlTag">B1</span></div>
+    <div class="card" id="advCard">
+      <!-- rempli dynamiquement -->
+    </div>
+  </div>
+
+  <!-- ECRAN 3 : infos contact -->
+  <div class="screen" id="s-info">
+    <div class="card">
+      <div style="font-family:var(--f-display);font-size:1.4rem;margin-bottom:.5rem;">Presque terminé !</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.65;">Entrez vos informations pour recevoir votre résultat et être contacté par votre formateur sous 48h.</div>
+      <label class="fl">Prénom *</label>
+      <input type="text" id="i_nom" placeholder="Votre prénom">
+      <label class="fl">Téléphone WhatsApp *</label>
+      <input type="tel" id="i_tel" placeholder="+261 XX XX XXX XX">
+      <label class="fl">Activité</label>
+      <select id="i_job">
+        <option value="">Votre métier</option>
+        <option>Guide touristique</option>
+        <option>Restauration</option>
+        <option>Hébergement</option>
+        <option>Transport</option>
+        <option>Artisanat</option>
+        <option>Autre</option>
+      </select>
+      <button class="btn btn-green" onclick="showResults()">Voir mes résultats →</button>
+    </div>
+  </div>
+
+  <!-- ECRAN 4 : résultats -->
+  <div class="screen" id="s-results">
+    <div class="card">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;text-align:center;">Résultat CECRL</div>
+      <div class="result-level" id="rLevel">B1</div>
+      <div class="result-name" id="rName">Seuil</div>
+      <div class="result-score" id="rScore"></div>
+      <div class="result-desc" id="rDesc"></div>
+      <div class="pending-box hidden" id="rPending"><div class="pending-title">⏳ Niveaux avancés en cours de validation</div><div class="pending-desc" id="rPendingDesc"></div></div>
+      <div class="plan-box"><div class="plan-title">Recommandation Parla</div><div class="plan-desc" id="rPlan"></div></div>
+      <a class="wa-btn" id="waBtn" href="#" target="_blank">💬 Envoyer mon résultat sur WhatsApp</a>
+      <div class="canal-box">
+        <div style="font-size:14px;font-weight:500;color:white;margin-bottom:4px;">Rejoindre la communauté Parla</div>
+        <p>Canal WhatsApp · Exercices · Annonces · Suivi formateur</p>
+        <a href="https://chat.whatsapp.com/E6reemqQnOKEEw7EhRKrPh" target="_blank">💬 Rejoindre le canal</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="f-logo">Parla <span style="font-family:var(--f-body);font-size:12px;font-weight:300;color:#2c343a">by Hitondra</span></div>
+  Formation en langues du tourisme · Madagascar · 100% en ligne
+</footer>
+
+<script>
+var WA_NUMBER = "34665060997";
+var GAS_URL = "https://script.google.com/macros/s/AKfycbze8VgCIkPO4B9JLTACbobTiCLjSUSuKBMawwQc_IZHCW4U8PkyQAW0kVe7TiVNaciW/exec";
+
+// ─── ENVOI VERS GOOGLE SHEET ────────────────────────────────
+// Envoi en x-www-form-urlencoded (pas de JSON) : c'est le format que
+// Google Apps Script lit nativement via e.parameter, et le seul type
+// de contenu autorisé sans déclencher de préflight CORS en mode no-cors.
+function postToSheet(url, data) {
+  try {
+    var params = new URLSearchParams();
+    for (var k in data) { if (data.hasOwnProperty(k)) params.append(k, data[k]); }
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: params
+    });
+  } catch (e) {}
+}
+
+// ─── QUESTIONS DE BASE (A0 à A2, auto-corrigées) ──────────────
+var QUESTIONS = {
+fr: [
+  {lvl:"A0", type:"qcm", text:'Complétez : "Bonjour, je ___ comptable."', options:["suis","es","est","êtes"], correct:0, fb:'Correct. "Je suis" = verbe être à la 1re personne.'},
+  {lvl:"A0", type:"qcm", text:'Votre collègue vous dit : « Je suis en réunion. » Que signifie cette phrase ?', options:["Il travaille seul.","Il participe à une réunion.","Il est en pause.","Il est absent."], correct:1, fb:'« Je suis en réunion » signifie que la personne participe actuellement à une réunion professionnelle.'},
+  {lvl:"A1", type:"qcm", reading:'Bonjour. Le petit-déjeuner est servi de 7h à 10h, au premier étage.', text:'À quelle heure commence le petit-déjeuner ?', options:["6h00","7h00","9h00","10h00"], correct:1, fb:'"De 7h à 10h" = l\'horaire du petit-déjeuner. Essentiel pour l\'hôtellerie.'},
+  {lvl:"A1", type:"qcm", text:'Un touriste vous demande : « Où est la plage ? » Quelle réponse est la plus utile ?', options:["Je ne sais pas.","Oui, c\'est ça.","C\'est à 5 minutes, à gauche.","La plage est belle."], correct:2, fb:'Direction + distance. La formule professionnelle pour orienter un client.'},
+  {lvl:"A2", type:"qcm", reading:"Paul commence son travail à 8h30. Aujourd'hui, il a une réunion avec son équipe à 10h et doit envoyer un rapport à son responsable avant midi.", text:'À quelle heure Paul doit-il envoyer son rapport ?', options:["À 8h30","À 10h00","Avant midi","Après la réunion"], correct:2, fb:'Le texte indique que Paul doit envoyer son rapport avant midi.'},
+  {lvl:"A2", type:"qcm", text:'Complétez le dialogue : Client : « Bonjour, j\'ai une réservation pour deux nuits. » Réceptionniste : « Bonsoir. Puis-je avoir votre ______, s\'il vous plaît ? »', options:["nom","petit-déjeuner","valise","clé"], correct:0, fb:'On demande le nom pour retrouver la réservation. Formule d\'accueil de base.'},
+  {lvl:"A2", type:"oral", text:"Vous accueillez un touriste à votre établissement. Présentez-vous, votre rôle, et proposez votre aide.", oralKey:"accueil"}
+],
+en: [
+  {lvl:"A0", type:"qcm", text:'Complete: "Good morning, ___ is your name?"', options:["who","what","where","how"], correct:1, fb:'"What is your name?" Standard greeting. "What" asks for information.'},
+  {lvl:"A0", type:"qcm", text:'A guest says "I am hungry." They want:', options:["A room","Food","Directions","The bill"], correct:1, fb:'"Hungry" = avoir faim. Always offer the menu when you hear this.'},
+  {lvl:"A1", type:"qcm", reading:'Breakfast is served from 7 a.m. to 10 a.m. in the restaurant on the first floor.', text:'Where is breakfast served?', options:["In the room","On the ground floor","In the garden","In the restaurant on the first floor"], correct:3, fb:'"In the restaurant on the first floor." Reading for location detail.'},
+  {lvl:"A1", type:"qcm", text:'A tourist asks "Where is the beach?" You answer:', options:["I don\'t know.","The beach is 5 minutes to the left.","Beach is nice.","Yes."], correct:1, fb:'Direction + distance. The professional formula for guiding guests.'},
+  {lvl:"A2", type:"qcm", reading:"Paul starts work at 8:30 a.m. Today, he has a meeting with his team at 10 a.m. and must send a report to his manager before noon.", text:'When does Paul have to send his report?', options:["At 8:30 a.m.","At 10 a.m.","Before noon","After the meeting"], correct:2, fb:'The text says that Paul must send his report before noon.'},
+  {lvl:"A2", type:"qcm", text:'Complete the dialogue: Employee: "Hello, I have a meeting with the manager." Colleague: "Good morning. Can I have your ______, please?"', options:["name","lunch","computer","office"], correct:0, fb:'The name is needed to identify the meeting. Basic workplace formula.'},,
+  {lvl:"A2", type:"oral", text:"Welcome a tourist arriving at your establishment. Introduce yourself, explain your role, and offer your help.", oralKey:"welcome"}
+],
+es: [
+  {lvl:"A0", type:"qcm", text:'Completa: "Buenos días, ___ llamo Ana."', options:["me","se","te","le"], correct:0, fb:'"Me llamo" = my name is. Presentación esencial en turismo.'},
+  {lvl:"A0", type:"qcm", text:'¿Qué significa "habitación" en un hotel?', options:["Sala de estar","Habitación para dormir","Recepción","Pasillo"], correct:1, fb:'"Habitación" = room. Vocabulario básico de alojamiento.'},
+  {lvl:"A1", type:"qcm", text:'Un turista dice "Tengo sed." ¿Qué quiere?', options:["Comida","Agua o una bebida","La cuenta","Una habitación"], correct:1, fb:'"Sed" = thirst. Ofrezca agua o bebidas de inmediato.'},
+  {lvl:"A1", type:"qcm", text:'Un compañero te pregunta: «¿Dónde está la sala de reuniones?» ¿Cuál es la respuesta más útil?', options:["No sé.","Está en el primer piso, a la derecha.","La sala es grande.","Sí."], correct:1, fb:'Una respuesta útil indica claramente dónde está el lugar.'},
+  {lvl:"A2", type:"qcm", text:'Completa el diálogo: Empleado: «Hola, tengo una reunión con el gerente.» Compañero: «Buenos días. ¿Me puede decir su ______, por favor?»', options:["nombre","almuerzo","ordenador","oficina"], correct:0, fb:'El compañero pide el nombre de la persona para identificar la reunión.'},
+  {lvl:"A2", type:"qcm", text:'Completa el diálogo: Cliente: «Hola, tengo una reserva para dos noches.» Recepcionista: «Buenas tardes. ¿Me puede dar su ______, por favor?»', options:["nombre","desayuno","maleta","llave"], correct:0, fb:'Se pide el nombre para localizar la reserva. Fórmula básica de recepción.'},
+  {lvl:"A2", type:"oral", text:"Reciba a un turista en su establecimiento. Preséntese, explique su función y ofrezca su ayuda.", oralKey:"bienvenida"}
+]
+};
+
+// ─── TÂCHES AVANCÉES (B1 à C2, réponses envoyées à un formateur) ──
+var ADVANCED_TASKS = {
+fr: [
+  {lvl:"B1", type:"written", key:"b1_email", text:"Courriel de réclamation court\nÉcris un courriel de 5–6 lignes à un hôtel parce que la chambre était bruyante et le Wi-Fi ne fonctionnait pas. Inclue :\n• Ce qui s'est passé\n• L'impact sur toi\n• Ce que tu attends (remboursement, changement de chambre, etc.)"},
+  {lvl:"B2", type:"oral", key:"b2_oral", text:"Tâche orale (1–2 minutes)\nDécris une expérience culturelle vécue en voyage (festival, dégustation, visite guidée…). Inclue :\n• Ce qui s'est passé\n• Ce que tu as appris\n• Comment cela a changé ta perception du lieu"},
+  {lvl:"C1", type:"written", key:"c1_review", text:"Critique détaillée\nÉcris une critique détaillée (10–12 lignes) d'un restaurant visité lors d'un voyage. Inclue :\n• Atmosphère\n• Service\n• Qualité des plats\n• Rapport qualité-prix\n• Points à améliorer"},
+  {lvl:"C2", type:"written", key:"c2_essay", text:"Argument persuasif\nÉcris un texte persuasif (12–15 lignes) défendant que le tourisme durable devrait être obligatoire pour toutes les entreprises internationales de voyage. Utilise des connecteurs avancés et un raisonnement nuancé."}
+],
+en: [
+  {lvl:"A0", type:"qcm", text:'Complete: "Good morning, ___ is your name?"', options:["who","what","where","how"], correct:1, fb:'"What is your name?" Standard greeting. "What" asks for information.'},
+  {lvl:"A0", type:"qcm", text:'A guest says "I am hungry." They want:', options:["A room","Food","Directions","The bill"], correct:1, fb:'"Hungry" = avoir faim. Always offer the menu when you hear this.'},
+  {lvl:"A1", type:"qcm", reading:'Breakfast is served from 7 a.m. to 10 a.m. in the restaurant on the first floor.', text:'Where is breakfast served?', options:["In the room","On the ground floor","In the garden","In the restaurant on the first floor"], correct:3, fb:'"In the restaurant on the first floor." Reading for location detail.'},
+  {lvl:"A1", type:"qcm", text:'A tourist asks "Where is the beach?" You answer:', options:["I don\'t know.","The beach is 5 minutes to the left.","Beach is nice.","Yes."], correct:1, fb:'Direction + distance. The professional formula for guiding guests.'},
+  {lvl:"A2", type:"qcm", reading:"Paul starts work at 8:30 a.m. Today, he has a meeting with his team at 10 a.m. and must send a report to his manager before noon.", text:'When does Paul have to send his report?', options:["At 8:30 a.m.","At 10 a.m.","Before noon","After the meeting"], correct:2, fb:'The text says that Paul must send his report before noon.'},
+  {lvl:"A2", type:"qcm", text:'Complete the dialogue: Employee: "Hello, I have a meeting with the manager." Colleague: "Good morning. Can I have your ______, please?"', options:["name","lunch","computer","office"], correct:0, fb:'The name is needed to identify the meeting. Basic workplace formula.'},
+  {lvl:"A2", type:"oral", text:"Welcome a tourist arriving at your establishment. Introduce yourself, explain your role, and offer your help.", oralKey:"welcome"}
+],
+es: [
+  {lvl:"B1", type:"written", key:"b1_email", text:"Correo de reclamación corto\nEscribe un correo de 5–6 líneas a un hotel porque la habitación era ruidosa y el Wi-Fi no funcionaba. Incluye:\n• Qué ocurrió\n• Cómo te afectó\n• Qué esperas (reembolso, cambio de habitación, etc.)"},
+  {lvl:"B2", type:"oral", key:"b2_oral", text:"Tarea oral (1–2 minutos)\nDescribe una experiencia cultural que tuviste viajando (festival, degustación, visita guiada…). Incluye:\n• Qué ocurrió\n• Qué aprendiste\n• Cómo cambió tu percepción del lugar"},
+  {lvl:"C1", type:"written", key:"c1_review", text:"Crítica detallada\nEscribe una reseña detallada (10–12 líneas) de un restaurante que visitaste durante un viaje. Incluye:\n• Ambiente\n• Servicio\n• Calidad de la comida\n• Precio vs. valor\n• Qué podría mejorar"},
+  {lvl:"C2", type:"written", key:"c2_essay", text:"Argumento persuasivo\nEscribe un ensayo persuasivo (12–15 líneas) defendiendo que el turismo sostenible debería ser obligatorio para todas las empresas de viajes internacionales. Usa conectores avanzados y un razonamiento matizado."}
+]
+};
+
+var LEVEL_DATA = {
+  A0:{name:"Zéro absolu",desc:"Vous démarrez de zéro. Le programme A0 vous amène des salutations de base aux échanges simples avec les touristes.",plan:"Essentiel · 34 000 Ar early bird (20h) · 1 langue"},
+  A1:{name:"Découverte",desc:"Vous avez quelques bases. Le programme A1 renforce vos phrases de service pour les situations courantes.",plan:"Essentiel · 34 000 Ar early bird (20h) · 1 langue confirmée"},
+  A2:{name:"Survie",desc:"Vous communiquez dans les situations de base. Le programme A2 vous rend autonome : présentations, négociations, imprévus.",plan:"Pro · 48 000 Ar early bird (20h) · 2 langues pour accélérer"}
+};
+
+var ADV_LEVEL_DATA = {
+  B1:{name:"Seuil",desc:"Bon niveau. Vous gérez les situations courantes : plaintes, opinions, e-mails simples.",plan:"Pro · 48 000 Ar early bird (20h) · 2 langues"},
+  B2:{name:"Avancé",desc:"Excellent niveau. Vous gérez l'imprévu avec confiance et l'argumentation structurée.",plan:"Expert · 74 000 Ar early bird (20h) · 3 langues"},
+  C1:{name:"Maîtrise",desc:"Très bon niveau. Vous pouvez servir de médiateur culturel et référent linguistique.",plan:"Expert · 74 000 Ar early bird (20h) + accès prioritaire au bootcamp à -25% (120 000 Ar)"},
+  C2:{name:"Expert",desc:"Niveau quasi natif. Vous êtes un atout majeur pour tout le tourisme malgache.",plan:"Bootcamp de clôture · 64 000 Ar early bird · Attestation Hitondra"}
+};
+
+// ─── STATE ───────────────────────────────────────────────────
+var lang = null;
+var questions = [];
+var current = 0;
+var score = 0;
+var total_qcm = 0;
+var oral_answers = {};
+var rec = null;
+var advTasks = [];
+var advIndex = 0;
+var advAnswers = {};
+var advAttempted = false;
+var advReachedLvl = null;
+var advRec = null;
+var baseLvl = 'A0';
+
+// ─── LANG PICK ───────────────────────────────────────────────
+function pickLang(l, el) {
+  lang = l;
+  document.querySelectorAll('.lang-opt').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('btnStart').classList.remove('hidden');
+}
+
+// ─── START ───────────────────────────────────────────────────
+function startTest() {
+  if (!lang) return;
+  questions = QUESTIONS[lang];
+  current = 0; score = 0; total_qcm = 0; oral_answers = {};
+  advTasks = []; advIndex = 0; advAnswers = {}; advAttempted = false; advReachedLvl = null; baseLvl = 'A0';
+  showScreen('s-quiz');
+  renderQuestion();
+}
+
+// ─── RENDER QUESTION ─────────────────────────────────────────
+function renderQuestion() {
+  var q = questions[current];
+  var pct = Math.round((current / questions.length) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('qNum').textContent = (current + 1) + ' / ' + questions.length;
+  document.getElementById('lvlTag').textContent = q.lvl;
+
+  var html = '';
+
+  if (q.type === 'qcm') {
+    total_qcm++;
+    if (q.reading) {
+      html += '<div class="q-reading">' + q.reading + '</div>';
+    }
+    html += '<div class="q-type-label">📝 Compréhension</div>';
+    html += '<div class="q-text">' + q.text + '</div>';
+    html += '<div class="options">';
+    for (var k = 0; k < q.options.length; k++) {
+      html += '<button class="opt" onclick="pick(' + k + ')">' + String.fromCharCode(65 + k) + '. ' + q.options[k] + '</button>';
+    }
+    html += '</div>';
+    html += '<div class="feedback" id="fb"></div>';
+    html += '<button class="btn btn-ink hidden" id="btnNext" onclick="next()">Continuer →</button>';
+
+  } else {
+    html += '<div class="q-type-label">🎤 Expression orale</div>';
+    html += '<div class="oral-text">' + q.text + '</div>';
+    html += '<button class="mic-btn" id="micBtn" onclick="toggleMic(\'' + q.oralKey + '\')">🎤 Parler</button><br>';
+    html += '<div class="transcript" id="tb-' + q.oralKey + '">Votre réponse apparaîtra ici...</div>';
+    html += '<div class="oral-note">Micro indisponible ? Tapez votre réponse :</div>';
+    html += '<textarea class="textarea" id="ot-' + q.oralKey + '" placeholder="Tapez ici..."></textarea>';
+    html += '<button class="btn btn-ink" onclick="nextOral(\'' + q.oralKey + '\')">Continuer →</button>';
+  }
+
+  document.getElementById('qCard').innerHTML = html;
+}
+
+// ─── PICK ANSWER ─────────────────────────────────────────────
+function pick(idx) {
+  var q = questions[current];
+  var opts = document.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.classList.add('disabled'); });
+  var correct = (idx === q.correct);
+  opts[idx].classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) opts[q.correct].classList.add('correct');
+  if (correct) score++;
+  var fb = document.getElementById('fb');
+  fb.textContent = (correct ? '✓ ' : '✗ ') + q.fb;
+  fb.className = 'feedback ' + (correct ? 'ok' : 'ko');
+  var btn = document.getElementById('btnNext');
+  btn.classList.remove('hidden');
+  btn.textContent = (current < questions.length - 1) ? 'Continuer →' : 'Voir mes résultats →';
+}
+
+// ─── NEXT QCM ────────────────────────────────────────────────
+function next() {
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    finishBaseline();
+  }
+}
+
+// ─── NEXT ORAL ───────────────────────────────────────────────
+function nextOral(key) {
+  if (rec) { rec.stop(); rec = null; }
+  var ta = document.getElementById('ot-' + key);
+  var tb = document.getElementById('tb-' + key);
+  var val = '';
+  if (ta && ta.value.trim()) val = ta.value.trim();
+  else if (tb && tb.textContent !== 'Votre réponse apparaîtra ici...') val = tb.textContent;
+  if (val) oral_answers[key] = val;
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    finishBaseline();
+  }
+}
+
+// ─── FIN DU TEST DE BASE : calcul + proposition avancée ───────
+function finishBaseline() {
+  var pct = total_qcm > 0 ? score / total_qcm : 0;
+  if (pct >= 0.83) baseLvl = 'A2';
+  else if (pct >= 0.5) baseLvl = 'A1';
+  else baseLvl = 'A0';
+
+  var txt = {
+    fr: 'Vous vous en sortez bien sur les bases ! Voulez-vous tenter les niveaux avancés (B1 à C2) ? Ce sont de vraies mises en situation (email, avis, expression orale) : un formateur Hitondra lira vos réponses et confirmera votre niveau réel sous 48h.',
+    en: 'You handled the basics well! Want to try the advanced levels (B1 to C2)? These are real-life tasks (email, review, speaking) — a Hitondra trainer will read your answers and confirm your real level within 48h.',
+    es: '¡Te fue bien en las bases! ¿Quieres intentar los niveles avanzados (B1 a C2)? Son tareas reales (correo, reseña, expresión oral): un formador de Hitondra leerá tus respuestas y confirmará tu nivel real en 48h.'
+  };
+  document.getElementById('advIntroText').textContent = txt[lang] || txt.fr;
+  showScreen('s-adv-intro');
+}
+
+// ─── DÉFIS AVANCÉS ────────────────────────────────────────────
+function startAdvanced() {
+  advTasks = ADVANCED_TASKS[lang];
+  advIndex = 0;
+  advAnswers = {};
+  advAttempted = true;
+  advReachedLvl = null;
+  showScreen('s-adv');
+  renderAdvTask();
+}
+
+function skipAdvanced() {
+  advAttempted = false;
+  showScreen('s-info');
+}
+
+function renderAdvTask() {
+  var t = advTasks[advIndex];
+  var pct = Math.round((advIndex / advTasks.length) * 100);
+  document.getElementById('advProgFill').style.width = pct + '%';
+  document.getElementById('advNum').textContent = (advIndex + 1) + ' / ' + advTasks.length;
+  document.getElementById('advLvlTag').textContent = t.lvl;
+
+  var html = '';
+  html += '<div class="q-type-label">' + (t.type === 'oral' ? '🎤 Expression orale' : '✍️ Expression écrite') + ' · Niveau ' + t.lvl + '</div>';
+  html += '<div class="adv-task-text">' + t.text + '</div>';
+
+  if (t.type === 'oral') {
+    html += '<button class="mic-btn" id="advMicBtn" onclick="toggleMicAdv(\'' + t.key + '\')">🎤 Parler</button><br>';
+    html += '<div class="transcript" id="adv-tb-' + t.key + '">Votre réponse apparaîtra ici...</div>';
+    html += '<div class="oral-note">Micro indisponible ? Tapez votre réponse :</div>';
+    html += '<textarea class="textarea" id="adv-ta-' + t.key + '" placeholder="Tapez ici..."></textarea>';
+  } else {
+    html += '<textarea class="textarea" id="adv-ta-' + t.key + '" placeholder="Écrivez votre réponse ici..." style="min-height:150px;"></textarea>';
+  }
+  html += '<button class="btn btn-ink" onclick="submitAdvTask()">Envoyer et continuer →</button>';
+  html += '<button class="btn btn-outline" onclick="skipAdvTask()">Je ne peux pas faire cet exercice</button>';
+
+  document.getElementById('advCard').innerHTML = html;
+}
+
+function submitAdvTask() {
+  if (advRec) { advRec.stop(); advRec = null; }
+  var t = advTasks[advIndex];
+  var ta = document.getElementById('adv-ta-' + t.key);
+  var tb = document.getElementById('adv-tb-' + t.key);
+  var val = '';
+  if (ta && ta.value.trim()) val = ta.value.trim();
+  else if (tb && tb.textContent !== 'Votre réponse apparaîtra ici...') val = tb.textContent;
+  if (val) advAnswers[t.key] = val;
+  advReachedLvl = t.lvl;
+  advIndex++;
+  if (advIndex < advTasks.length) {
+    renderAdvTask();
+  } else {
+    showScreen('s-info');
+  }
+}
+
+function skipAdvTask() {
+  if (advRec) { advRec.stop(); advRec = null; }
+  showScreen('s-info');
+}
+
+function toggleMicAdv(key) {
+  var btn = document.getElementById('advMicBtn');
+  var box = document.getElementById('adv-tb-' + key);
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { if (btn) btn.style.display = 'none'; return; }
+  if (advRec) {
+    advRec.stop(); advRec = null;
+    if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Recommencer'; }
+    return;
+  }
+  advRec = new SR();
+  advRec.lang = lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'es-ES';
+  advRec.continuous = true; advRec.interimResults = true;
+  advRec.onstart = function() {
+    if (btn) { btn.className = 'mic-btn rec'; btn.textContent = '🔴 Parler... (cliquez pour arrêter)'; }
+    if (box) box.style.color = 'var(--ink)';
+  };
+  advRec.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    if (box) box.textContent = t;
+    var ta = document.getElementById('adv-ta-' + key);
+    if (ta) ta.value = t;
+  };
+  advRec.onerror = function() { advRec = null; if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Parler'; } };
+  advRec.onend = function() { advRec = null; if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Recommencer'; } };
+  advRec.start();
+}
+
+// ─── MIC ─────────────────────────────────────────────────────
+function toggleMic(key) {
+  var btn = document.getElementById('micBtn');
+  var box = document.getElementById('tb-' + key);
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { if (btn) btn.style.display = 'none'; return; }
+  if (rec) {
+    rec.stop(); rec = null;
+    if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Recommencer'; }
+    return;
+  }
+  rec = new SR();
+  rec.lang = lang === 'fr' ? 'fr-FR' : lang === 'en' ? 'en-US' : 'es-ES';
+  rec.continuous = true; rec.interimResults = true;
+  rec.onstart = function() {
+    if (btn) { btn.className = 'mic-btn rec'; btn.textContent = '🔴 Parler... (cliquez pour arrêter)'; }
+    if (box) box.style.color = 'var(--ink)';
+  };
+  rec.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    if (box) box.textContent = t;
+    oral_answers[key] = t;
+    var ta = document.getElementById('ot-' + key);
+    if (ta) ta.value = t;
+  };
+  rec.onerror = function() { rec = null; if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Parler'; } };
+  rec.onend = function() { rec = null; if (btn) { btn.className = 'mic-btn'; btn.textContent = '🎤 Recommencer'; } };
+  rec.start();
+}
+
+// ─── RESULTS ─────────────────────────────────────────────────
+function showResults() {
+  var nom = document.getElementById('i_nom').value.trim();
+  var tel = document.getElementById('i_tel').value.trim();
+  if (!nom || !tel) { alert('Prénom et téléphone obligatoires.'); return; }
+  var job = document.getElementById('i_job').value || '';
+  var langName = {fr:'Français', en:'English', es:'Español'}[lang];
+
+  var lvl = baseLvl;
+  var d = LEVEL_DATA[lvl];
+  document.getElementById('rLevel').textContent = lvl;
+  document.getElementById('rName').textContent = d.name;
+  document.getElementById('rScore').textContent = score + ' / ' + total_qcm + ' en compréhension · ' + langName;
+  document.getElementById('rDesc').textContent = d.desc;
+  document.getElementById('rPlan').textContent = d.plan;
+
+  // Section "en attente de validation" si des tâches avancées ont été tentées
+  var pendingBox = document.getElementById('rPending');
+  var advSummary = '';
+  if (advAttempted && advReachedLvl) {
+    var adv = ADV_LEVEL_DATA[advReachedLvl];
+    var pendingTxt = 'Vous avez soumis des réponses jusqu\'au niveau ' + advReachedLvl + ' (' + adv.name + '). Un formateur Hitondra va lire vos réponses et vous confirmera votre niveau exact sur WhatsApp sous 48h.';
+    document.getElementById('rPendingDesc').textContent = pendingTxt;
+    pendingBox.classList.remove('hidden');
+    document.getElementById('rPlan').textContent = d.plan + ' — potentiellement ' + adv.plan + ' selon la validation formateur.';
+  } else {
+    pendingBox.classList.add('hidden');
+  }
+
+  // Message WhatsApp
+  var oralText = '';
+  var oralKeys = Object.keys(oral_answers);
+  for (var i = 0; i < oralKeys.length; i++) {
+    oralText += '\n• ' + oralKeys[i] + ' : ' + oral_answers[oralKeys[i]];
+  }
+  if (!oralText) oralText = '\nAucune réponse orale enregistrée';
+
+  var advText = '';
+  if (advAttempted) {
+    var advKeys = Object.keys(advAnswers);
+    if (advKeys.length) {
+      for (var j = 0; j < advKeys.length; j++) {
+        advText += '\n• ' + advKeys[j] + ' : ' + advAnswers[advKeys[j]];
+      }
+    } else {
+      advText = '\nAucune tâche avancée complétée';
+    }
+  } else {
+    advText = '\nNon tenté';
+  }
+
+  var advLine = advAttempted ? ('🚀 Niveau avancé atteint (à valider) : ' + (advReachedLvl || '—') + '\n📝 Tâches avancées :' + advText + '\n\n') : '';
+
+  var msg = encodeURIComponent(
+    'Bonjour 👋 Voici mon résultat au test Parla.\n\n' +
+    '📊 Niveau de base confirmé : ' + lvl + ' — ' + d.name + ' · ' + langName + '\n' +
+    '✅ Score : ' + score + '/' + total_qcm + '\n' +
+    '👤 Prénom : ' + nom + '\n' +
+    '📱 Tél : ' + tel + '\n' +
+    '💼 Métier : ' + (job || 'non renseigné') + '\n\n' +
+    '🎤 Réponses orales (base) :' + oralText + '\n\n' +
+    advLine +
+    'Je souhaite m\'inscrire à la formation Parla by Hitondra 🙏'
+  );
+  document.getElementById('waBtn').href = 'https://wa.me/' + WA_NUMBER + '?text=' + msg;
+
+  // Google Sheet
+  postToSheet(GAS_URL, {
+    Prénom: nom, Téléphone: tel, Activité: job, Langue: langName,
+    Niveau_CEFR_confirme: lvl, Score: score + '/' + total_qcm,
+    Réponses_orales: oralText,
+    Niveau_avance_tente: advAttempted ? (advReachedLvl || 'aucune tâche complétée') : 'non',
+    Réponses_avancées: advText,
+    Date: new Date().toLocaleDateString('fr-FR'),
+    Source: 'Test de niveau'
+  });
+
+  showScreen('s-results');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</body>
+</html>
