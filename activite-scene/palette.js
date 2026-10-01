@@ -57,7 +57,7 @@ export const dayInk = {
 // stage, then amber), each idea's thread in its own colour, and no halo; Parla
 // in moonlight, signed in vanilla.
 export const nightInk = {
-  colors: [hex.vanilla, hex.stage[1], hex.lagoon, hex.mint, hex.ocean, hex.stage[0]],
+  colors: [hex.vanilla, hex.stage[1], hex.lagoon, hex.mint, hex.ocean, "#e8a63a"], // amber last
   sign: "#fff3dc",
   halo: null,
   thread: null,

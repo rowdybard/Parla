@@ -167,6 +167,7 @@ function createScene(canvas, setting) {
   };
   let water = null, words = null, threads = null, post = null;
   let viewObserver = null, sizeObserver = null, destroyed = false;
+  let started = false, startTimer = 0; // the scene starts once its shaders are ready
   try {
     ctx.atlas = createAtlas(WORDS);
     water = setting.build(ctx, add);
@@ -357,19 +358,26 @@ function createScene(canvas, setting) {
   // compile the shaders off the main thread where the browser can, then start. They're
   // compiled for the composer's target, where the scene is drawn: compiled for the
   // screen they'd be other variants (tone mapped), and the real ones would still stall.
+  // If the browser never says they're ready, start anyway after a few seconds.
+  const begin = () => {
+    if (destroyed || started) return;
+    started = true;
+    clearTimeout(startTimer);
+    apply();
+  };
   if (renderer.extensions.has("KHR_parallel_shader_compile")) {
     renderer.setRenderTarget(post.target);
     const compiling = renderer.compileAsync(scene, camera);
     renderer.setRenderTarget(null);
-    compiling.catch(() => {}).then(() => {
-      if (!destroyed) apply();
-    });
-  } else apply();
+    compiling.catch(() => {}).then(begin);
+    startTimer = setTimeout(begin, 4000);
+  } else begin();
 
   // The techdemo's teardown order (its no-leak rule 8).
   function destroy() {
     if (destroyed) return;
     destroyed = true;
+    clearTimeout(startTimer);
     renderer.setAnimationLoop(null);
     abort.abort();
     if (viewObserver) viewObserver.disconnect();

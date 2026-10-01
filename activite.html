@@ -581,15 +581,15 @@ input[type="radio"] {
 /* ===== Parla design ===== */
 html,body{overflow-x:hidden}
 .page-title{font-weight:700;letter-spacing:-.035em}
-/* ===== Colour per card: the 5 stages of a mission, from the Parla palette ===== */
-:root{--s1:#e8a63a;--s2:#2fbf8f;--s3:#1D9E75;--s4:#0F6E56;--s5:#2c5d7c;--stage:var(--s1)}
+/* ===== Colour per card: the 5 stages of a mission, from the Parla palette (card 1 in purple, as the owner asked; it was amber) ===== */
+:root{--s1:#8e4fc9;--s2:#2fbf8f;--s3:#1D9E75;--s4:#0F6E56;--s5:#2c5d7c;--stage:var(--s1)}
 .cards-layout:has(.card-tab:nth-child(2).active){--stage:var(--s2)}
 .cards-layout:has(.card-tab:nth-child(3).active){--stage:var(--s3)}
 .cards-layout:has(.card-tab:nth-child(4).active){--stage:var(--s4)}
 .cards-layout:has(.card-tab:nth-child(5).active){--stage:var(--s5)}
 .card-tab:nth-child(1){--c:var(--s1)}.card-tab:nth-child(2){--c:var(--s2)}.card-tab:nth-child(3){--c:var(--s3)}.card-tab:nth-child(4){--c:var(--s4)}.card-tab:nth-child(5){--c:var(--s5)}
 
-body{background:radial-gradient(70% 40% at 100% 0%,color-mix(in srgb,var(--s2) 9%,transparent),transparent 70%),radial-gradient(60% 40% at 0% 30%,color-mix(in srgb,var(--s1) 8%,transparent),transparent 70%),#f4f7f6}
+body{background:#fff} /* white behind the editor, as the owner asked */
 
 .panel{border-color:#e1e9e6}
 .mission-selector.panel,.panel.mission-selector{background:#fff}
