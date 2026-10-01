@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+
+  <title>Aperçu de l'activité — Parla by Hitondra</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <!--
+    A public preview of the activity builder's header: the same living scene,
+    light switch and styles as activite.html (activite-scene/), without the
+    editor below it, which needs a trainer login. Nothing here reads or writes data.
+  -->
+  <style>
+    /* the base the header sits on, as in activite.html */
+    :root {
+      --text: #202a27;
+      --muted: #6e8291;
+      --s1: #e8a63a; --s2: #2fbf8f; --s3: #1D9E75; --s4: #0F6E56; --s5: #2c5d7c;
+    }
+    html, body { overflow-x: hidden; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--f-body);
+      background: radial-gradient(70% 40% at 100% 0%, color-mix(in srgb, var(--s2) 9%, transparent), transparent 70%),
+        radial-gradient(60% 40% at 0% 30%, color-mix(in srgb, var(--s1) 8%, transparent), transparent 70%), #f4f7f6;
+    }
+    button { font: inherit; }
+    .page { position: relative; z-index: 1; max-width: 1250px; margin: 0 auto; padding: 30px 22px 60px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { font-family: var(--f-display); }
+    .back-link { text-decoration: none; font-weight: 600; }
+    .page-title { font-family: var(--f-display); font-weight: 700; letter-spacing: -.035em; }
+
+    /* below the header: what this page is */
+    .apercu {
+      display: grid; gap: 14px; max-width: 640px; padding: 22px 24px;
+      background: #fff; border: 1px solid #e1e9e6; border-radius: 22px;
+    }
+    .apercu p { color: var(--muted); line-height: 1.6; }
+    .apercu strong { color: var(--text); font-weight: 600; }
+    .apercu-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .apercu-actions a {
+      display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 999px;
+      font-weight: 600; border: 1px solid #d5e3de; color: var(--text);
+    }
+    .apercu-actions a.primary { background: var(--s3); border-color: var(--s3); color: #fff; }
+    .apercu-actions a:hover { border-color: var(--s3); }
+    .apercu-actions a.primary:hover { background: var(--s4); border-color: var(--s4); }
+  </style>
+  <link rel="stylesheet" href="activite-scene/header.css">
+</head>
+
+<body>
+
+<div class="page">
+
+  <header class="sky" id="sky">
+
+    <canvas class="sky-canvas" id="skyCanvas" aria-hidden="true"></canvas>
+
+    <div class="topbar">
+      <div class="brand">Parla</div>
+
+      <div class="topbar-actions">
+        <button
+          type="button"
+          class="light-switch"
+          id="lightSwitch"
+          role="switch"
+          aria-checked="true"
+          title="Allumer ou éteindre la lumière : la plage au coucher du soleil, ou le lagon la nuit"
+          hidden>
+          <span class="switch-plate" aria-hidden="true"><span class="switch-lever"></span></span>
+          <span class="switch-label">Lumière</span>
+        </button>
+
+        <button
+          type="button"
+          class="motion-toggle"
+          id="motionToggle"
+          aria-pressed="true"
+          title="Mettre en pause ou relancer l'animation"
+          hidden>
+          <span class="motion-dot" aria-hidden="true"></span>
+          <span class="motion-label">Animation</span>
+        </button>
+
+        <a href="landing.html" class="back-link" aria-label="Retour au site Parla">← <span class="back-long">Retour au site</span><span class="back-short">Le site</span></a>
+      </div>
+    </div>
+
+    <div class="sky-copy" id="skyCopy">
+      <h1 class="page-title">Construire une <em>activité</em></h1>
+
+      <p class="page-subtitle">
+        Créez les 5 cartes pédagogiques de votre mission avec des éléments qui apparaissent progressivement.
+      </p>
+    </div>
+
+    <span class="sky-hint" aria-hidden="true">Cliquez dans le ciel</span>
+
+  </header>
+
+  <section class="apercu" aria-label="À propos de cet aperçu">
+    <p><strong>Aperçu de l'en-tête de la page « Construire une activité ».</strong> Basculez l'interrupteur « Lumière » pour passer de la plage au coucher du soleil au lagon la nuit, et cliquez dans le ciel pour écrire un mot.</p>
+    <p>L'éditeur d'activités, sous cet en-tête, est réservé aux formateurs.</p>
+    <div class="apercu-actions">
+      <a class="primary" href="connexion.html">Se connecter</a>
+      <a href="landing.html">Découvrir Parla</a>
+    </div>
+  </section>
+
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="activite-scene/main.js"></script>
+
+</body>
+</html>
