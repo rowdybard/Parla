@@ -962,6 +962,7 @@
 <!-- Librairie Supabase (doit être chargée avant config.js) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="parla-languages.js"></script>
 <script>
 /* =========================================================
    Parla by Hitondra — Espace formateur
@@ -1058,7 +1059,7 @@ document.getElementById('logoutBtn').addEventListener('click', async function(){
 
 const role = (profile.role || '').toLowerCase();
 
-if (role !== 'teacher' && role !== 'admin') {
+if (role !== 'teacher' && role !== 'formateur' && role !== 'admin') {
   window.location.href = 'membre.html';
   return;
 }
@@ -1130,12 +1131,9 @@ async function loadMissionsData() {
     return;
   }
 
-  const teacherLanguage =
-    (profile.language || '')
-      .trim()
-      .toLowerCase();
+  const teacherLanguage = profile.language;
 
-  if (!teacherLanguage) {
+  if (userRole !== 'admin' && !ParlaLanguages.code(teacherLanguage)) {
     slot.innerHTML =
       '<div class="empty-state">Aucune langue n’est définie pour votre profil.</div>';
 
@@ -1168,10 +1166,7 @@ async function loadMissionsData() {
     userRole === 'admin'
       ? (allMissions || [])
       : (allMissions || []).filter(
-          mission =>
-            (mission.language || '')
-              .trim()
-              .toLowerCase() === teacherLanguage
+          mission => ParlaLanguages.same(mission.language, teacherLanguage)
         );
 
   if (missions.length === 0) {
@@ -1486,7 +1481,7 @@ async function loadLiveSessions() {
 
           <div class="fm-meta">
             Semaine ${session.missions?.week_number ?? '—'}
-            · ${escapeHtml(session.missions?.language || '')}
+            · ${escapeHtml(ParlaLanguages.label(session.missions?.language))}
           </div>
         </div>
 
@@ -1544,6 +1539,37 @@ async function loadLiveSessions() {
 
 loadLiveSessions();
 
+// Les langues de chaque apprenant (codes « fr », « en », « es ») : celles qu'il a
+// choisies dans son espace (learner_languages), sinon celle de son profil.
+async function learnerLanguageCodes(learners) {
+  const byLearner = new Map(learners.map(learner => [learner.id, new Set()]));
+  const ids = learners.map(learner => learner.id);
+
+  if (ids.length) {
+    const { data, error } = await supabaseClient
+      .from('learner_languages')
+      .select('user_id, language')
+      .in('user_id', ids);
+
+    if (error) {
+      console.error('Erreur chargement des langues des apprenants :', error);
+    }
+
+    (data || []).forEach(row => {
+      const code = ParlaLanguages.code(row.language);
+      if (code && byLearner.has(row.user_id)) byLearner.get(row.user_id).add(code);
+    });
+  }
+
+  learners.forEach(learner => {
+    const codes = byLearner.get(learner.id);
+    const fallback = ParlaLanguages.code(learner.language);
+    if (!codes.size && fallback) codes.add(fallback);
+  });
+
+  return byLearner;
+}
+
 // ---------- Chargement du tableau de bord ----------
 async function loadDashboardData(){
 
@@ -1559,8 +1585,7 @@ async function loadDashboardData(){
     return;
   }
 
-  const teacherLanguage =
-    (profile.language || '').trim().toLowerCase();
+  const teacherLanguage = profile.language;
     const userRole =
   (state.profile?.role || '').trim().toLowerCase();
 
@@ -1597,15 +1622,16 @@ const activeLearnerIds =
     enrollment => enrollment.user_id
   );
 
+const activeLearners = (allLearners || []).filter(
+  learner => activeLearnerIds.includes(learner.id)
+);
+const dashboardLearnerLanguages = await learnerLanguageCodes(activeLearners);
+
 const learners =
   userRole === 'admin'
-    ? (allLearners || []).filter(
-        learner => activeLearnerIds.includes(learner.id)
-      )
-    : (allLearners || []).filter(
-        learner =>
-          activeLearnerIds.includes(learner.id) &&
-          (learner.language || '').trim().toLowerCase() === teacherLanguage
+    ? activeLearners
+    : activeLearners.filter(
+        learner => dashboardLearnerLanguages.get(learner.id).has(ParlaLanguages.code(teacherLanguage))
       );
 
 const learnersCount = learners.length;
@@ -1626,7 +1652,7 @@ const learnersCount = learners.length;
   userRole === 'admin'
     ? (allMissions || [])
     : (allMissions || []).filter(mission =>
-        (mission.language || '').trim().toLowerCase() === teacherLanguage
+        ParlaLanguages.same(mission.language, teacherLanguage)
       );
 
   const missionsCount = missions.length;
@@ -1752,10 +1778,9 @@ async function loadLearnersData(){
   const userRole =
     (state.profile?.role || '').trim().toLowerCase();
 
-  const teacherLanguage =
-    (teacherProfile.language || '').trim().toLowerCase();
+  const teacherLanguage = teacherProfile.language;
 
-  if (userRole !== 'admin' && !teacherLanguage) {
+  if (userRole !== 'admin' && !ParlaLanguages.code(teacherLanguage)) {
     slot.innerHTML =
       '<div class="empty-state">Aucune langue n’est définie pour votre profil.</div>';
     return;
@@ -1814,11 +1839,13 @@ console.log('ERREUR APPRENANTS :', learnersError);
 
 // Admin : tous les apprenants actifs.
 // Teacher : uniquement les apprenants actifs de sa langue.
+const listLearnerLanguages = await learnerLanguageCodes(allLearners || []);
+
 const learners =
   userRole === 'admin'
     ? (allLearners || [])
     : (allLearners || []).filter(learner =>
-        (learner.language || '').trim().toLowerCase() === teacherLanguage
+        listLearnerLanguages.get(learner.id).has(ParlaLanguages.code(teacherLanguage))
       );
 
 console.log('ROLE FORMATEUR :', userRole);
@@ -4839,15 +4866,18 @@ if (!language || !weekNumber || !title || !startsAt) {
 
   message.textContent = 'Enregistrement...';
 
-  const { data: mission, error: missionError } =
+  const { data: weekMissions, error: missionError } =
   await supabaseClient
     .from('missions')
-    .select('id, week_number, language')
-    .eq('language', language)
-    .eq('week_number', weekNumber)
-    .limit(1)
-    .single();
-    
+    .select('id, week_number, language, level')
+    .eq('week_number', weekNumber);
+
+  // la mission de cette semaine dans cette langue ; s'il y en a à plusieurs
+  // niveaux, celle du niveau le plus simple
+  const mission = (weekMissions || [])
+    .filter(m => ParlaLanguages.same(m.language, language))
+    .sort((a, b) => ParlaLanguages.levelRank(a.level) - ParlaLanguages.levelRank(b.level))[0];
+
   if (missionError || !mission) {
     console.error(missionError);
     message.textContent =

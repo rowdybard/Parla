@@ -839,6 +839,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--stage)!important;box-
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="parla-languages.js"></script>
 <script src="mission-renderer.js"></script>
     
 <script>
@@ -1000,10 +1001,7 @@ console.log("ACTIVITE — profil :", state.profile);
 
   }
 
-  const teacherLanguage =
-    String(state.profile.language || "")
-      .trim()
-      .toLowerCase();
+  const teacherLanguage = state.profile.language;
 
   if (state.profile.role === "admin") {
 
@@ -1011,10 +1009,9 @@ console.log("ACTIVITE — profil :", state.profile);
 
   } else {
 
+    // « Anglais » et « en » sont la même langue
     state.missions = (data || []).filter(mission =>
-      String(mission.language || "")
-        .trim()
-        .toLowerCase() === teacherLanguage
+      ParlaLanguages.same(mission.language, teacherLanguage)
     );
 
   }

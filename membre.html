@@ -455,6 +455,15 @@
   cursor: default;
 }
     
+/* the language a trainee works in, when they have several */
+.mission-language-switch{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.mission-language-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;border:1px solid var(--sand-stroke);background:var(--white);color:var(--ink);font:600 14px/1 var(--f-body);cursor:pointer;}
+.mission-language-btn span{font:500 12px/1 var(--f-mono);color:var(--ink-soft);}
+.mission-language-btn:hover{border-color:var(--green);}
+.mission-language-btn.is-on{background:var(--green-light);border-color:var(--green);color:var(--green-dark);}
+.mission-language-btn.is-on span{color:var(--green-dark);}
+.mission-level-hint{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--vanilla-light);color:var(--vanilla-deep);font-size:14px;}
+.mission-level-hint a{color:inherit;font-weight:600;text-decoration:underline;}
 </style>
     
 </head>
@@ -608,6 +617,7 @@
   console.log('MEMBRE.HTML CHARGE');
 </script>
 <script src="config.js"></script>
+<script src="parla-languages.js"></script>
 <script src="mission-renderer.js"></script>
 <script>
 
@@ -641,6 +651,14 @@ function formatDate(iso){
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+// Les langues de l'apprenant, en toutes lettres
+function learnerLanguagesLabel(){
+  const languages = state.learnerLanguages || [];
+  return languages.length
+    ? languages.map(code => ParlaLanguages.label(code)).join(' / ')
+    : languageLabel(state.profile && state.profile.language);
 }
 
 function languageLabel(code){
@@ -1021,6 +1039,7 @@ function showView(name){
   if (name === 'travaux') renderTravauxView();
   if (name === 'questions') renderQuestionsView();
   if (name === 'profil') renderProfilView();
+  if (name === 'live') loadLearnerLiveSessions();
 }
 
 document.querySelectorAll('#sideNav a, #bottomNav a').forEach(a => {
@@ -1092,16 +1111,90 @@ if (state.enrollment) {
   );
 }
 
-  // 2) Missions correspondant à la langue + au niveau de l'apprenant
-  const { data: missions } = await supabaseClient
+  // 2) Les langues de l'apprenant : celles qu'il a choisies (en code, « en »,
+  //    dans learner_languages), sinon celle de son profil. Les missions sont
+  //    enregistrées avec un libellé (« Anglais ») : ParlaLanguages compare les deux.
+  const { data: chosenLanguages, error: chosenLanguagesError } = await supabaseClient
+    .from('learner_languages')
+    .select('language, level, is_active, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true });
+
+  if (chosenLanguagesError) {
+    console.error('Erreur chargement des langues de l’apprenant :', chosenLanguagesError);
+  }
+
+  const learnerLanguages = [];
+  (chosenLanguages || []).forEach(row => {
+    const code = ParlaLanguages.code(row.language);
+    if (code && row.is_active !== false && !learnerLanguages.includes(code)) {
+      learnerLanguages.push(code);
+    }
+  });
+  if (!learnerLanguages.length && ParlaLanguages.code(profile.language)) {
+    learnerLanguages.push(ParlaLanguages.code(profile.language));
+  }
+  state.learnerLanguages = learnerLanguages;
+
+  // 3) Son niveau dans chaque langue : le dernier test de niveau passé dans
+  //    cette langue, sinon le niveau choisi avec la langue, sinon celui du profil
+  //    (qui vient du dernier test, quelle qu'en soit la langue : il ne compte que
+  //    si l'apprenant n'a qu'une langue, ou n'a encore passé aucun test).
+  const { data: levelTests, error: levelTestsError } = await supabaseClient
+    .from('level_test_results')
+    .select('language, cefr_level, completed_at')
+    .eq('user_id', user.id)
+    .order('completed_at', { ascending: false });
+
+  if (levelTestsError) {
+    console.error('Erreur chargement des tests de niveau :', levelTestsError);
+  }
+
+  state.learnerLevels = {};
+  learnerLanguages.forEach(code => {
+    const test = (levelTests || []).find(t =>
+      ParlaLanguages.code(t.language) === code && ParlaLanguages.level(t.cefr_level)
+    );
+    const chosen = (chosenLanguages || []).find(r =>
+      ParlaLanguages.code(r.language) === code && ParlaLanguages.level(r.level)
+    );
+    const profileLevelApplies =
+      learnerLanguages.length === 1 || !(levelTests || []).length;
+    state.learnerLevels[code] =
+      ParlaLanguages.level(test && test.cefr_level) ||
+      ParlaLanguages.level(chosen && chosen.level) ||
+      (profileLevelApplies ? ParlaLanguages.level(profile.level) : '');
+  });
+
+  // 4) Les missions de ses langues, à son niveau. Sans niveau connu (pas encore
+  //    de test), celles du niveau le plus simple proposé dans cette langue.
+  const { data: allMissions, error: missionsError } = await supabaseClient
     .from('missions')
     .select('*')
-    .eq('language', profile.language)
-    .eq('level', profile.level)
     .order('week_number', { ascending: true });
-  state.missions = missions || [];
 
-  // 3) Submissions de l'apprenant (avec la mission liée)
+  if (missionsError) {
+    console.error('Erreur chargement des missions :', missionsError);
+  }
+
+  state.missionLevels = {};
+  state.missions = [];
+  learnerLanguages.forEach(code => {
+    const inLanguage = (allMissions || []).filter(m => ParlaLanguages.code(m.language) === code);
+    let level = state.learnerLevels[code];
+    if (!level) {
+      level = inLanguage
+        .map(m => ParlaLanguages.level(m.level))
+        .filter(Boolean)
+        .sort((a, b) => ParlaLanguages.levelRank(a) - ParlaLanguages.levelRank(b))[0] || '';
+    }
+    state.missionLevels[code] = level;
+    inLanguage
+      .filter(m => ParlaLanguages.level(m.level) === level)
+      .forEach(m => state.missions.push(m));
+  });
+
+  // 5) Les réponses de l'apprenant (avec la mission liée)
   const { data: submissions } = await supabaseClient
     .from('submissions')
     .select('*, missions(id, title, week_number, language, level)')
@@ -1109,50 +1202,29 @@ if (state.enrollment) {
     .order('submitted_at', { ascending: false });
   state.submissions = submissions || [];
 
-// 4) Prépare les cartes de la mission active
-state.missionCards = [];
+  // 6) La mission active de chaque langue : la première pas encore rendue.
+  const submittedMissionIds = new Set(state.submissions.map(s => s.mission_id));
+  state.activeMissions = {};
+  learnerLanguages.forEach(code => {
+    state.activeMissions[code] =
+      state.missions.find(m =>
+        ParlaLanguages.code(m.language) === code && !submittedMissionIds.has(m.id)
+      ) || null;
+  });
 
- // 5) Détermine la mission active : première mission non terminée.
-const submittedMissionIds = new Set(
-  state.submissions.map(s => s.mission_id)
-);
+  // la langue travaillée : la dernière choisie ici, sinon la première qui a une mission
+  let rememberedLanguage = '';
+  try { rememberedLanguage = localStorage.getItem('parla:mission-language') || ''; } catch (e) { /* stockage bloqué */ }
+  state.activeLanguage =
+    (learnerLanguages.includes(rememberedLanguage) && state.activeMissions[rememberedLanguage]
+      ? rememberedLanguage
+      : '') ||
+    learnerLanguages.find(code => state.activeMissions[code]) ||
+    learnerLanguages[0] ||
+    '';
 
-state.activeMission =
-  state.missions.find(
-    m => !submittedMissionIds.has(m.id)
-  ) || null;
-
-// 6) Charge les cartes de la mission active
-if (state.activeMission) {
-
-  const { data: missionCards, error: missionCardsError } =
-    await supabaseClient
-      .from('mission_cards')
-      .select('*')
-      .eq('mission_id', state.activeMission.id)
-      .order('card_order', { ascending: true });
-    
-console.log('MISSION ID :', state.activeMission.id);
-console.log('INIT MEMBRE OK');
-console.log('CARTES SUPABASE :', missionCards);
-console.log('ERREUR CARTES :', missionCardsError);
-    
-  if (missionCardsError) {
-    console.error(
-      'Erreur chargement des cartes :',
-      missionCardsError
-    );
-
-    state.missionCards = [];
-  } else {
-    state.missionCards = missionCards || [];
-  }
-
-} else {
-
-  state.missionCards = [];
-
-}
+  // 7) Les cartes de la mission active
+  await loadActiveMissionCards();
 
   renderTopbar();
   await renderDashboard();
@@ -1162,13 +1234,86 @@ console.log('ERREUR CARTES :', missionCardsError);
   document.getElementById('appShell').style.display = 'block';
 })();
 
+// ---------- Mission active ----------
+// Les cartes de la mission active de la langue travaillée.
+async function loadActiveMissionCards() {
+  state.activeMission = (state.activeMissions || {})[state.activeLanguage] || null;
+  state.missionCards = [];
+
+  if (!state.activeMission) return;
+
+  const { data: missionCards, error } = await supabaseClient
+    .from('mission_cards')
+    .select('*')
+    .eq('mission_id', state.activeMission.id)
+    .order('card_order', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement des cartes :', error);
+    return;
+  }
+
+  state.missionCards = missionCards || [];
+}
+
+// Un apprenant inscrit dans plusieurs langues choisit celle qu'il travaille.
+async function selectMissionLanguage(code) {
+  if (!(state.learnerLanguages || []).includes(code) || code === state.activeLanguage) return;
+  state.activeLanguage = code;
+  try { localStorage.setItem('parla:mission-language', code); } catch (e) { /* non mémorisé */ }
+  await loadActiveMissionCards();
+  renderTopbar();
+  renderMissionView();
+}
+
+function missionLanguageSwitcher() {
+  const languages = state.learnerLanguages || [];
+  if (languages.length < 2) return '';
+  return `
+    <div class="mission-language-switch" role="group" aria-label="Langue travaillée">
+      ${languages.map(code => `
+        <button
+          type="button"
+          class="mission-language-btn${code === state.activeLanguage ? ' is-on' : ''}"
+          data-language="${code}"
+          aria-pressed="${code === state.activeLanguage}"
+        >
+          ${escapeHtml(ParlaLanguages.label(code))}
+          <span>${escapeHtml(state.missionLevels[code] || '—')}</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function bindMissionLanguageSwitcher(slot) {
+  slot.querySelectorAll('.mission-language-btn').forEach(button => {
+    button.addEventListener('click', () => selectMissionLanguage(button.dataset.language));
+  });
+}
+
+// Pourquoi il n'y a pas de mission à montrer
+function noMissionMessage() {
+  const code = state.activeLanguage;
+  if (!code) {
+    return 'Choisissez d’abord vos langues dans votre tableau de bord : vos missions apparaîtront ici.';
+  }
+  const label = ParlaLanguages.label(code);
+  const level = state.missionLevels[code];
+  const inLanguage = state.missions.filter(m => ParlaLanguages.code(m.language) === code);
+  if (inLanguage.length) {
+    return `Vous avez rendu toutes les missions en ${escapeHtml(label)}${level ? ' au niveau ' + escapeHtml(level) : ''}. Bravo ! Les prochaines arriveront bientôt.`;
+  }
+  return `Aucune mission n’est encore disponible en ${escapeHtml(label)}${level ? ' au niveau ' + escapeHtml(level) : ''}. Elle apparaîtra ici dès que votre formateur l’aura publiée.`;
+}
+
 // ---------- Topbar ----------
 function renderTopbar(){
   const p = state.profile;
   const initial = (p.first_name || '?').trim().charAt(0).toUpperCase();
   document.getElementById('avatarInitial').textContent = initial || '?';
   document.getElementById('topbarMeta').textContent =
-    `${p.first_name || ''} · ${languageLabel(p.language)} · ${p.level || '—'}`;
+    `${p.first_name || ''} · ${learnerLanguagesLabel()} · ${(state.missionLevels || {})[state.activeLanguage] || p.level || '—'}`;
 }
 
 // ---------- Tableau de bord ----------
@@ -1177,7 +1322,11 @@ async function renderDashboard(){
 
   document.getElementById('dashGreeting').textContent = `Bonjour, ${p.first_name || ''} 👋`;
   document.getElementById('dashSub').textContent =
-    `Langue actuelle : ${languageLabel(p.language)}  ·  Niveau : ${p.level || '—'}`;
+    (state.learnerLanguages || []).length
+      ? 'Vos langues : ' + state.learnerLanguages.map(code =>
+          `${ParlaLanguages.label(code)} (${state.learnerLevels[code] || 'niveau à évaluer'})`
+        ).join('  ·  ')
+      : 'Choisissez vos langues ci-dessous pour recevoir vos missions.';
 
   document.getElementById('statMissions').textContent = state.missions.length;
   document.getElementById('statSubmissions').textContent = state.submissions.length;
@@ -2116,12 +2265,16 @@ function renderMissionView(){
 
   const slot = document.getElementById('missionDetailSlot');
   const m = state.activeMission;
+  const switcher = missionLanguageSwitcher();
 
   if (!m) {
-    slot.innerHTML =
-      '<div class="empty-state">Aucune mission n\'est disponible pour votre langue et votre niveau pour le moment.</div>';
+    slot.innerHTML = switcher + `<div class="empty-state">${noMissionMessage()}</div>`;
+    bindMissionLanguageSwitcher(slot);
     return;
   }
+
+  const levelUnknown =
+    !(state.learnerLevels || {})[ParlaLanguages.code(m.language)];
 
   const existingSubmission =
     state.submissions.find(
@@ -2134,7 +2287,7 @@ function renderMissionView(){
   console.log('MISSION ACTIVE :', m.id);
   console.log('CARTES CHARGEES :', missionCards);
 
-  let html = `
+  let html = switcher + `
     <div class="card mission-detail-head">
 
       <div class="mission-tags">
@@ -2174,6 +2327,15 @@ function renderMissionView(){
         ${escapeHtml(m.description || '')}
       </p>
 
+      ${
+        levelUnknown
+          ? `<p class="mission-level-hint">
+               Votre niveau n’est pas encore connu : voici les missions du niveau ${escapeHtml(m.level || '')}.
+               <a href="parla-test-niveau-community.html">Passez le test de niveau</a> pour recevoir celles de votre niveau.
+             </p>`
+          : ''
+      }
+
     </div>
   `;
 
@@ -2193,6 +2355,7 @@ function renderMissionView(){
   }
 
   slot.innerHTML = html;
+  bindMissionLanguageSwitcher(slot);
 
   const cardsContainer =
     slot.querySelector('#missionCardsContainer');
@@ -3012,8 +3175,8 @@ async function renderProfilView(){
     </div>
 
     <div class="profile-row">
-      <span class="k">Langue</span>
-      <span class="v">${languageLabel(p.language)}</span>
+      <span class="k">${(state.learnerLanguages || []).length > 1 ? 'Langues' : 'Langue'}</span>
+      <span class="v">${escapeHtml(learnerLanguagesLabel())}</span>
     </div>
 
     <div class="profile-row">
@@ -3024,35 +3187,24 @@ async function renderProfilView(){
 }
     
 // ---------- Sessions live apprenant ----------
+// Les sessions à venir dans les langues de l'apprenant (ni annulées, ni terminées).
 async function loadLearnerLiveSessions() {
   const slot = document.getElementById('learnerLiveSessionsSlot');
 
   if (!slot) return;
 
-  const { data: { session } } =
-  await supabaseClient.auth.getSession();
+  const languages = state.learnerLanguages || [];
 
-if (!session) {
-  console.error('Aucune session utilisateur.');
-  slot.innerHTML =
-    '<div class="error-msg">Aucune session utilisateur détectée.</div>';
-  return;
-}
-
-const { data: profile, error: profileError } =
-  await supabaseClient
-    .from('profiles')
-    .select('language')
-    .eq('id', session.user.id)
-    .single();
-
-  if (profileError || !profile) {
-    console.error('Erreur récupération langue apprenant :', profileError);
+  if (!languages.length) {
+    slot.innerHTML = `
+      <div class="empty-state">
+        Choisissez d’abord vos langues dans votre tableau de bord.
+      </div>
+    `;
     return;
   }
 
-  const learnerLanguage =
-    (profile.language || '').trim().toLowerCase();
+  slot.innerHTML = '<div class="empty-state">Chargement…</div>';
 
   const { data: sessions, error } =
     await supabaseClient
@@ -3060,10 +3212,12 @@ const { data: profile, error: profileError } =
       .select(`
         id,
         title,
+        status,
         starts_at,
         duration_minutes,
         google_meet_url,
         missions (
+          title,
           language,
           week_number
         )
@@ -3077,171 +3231,101 @@ const { data: profile, error: profileError } =
     return;
   }
 
-  const filteredSessions = (sessions || []).filter(session =>
-    (session.missions?.language || '').trim().toLowerCase() ===
-    learnerLanguage
-  );
+  const now = Date.now();
+  const upcoming = (sessions || []).filter(session => {
+    if (session.status === 'cancelled') return false;
+    if (!languages.includes(ParlaLanguages.code(session.missions?.language))) return false;
+    if (!session.starts_at) return true;
+    const ends = new Date(session.starts_at).getTime() +
+      (Number(session.duration_minutes) || 60) * 60000;
+    return ends >= now;
+  });
 
- if (filteredSessions.length === 0) {
-  slot.innerHTML = `
-    <div class="empty-state">
-      Aucune session live n'est actuellement prévue pour votre langue.
-    </div>
-  `;
-  return;
-}
+  if (upcoming.length === 0) {
+    slot.innerHTML = `
+      <div class="empty-state">
+        Aucune session live n'est prévue pour le moment dans ${
+          languages.length > 1 ? 'vos langues' : 'votre langue'
+        }.
+      </div>
+    `;
+    return;
+  }
 
-slot.innerHTML = filteredSessions.map(session => {
+  slot.innerHTML = upcoming.map(session => {
 
-  const startsAt = session.starts_at
-    ? new Date(session.starts_at)
-    : null;
+    const startsAt = session.starts_at
+      ? new Date(session.starts_at)
+      : null;
 
-  const dateLabel = startsAt
-    ? startsAt.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    : 'Date non précisée';
+    const dateLabel = startsAt
+      ? startsAt.toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        })
+      : 'Date non précisée';
 
-  const timeLabel = startsAt
-    ? startsAt.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    : '';
+    const timeLabel = startsAt
+      ? startsAt.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      : '';
 
-  return `
-    <div class="card" style="margin-top:16px;">
+    const mission = session.missions;
 
-      <span class="badge badge-progress">
-        Session live
-      </span>
+    return `
+      <div class="card" style="margin-top:16px;">
 
-      <h3 style="
-        margin-top:12px;
-        margin-bottom:8px;
-      ">
-        ${escapeHtml(session.title || 'Session live')}
-      </h3>
+        <span class="badge badge-progress">
+          Session live · ${escapeHtml(ParlaLanguages.label(mission?.language))}
+        </span>
 
-      <p style="color:var(--ink-soft);">
-        ${escapeHtml(dateLabel)}
-        ${timeLabel ? ` · ${escapeHtml(timeLabel)}` : ''}
-      </p>
+        <h3 style="
+          margin-top:12px;
+          margin-bottom:8px;
+        ">
+          ${escapeHtml(session.title || 'Session live')}
+        </h3>
 
-      ${
-        session.duration_minutes
-          ? `
-            <p style="color:var(--ink-soft);">
-              Durée : ${escapeHtml(session.duration_minutes)} min
-            </p>
-          `
-          : ''
-      }
+        <p style="color:var(--ink-soft);">
+          ${escapeHtml(dateLabel)}
+          ${timeLabel ? ` · ${escapeHtml(timeLabel)}` : ''}
+          ${session.duration_minutes ? ` · ${escapeHtml(session.duration_minutes)} min` : ''}
+        </p>
 
-      ${
-        session.google_meet_url
-          ? `
-            <a
-              href="${escapeHtml(session.google_meet_url)}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn btn-primary"
-              style="margin-top:10px;"
-            >
-              Rejoindre Google Meet
-            </a>
-          `
-          : ''
-      }
+        ${
+          mission
+            ? `<p style="color:var(--ink-soft);">
+                 Mission de la semaine ${escapeHtml(mission.week_number ?? '—')} : ${escapeHtml(mission.title || '')}
+               </p>`
+            : ''
+        }
 
-    </div>
-  `;
-}).join('');
+        ${
+          session.google_meet_url
+            ? `
+              <a
+                href="${escapeHtml(session.google_meet_url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-primary"
+                style="margin-top:10px;"
+              >
+                Rejoindre Google Meet
+              </a>
+            `
+            : ''
+        }
 
-if (filteredSessions.length === 0) {
-  slot.innerHTML = `
-    <div class="empty-state">
-      Aucune session live n'est actuellement prévue pour votre langue.
-    </div>
-  `;
-  return;
-}
-
-slot.innerHTML = filteredSessions.map(session => {
-
-  const startsAt = session.starts_at
-    ? new Date(session.starts_at)
-    : null;
-
-  const dateLabel = startsAt
-    ? startsAt.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    : 'Date non précisée';
-
-  const timeLabel = startsAt
-    ? startsAt.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    : '';
-
-  return `
-    <div class="card" style="margin-top:16px;">
-
-      <span class="badge badge-progress">
-        Session live
-      </span>
-
-      <h3 style="
-        margin-top:12px;
-        margin-bottom:8px;
-      ">
-        ${escapeHtml(session.title || 'Session live')}
-      </h3>
-
-      <p style="color:var(--ink-soft);">
-        ${escapeHtml(dateLabel)}
-        ${timeLabel ? ` · ${escapeHtml(timeLabel)}` : ''}
-      </p>
-
-      ${
-        session.duration_minutes
-          ? `
-            <p style="color:var(--ink-soft);">
-              Durée : ${escapeHtml(session.duration_minutes)} min
-            </p>
-          `
-          : ''
-      }
-
-      ${
-        session.google_meet_url
-          ? `
-            <a
-              href="${escapeHtml(session.google_meet_url)}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn btn-primary"
-              style="margin-top:10px;"
-            >
-              Rejoindre Google Meet
-            </a>
-          `
-          : ''
-      }
-
-    </div>
-  `;
-}).join('');
+      </div>
+    `;
+  }).join('');
 
 }
-    
+
 </script>
 </body>
 </html>

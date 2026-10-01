@@ -209,7 +209,7 @@
 
     const role = (profile.role || '').toLowerCase();
 
-    if (role === 'teacher' || role === 'admin') {
+    if (role === 'teacher' || role === 'formateur' || role === 'admin') {
       window.location.href = "formateur.html";
     } else {
       window.location.href = "membre.html";
@@ -541,7 +541,7 @@ signupBtn.addEventListener('click', async function() {
       const role =
         (profile.role || '').toLowerCase();
 
-      if (role === 'teacher' || role === 'admin') {
+      if (role === 'teacher' || role === 'formateur' || role === 'admin') {
         window.location.href = "formateur.html";
       } else {
         window.location.href = "membre.html";
