@@ -3,7 +3,8 @@
 //
 // A beach at sunset, pink and lilac as the owner asked: words in French,
 // English, Spanish and Malagasy are written in light over the sea, each carried
-// to its translation by a thread of gold; the sea mirrors them, the sun glitters
+// to its translation by a thread of gold, and now and then Parla, her own word,
+// signed with a gold flourish; the sea mirrors them, the sun glitters
 // on the ripples, waves roll in over pale pink sand, and sea oats sway on the
 // dunes. A click in the sky writes another. It pauses off screen, in a hidden
 // tab, and with the header's « Animation » toggle, and shows one still frame for
@@ -23,7 +24,7 @@ import { createSky, SUN_LAYER } from "./sky.js";
 import { sandHeight } from "./terrain.js";
 import { createThreads } from "./threads.js";
 import { createWater } from "./water.js";
-import { CONCEPTS, createWords } from "./words.js";
+import { WORDS, createWords } from "./words.js";
 
 const host = document.getElementById("sky");
 const copy = document.getElementById("skyCopy");
@@ -128,7 +129,7 @@ function createScene(canvas) {
   let water = null, words = null, threads = null, post = null;
   let viewObserver = null, sizeObserver = null, destroyed = false;
   try {
-    ctx.atlas = createAtlas(CONCEPTS.flat());
+    ctx.atlas = createAtlas(WORDS);
     const sky = createSky(ctx);
     parts.push(sky);
     ctx.gradient = sky.gradient;

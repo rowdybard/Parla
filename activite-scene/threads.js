@@ -123,8 +123,9 @@ export function createThreads({ scene }) {
   }
 
   return {
-    // a: where the stroke leaves (end of a word), b: where it lands, up: the camera's up
-    spawn(a, b, camUp, tint, start, draw, width) {
+    // a: where the stroke leaves (end of a word), b: where it lands, up: which way its
+    // arc and loop lean (the camera's up); it stays `stay` seconds once drawn, then goes
+    spawn(a, b, camUp, tint, start, draw, width, stay = 0.7, erase = 1.3) {
       const r = cursor;
       cursor = (cursor + 1) % COUNT;
       chord.subVectors(b, a);
@@ -163,8 +164,8 @@ export function createThreads({ scene }) {
       const t = timing[r];
       t.start = start;
       t.draw = draw;
-      t.stay = 0.7;
-      t.erase = 1.3;
+      t.stay = stay;
+      t.erase = erase;
     },
     // every thread drawn in full, for the still frame
     settle() {

@@ -1,30 +1,35 @@
 // Words in four languages, written in light over the sea. An idea is written
 // in French; a thread of gold carries it on into English, Spanish and Malagasy;
-// the four drift together a while, mirrored in the water, and fade. The show
-// opens with the school's own name: Parla, French and Spanish in one word.
+// the four drift together a while, mirrored in the water, and fade.
+// And once a round, first of all, Parla: the word the school's founder made up
+// from French and Spanish. It is nobody's translation, so it comes on its own,
+// larger, and signed underneath with a gold flourish.
 // Each word is an instance of one mesh: its slot is written once, and the
 // shader does the rest (writing it out left to right, drifting, fading).
 // Everything is allocated up front; placing an idea creates nothing.
 import * as THREE from "three";
 import { billboard } from "./glsl.js";
-import { inks, halo, sunset, color as paint } from "./palette.js";
+import { inks, signInk, halo, sunset, color as paint } from "./palette.js";
 
-export const LANGS = ["Français", "English", "Español", "Malagasy"];
+// French, English, Spanish, Malagasy
 export const CONCEPTS = [
   ["Bonjour", "Hello", "Hola", "Salama"],
   ["Merci", "Thank you", "Gracias", "Misaotra"],
   ["Apprendre", "Learn", "Aprender", "Mianatra"],
-  ["Parla", "Speak", "Hablar", "Miteny"],
   ["Ensemble", "Together", "Juntos", "Miaraka"],
   ["Mots", "Words", "Palabras", "Teny"]
 ];
+export const SIGNATURE = "Parla";
+export const WORDS = [SIGNATURE, ...CONCEPTS.flat()]; // all the atlas has to draw
 
-const FIRST = 3; // Parla opens the show
+const SIGN = CONCEPTS.length; // the signature's place in the deck, after the ideas
 const SLOTS = 40;
 const POOL = 6; // ideas on screen at once, at most
 const SCALES = [1, 0.84, 0.7]; // an idea that doesn't fit is tried smaller (narrow screens)
 const STEP = 1.55; // seconds from one language to the next
 const WRITE = 0.95; // seconds to write one word
+const SIGN_SIZE = 1.6; // the signature, against a word of an idea
+const SIGN_WRITE = 1.6; // seconds to write it
 const STAY = 15; // an idea stays this long ...
 const FADE = 2.4; // ... the last part of it fading
 
@@ -115,15 +120,15 @@ export function createWords(ctx) {
   };
   let next = 0.35, hue = 0, cursor = 0;
 
-  // every idea once per round, in a new order each round
-  const deck = new Int8Array(CONCEPTS.length);
+  // every idea once per round and the signature with them, in a new order each round
+  const deck = new Int8Array(CONCEPTS.length + 1);
   let dealt = deck.length, last = -1;
   function upcoming() {
     if (dealt === deck.length) {
       for (let i = 0; i < deck.length; i++) deck[i] = i;
       for (let i = deck.length - 1; i > 0; i--) swap(i, (Math.random() * (i + 1)) | 0);
       // the first round opens with Parla; a round never starts with the idea just shown
-      if (last < 0) swap(0, deck.indexOf(FIRST));
+      if (last < 0) swap(0, deck.indexOf(SIGN));
       else if (deck[0] === last) swap(0, 1 + ((Math.random() * (deck.length - 1)) | 0));
       dealt = 0;
     }
@@ -142,11 +147,14 @@ export function createWords(ctx) {
 
   // each word's place in the atlas, and the inks and thread colour, looked up once
   const table = CONCEPTS.map(texts => texts.map(text => atlas.word(text)));
+  table[SIGN] = [atlas.word(SIGNATURE)];
   const inkColors = inks.map(hex => paint(hex, 1.25));
+  const signColor = paint(signInk, 1.4);
   const gold = paint(sunset.gold);
 
   const v = new THREE.Vector3(), dir = new THREE.Vector3(), forward = new THREE.Vector3();
-  const right = new THREE.Vector3(), up = new THREE.Vector3(), from = new THREE.Vector3(), to = new THREE.Vector3();
+  const right = new THREE.Vector3(), up = new THREE.Vector3(), down = new THREE.Vector3();
+  const from = new THREE.Vector3(), to = new THREE.Vector3();
   const spots = [0, 1, 2, 3].map(() => new THREE.Vector3());
   const cellW = new Float64Array(4), w = new Float64Array(4), xs = new Float64Array(4), ys = new Float64Array(4);
   const box = { x0: 0, x1: 0, y0: 0, y1: 0 }, mirrored = { x0: 0, x1: 0, y0: 0, y1: 0 };
@@ -197,20 +205,22 @@ export function createWords(ctx) {
   }
 
   function write(time, ci, scale, idea, near, atX, atY) {
-    const entries = table[ci];
+    const entries = table[ci], n = entries.length, signing = ci === SIGN;
     const depth = 36 + Math.random() * 34;
     const tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     const viewH = 2 * depth * tanHalf;
-    const cell = (viewH * ctx.wordPx * scale) / ctx.height; // world height of one word's cell
+    const cell = (viewH * ctx.wordPx * scale * (signing ? SIGN_SIZE : 1)) / ctx.height; // world height of one word's cell
     const sx = 2 / (viewH * camera.aspect), sy = 2 / viewH; // world size to normalised screen size
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < n; i++) {
       cellW[i] = cell * entries[i].aspect;
       w[i] = cellW[i] * sx;
     }
-    // two lines, like a short sentence: French and English, then Spanish and Malagasy, indented
+    // an idea in two lines, like a short sentence: French and English, then Spanish and
+    // Malagasy, indented. The signature on its own, with room below for its flourish.
     const gap = cell * sy * 0.3, lineH = cell * sy * 0.9;
-    const indent = Math.min(w[0] * 0.55, cell * sx * 1.4);
-    const blockW = Math.max(w[0] + gap + w[1], indent + w[2] + gap + w[3]), blockH = lineH * 2.1;
+    const indent = signing ? 0 : Math.min(w[0] * 0.55, cell * sx * 1.4);
+    const blockW = signing ? w[0] * 1.04 : Math.max(w[0] + gap + w[1], indent + w[2] + gap + w[3]);
+    const blockH = signing ? cell * sy * 1.5 : lineH * 2.1;
     if (blockW > 1.9) return false;
 
     // the reflection shows about as far below the horizon as the words are above
@@ -239,17 +249,19 @@ export function createWords(ctx) {
 
     const top = box.y1, left = box.x0;
     xs[0] = left + w[0] / 2;
-    xs[1] = left + w[0] + gap + w[1] / 2;
-    xs[2] = left + indent + w[2] / 2;
-    xs[3] = left + indent + w[2] + gap + w[3] / 2;
     ys[0] = top - lineH * 0.5;
-    ys[1] = top - lineH * 0.6;
-    ys[2] = top - lineH * 1.55;
-    ys[3] = top - lineH * 1.65;
-    const ink = inkColors[(ctx.stage() + hue++) % inkColors.length];
+    if (!signing) {
+      xs[1] = left + w[0] + gap + w[1] / 2;
+      xs[2] = left + indent + w[2] / 2;
+      xs[3] = left + indent + w[2] + gap + w[3] / 2;
+      ys[1] = top - lineH * 0.6;
+      ys[2] = top - lineH * 1.55;
+      ys[3] = top - lineH * 1.65;
+    }
+    const ink = signing ? signColor : inkColors[(ctx.stage() + hue++) % inkColors.length];
     const driftX = (Math.random() - 0.5) * 0.08, driftY = 0.035 + Math.random() * 0.04;
     const seed = Math.random() * 100;
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < n; i++) {
       worldAt(xs[i], ys[i], depth, spots[i]);
       const slot = cursor;
       cursor = (cursor + 1) % SLOTS;
@@ -259,7 +271,24 @@ export function createWords(ctx) {
       set(iRect, slot, e.u0, e.v0, e.u1, e.v1);
       set(iSize, slot, cellW[i], cell);
       set(iColor, slot, ink.r, ink.g, ink.b);
-      set(iTime, slot, time + i * STEP, WRITE, time + STAY, seed);
+      set(iTime, slot, time + i * STEP, signing ? SIGN_WRITE : WRITE, time + STAY, seed);
+    }
+    if (signing) {
+      // the flourish: from the end of the word, back underneath it, as a signature is
+      // underlined; it stays as long as the word does
+      const e = entries[0], start = time + SIGN_WRITE * 0.92, draw = 1.3;
+      const lead = start - time + draw * 0.5; // where the word will have drifted to by mid-stroke
+      v.set(driftX, driftY, 0).multiplyScalar(lead);
+      from.copy(spots[0]).addScaledVector(right, cellW[0] * 0.46).addScaledVector(up, (e.baseline - 0.54) * cell).add(v);
+      to.copy(spots[0]).addScaledVector(right, -cellW[0] * 0.4).addScaledVector(up, (e.baseline - 0.74) * cell).add(v);
+      down.copy(up).negate();
+      threads.spawn(from, to, down, gold, start, draw, cell * 0.045, STAY - FADE - (start - time) - draw, FADE);
+      idea.end = time + STAY;
+      idea.box.x0 = box.x0;
+      idea.box.x1 = box.x1;
+      idea.box.y0 = box.y0;
+      idea.box.y1 = box.y1;
+      return true;
     }
     // a thread from the end of each word to the start of the next, landing as that word begins
     for (let i = 0; i < 3; i++) {

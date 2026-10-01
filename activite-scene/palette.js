@@ -37,6 +37,8 @@ export const sunset = {
 // Ink for the words: white, then soft gold, blush and lilac, one idea each,
 // with a soft plum halo so they read against the bright sky.
 export const inks = ["#ffffff", "#ffe6b0", "#ffe0ec", "#f3ebff"];
+// Parla, the founder's own word: a warm white, signed in gold
+export const signInk = "#fff3dd";
 export const halo = "#5a2a63";
 
 // A three.js colour (linear), optionally pushed past 1 so the bloom picks it up.
