@@ -4,7 +4,7 @@
 // and moved entirely in the shader.
 import * as THREE from "three";
 import { sandHeight } from "./terrain.js";
-import { sunset, color } from "./palette.js";
+import { sunset, color } from "../palette.js";
 
 function seeded(seed) {
   return () => {

@@ -1,35 +1,36 @@
 // Parla — Activité: the header's living scene, built the way the techdemo is
 // (three.js through an importmap, no build step, one small module per part).
 //
-// A beach at sunset, pink and lilac as the owner asked: words in French,
-// English, Spanish and Malagasy are written in light over the sea, each carried
-// to its translation by a thread of gold, and now and then Parla, her own word,
-// signed with a gold flourish; the sea mirrors them, the sun glitters
-// on the ripples, waves roll in over pale pink sand, and sea oats sway on the
-// dunes. A click in the sky writes another. It pauses off screen, in a hidden
+// Two settings, and a light switch in the header between them (settings.js).
+// Lights on: a beach at sunset, pink and lilac as the owner asked, waves rolling
+// in over pale pink sand and sea oats swaying on the dunes. Lights off: the
+// lagoon at night in the site's own colours, stars, a moon, baobabs on the far
+// shore. In both, words in French, English, Spanish and Malagasy are written in
+// light over the water, each carried to its translation by a thread, and now and
+// then Parla, the founder's own word, signed with a flourish; the water mirrors
+// them. A click in the sky writes another. It pauses off screen, in a hidden
 // tab, and with the header's « Animation » toggle, and shows one still frame for
 // prefers-reduced-motion.
 //
 // Memory follows the techdemo's no-leak rules: everything is allocated when the
 // scene is built, nothing in the render loop, and destroy() gives it all back in
 // the techdemo's order (loop, listeners, observers, parts, passes, renderer,
-// context). With #debug in the address, window.parlaScene.rebuild() tears the
-// scene down and builds it again, for the leak test.
+// context). The light switch fades one scene out, destroys it, and builds the
+// other, so only one is ever alive. With #debug in the address,
+// window.parlaScene.rebuild() does the same with one setting, for the leak test.
 import * as THREE from "three";
 import { createAtlas } from "./atlas.js";
-import { createBeach } from "./beach.js";
-import { createGrass } from "./grass.js";
 import { createPost } from "./post.js";
-import { createSky, SUN_LAYER } from "./sky.js";
-import { sandHeight } from "./terrain.js";
+import { SETTINGS } from "./settings.js";
 import { createThreads } from "./threads.js";
-import { createWater } from "./water.js";
 import { WORDS, createWords } from "./words.js";
 
 const host = document.getElementById("sky");
 const copy = document.getElementById("skyCopy");
 const toggle = document.getElementById("motionToggle");
+const lightSwitch = document.getElementById("lightSwitch");
 const topbar = host && host.querySelector(".topbar");
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 // quality tiers: pixel-ratio cap, multisampling, bloom and mirror resolution
 const TIERS = [
@@ -37,27 +38,61 @@ const TIERS = [
   { pixelRatio: 1.5, samples: 0, bloom: 0.5, mirror: 0.45 },
   { pixelRatio: 2, samples: 4, bloom: 0.5, mirror: 0.5 }
 ];
-// standing at the water's edge, looking out to sea a little to the left of the sun
-const EYE = new THREE.Vector3(0, sandHeight(0, 10) + 1.7, 10);
-const LOOK = new THREE.Vector3(-7, EYE.y - 3.4, -100);
 const PREF = "parla:animation";
+const LIGHT = "parla:light"; // "off": the night lagoon
+const SWITCH_FADE = 320; // ms, as .sky-canvas's opacity transition
+
+// the viewer's last choice, on the header straight away so its own gradient
+// (shown until the scene has drawn) is already the right one
+let lightsOn = true;
+try { lightsOn = localStorage.getItem(LIGHT) !== "off"; } catch (e) { /* storage blocked: lights on */ }
+if (host) host.classList.toggle("is-night", !lightsOn);
 
 if (host && copy && document.getElementById("skyCanvas")) boot();
 
 async function boot() {
   await fonts(); // the words take the accent serif's shape
-  let current = launch();
+  const chosen = () => (lightsOn ? SETTINGS.day : SETTINGS.night);
+  let current = launch(chosen()), switching = false;
+
+  // The light switch: fade the scene out, let it go, build the other, which
+  // fades itself in once it has drawn. A flip during the fade is picked up after.
+  // (This listener belongs to the page, not to any one scene, as in the techdemo.)
+  function change() {
+    if (switching || !current || current.setting === chosen()) return;
+    switching = true;
+    current.hide();
+    setTimeout(() => {
+      current.destroy();
+      current = launch(chosen());
+      switching = false;
+      change();
+    }, reducedMotion.matches ? 0 : SWITCH_FADE);
+  }
+  if (current && lightSwitch) {
+    lightSwitch.setAttribute("aria-checked", String(lightsOn));
+    lightSwitch.hidden = false;
+    lightSwitch.addEventListener("click", () => {
+      lightsOn = !lightsOn;
+      try { localStorage.setItem(LIGHT, lightsOn ? "on" : "off"); } catch (e) { /* not remembered */ }
+      lightSwitch.setAttribute("aria-checked", String(lightsOn));
+      host.classList.toggle("is-night", !lightsOn);
+      change();
+    });
+  }
+
   if (!location.hash.includes("debug")) return;
   // for tests: drive the scene, read its counts, and rebuild it
   window.parlaScene = {
     rebuild() {
       if (current) current.destroy();
-      current = launch();
+      current = launch(chosen());
     },
     destroy() {
       if (current) current.destroy();
       current = null;
     },
+    setting: () => current && !switching ? current.setting.name : null,
     get renderer() { return current && current.renderer; },
     info: () => current.renderer.info,
     tier: () => current.tier(),
@@ -67,10 +102,10 @@ async function boot() {
   };
 }
 
-function launch() {
+function launch(setting) {
   const canvas = document.getElementById("skyCanvas");
   try {
-    return createScene(canvas);
+    return createScene(canvas, setting);
   } catch (error) {
     console.warn("Parla: the header scene could not start.", error);
     canvas.style.visibility = "hidden"; // the header's own gradient shows instead
@@ -94,17 +129,17 @@ function activeCard() {
   return i;
 }
 
-function createScene(canvas) {
+function createScene(canvas, setting) {
   const abort = new AbortController();
   const { signal } = abort;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-  // Neutral keeps the pinks pink (ACES would wash them towards orange and grey)
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 0.92;
+  renderer.toneMapping = setting.toneMapping;
+  renderer.toneMappingExposure = setting.exposure;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 2, 0.1, 6000);
-  camera.layers.enable(SUN_LAYER);
-  const sunDir = new THREE.Vector3(0.2, 0.05, -1).normalize();
+  camera.layers.enable(setting.layer); // the sun or moon (the water's mirror leaves it out)
+  const EYE = setting.eye, LOOK = setting.look;
+  const lightDir = new THREE.Vector3(0.2, 0.05, -1).normalize(); // towards the sun or moon
   const rest = () => {
     camera.position.copy(EYE);
     camera.lookAt(LOOK);
@@ -116,55 +151,55 @@ function createScene(canvas) {
   let tier = phone ? 1 : 2;
   // shared with the parts; the boxes are in normalised screen space, measured on resize
   const ctx = {
-    scene, camera, sunDir, eye: EYE, atlas: null,
+    scene, camera, lightDir, eye: EYE, ink: setting.ink, atlas: null,
     height: 1, wordPx: 60, floor: -0.1, ceiling: 0.8, wide: true,
     avoid: { x0: 9, x1: 9, y0: 9, y1: 9 }, // the title and its subtitle
-    sun: { x0: 9, x1: 9, y0: 9, y1: 9 },
+    light: { x0: 9, x1: 9, y0: 9, y1: 9 }, // the sun or moon
     stage: activeCard,
     maxIdeas: () => (ctx.wide ? 3 : 2)
   };
 
-  // the parts, updated in this order and disposed in reverse
+  // the parts, updated in this order and disposed in reverse: the place, then the words
   const parts = [];
+  const add = part => {
+    parts.push(part);
+    return part;
+  };
   let water = null, words = null, threads = null, post = null;
   let viewObserver = null, sizeObserver = null, destroyed = false;
   try {
     ctx.atlas = createAtlas(WORDS);
-    const sky = createSky(ctx);
-    parts.push(sky);
-    ctx.gradient = sky.gradient;
-    parts.push((water = createWater(ctx)));
-    parts.push(createBeach(ctx));
-    parts.push(createGrass(ctx));
-    parts.push((threads = ctx.threads = createThreads(ctx)));
-    parts.push((words = createWords(ctx)));
-    post = createPost(renderer, scene, camera);
+    water = setting.build(ctx, add);
+    threads = ctx.threads = add(createThreads(ctx));
+    words = add(createWords(ctx));
+    post = createPost(renderer, scene, camera, setting.bloom);
   } catch (error) {
     destroy();
     throw error;
   }
 
   // where the words may go: above the horizon, below the top bar, clear of the title
-  const v = new THREE.Vector3();
+  const v = new THREE.Vector3(), at = new THREE.Vector2();
   function measure() {
-    const box = host.getBoundingClientRect(), w = box.width, h = box.height;
+    const frameBox = host.getBoundingClientRect(), w = frameBox.width, h = frameBox.height;
     const ndcX = px => (px / w) * 2 - 1, ndcY = py => 1 - (py / h) * 2;
     const c = copy.getBoundingClientRect();
-    ctx.avoid.x0 = ndcX(c.left - box.left);
-    ctx.avoid.x1 = ndcX(c.right - box.left);
-    ctx.avoid.y0 = ndcY(c.bottom - box.top);
-    ctx.avoid.y1 = ndcY(c.top - box.top);
-    ctx.ceiling = topbar ? ndcY(topbar.getBoundingClientRect().bottom - box.top) - 0.04 : 0.8;
+    ctx.avoid.x0 = ndcX(c.left - frameBox.left);
+    ctx.avoid.x1 = ndcX(c.right - frameBox.left);
+    ctx.avoid.y0 = ndcY(c.bottom - frameBox.top);
+    ctx.avoid.y1 = ndcY(c.top - frameBox.top);
+    ctx.ceiling = topbar ? ndcY(topbar.getBoundingClientRect().bottom - frameBox.top) - 0.04 : 0.8;
     ctx.floor = v.set(0, 0, -5000).project(camera).y + 0.06;
     ctx.height = h;
     ctx.wide = w >= 700;
     ctx.wordPx = ctx.wide ? Math.min(Math.max(h * 0.095, 44), 64) : Math.min(Math.max(h * 0.085, 34), 44);
-    // keep the words off the sun
-    v.copy(camera.position).addScaledVector(sunDir, 100).project(camera);
-    ctx.sun.x0 = v.x - 0.08;
-    ctx.sun.x1 = v.x + 0.08;
-    ctx.sun.y0 = v.y - 0.14;
-    ctx.sun.y1 = v.y + 0.16;
+    // keep the words off the sun or moon
+    const box = setting.lightBox;
+    v.copy(camera.position).addScaledVector(lightDir, 100).project(camera);
+    ctx.light.x0 = v.x - box.half;
+    ctx.light.x1 = v.x + box.half;
+    ctx.light.y0 = v.y - box.below;
+    ctx.light.y1 = v.y + box.above;
   }
 
   function resize() {
@@ -178,10 +213,10 @@ function createScene(canvas) {
     post.setSize(w, h, pixelRatio, t.bloom);
     water.setSize(w * pixelRatio * t.mirror, h * pixelRatio * t.mirror);
     rest();
-    // the sun low over the sea, right of centre (further right on a tall screen, so the
-    // words have the left of the sky)
+    // where the setting puts its sun or moon, whatever the frame's shape
     const horizon = v.set(0, 0, -5000).project(camera).y;
-    sunDir.set(w > h ? 0.2 : 0.5, horizon + 0.1, 0.5).unproject(camera).sub(camera.position).normalize();
+    setting.light(w > h, horizon, at);
+    lightDir.set(at.x, at.y, 0.5).unproject(camera).sub(camera.position).normalize();
     measure();
   }
 
@@ -202,7 +237,15 @@ function createScene(canvas) {
     camera.lookAt(LOOK);
     for (let i = 0; i < parts.length; i++) parts[i].update(dt, time);
     post.render();
+    if (!revealed) reveal();
     watch(dt);
+  }
+
+  // the canvas fades in (CSS) once it has something on it, over the header's gradient
+  let revealed = false;
+  function reveal() {
+    revealed = true;
+    canvas.classList.add("is-on");
   }
 
   // if frames keep running slow, step down a tier (as the techdemo does)
@@ -256,6 +299,7 @@ function createScene(canvas) {
       rest();
       words.compose(time);
       redraw();
+      reveal();
     }
     shown = true;
     animate = on;
@@ -337,14 +381,19 @@ function createScene(canvas) {
     const lost = renderer.getContext().isContextLost();
     renderer.dispose();
     if (!lost) renderer.forceContextLoss(); // browsers cap how many contexts can be alive
-    // a canvas keeps its lost context: leave a fresh one in its place
-    canvas.replaceWith(canvas.cloneNode(false));
+    // a canvas keeps its lost context: leave a fresh one in its place, hidden until drawn on
+    const fresh = canvas.cloneNode(false);
+    fresh.classList.remove("is-on");
+    canvas.replaceWith(fresh);
     host.classList.remove("is-live");
     if (toggle) toggle.hidden = true;
   }
 
   return {
+    setting,
     destroy,
+    // fades the canvas out (the light switch, before destroy)
+    hide() { canvas.classList.remove("is-on"); },
     renderer,
     tier: () => tier,
     time: () => time,

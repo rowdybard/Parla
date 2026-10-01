@@ -5,9 +5,9 @@
 // and the whole sea rises and falls a little so the swash runs up the beach.
 import * as THREE from "three";
 import { Reflector } from "three/addons/objects/Reflector.js";
-import { hash } from "./glsl.js";
+import { hash } from "../glsl.js";
 import { terrain, seaLevel } from "./terrain.js";
-import { sunset, color } from "./palette.js";
+import { sunset, color } from "../palette.js";
 import { SUN_LAYER } from "./sky.js";
 
 const seaShader = {

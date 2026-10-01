@@ -2,9 +2,9 @@
 // of the low sun and warm where it reaches, darker and glossy in the wet band at
 // the water's edge, where it mirrors the sunset, with a lace of foam on the edge.
 import * as THREE from "three";
-import { hash, skyGradient } from "./glsl.js";
+import { hash, skyGradient } from "../glsl.js";
 import { terrain, seaLevel } from "./terrain.js";
-import { sunset, color } from "./palette.js";
+import { sunset, color } from "../palette.js";
 
 const vertexShader = /* glsl */ `
   varying vec3 vWorld;

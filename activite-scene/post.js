@@ -30,13 +30,14 @@ const SafeShader = {
   `
 };
 
-export function createPost(renderer, scene, camera) {
+// bloom: { strength, radius, threshold }, per setting
+export function createPost(renderer, scene, camera, bloomLook) {
   const target = samples => new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples });
   let samples = 4;
   const composer = new EffectComposer(renderer, target(samples));
   const scenePass = new RenderPass(scene, camera);
   const safe = new ShaderPass(SafeShader);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.32, 0.2, 1.0);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), bloomLook.strength, bloomLook.radius, bloomLook.threshold);
   const output = new OutputPass();
   composer.addPass(scenePass);
   composer.addPass(safe);

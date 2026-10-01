@@ -2,8 +2,8 @@
 // overhead, long streaks of cloud lit from below (gold near the sun, hot pink,
 // lilac higher up), and the sun itself sitting low over the sea.
 import * as THREE from "three";
-import { hash, skyGradient } from "./glsl.js";
-import { sunset, color } from "./palette.js";
+import { hash, skyGradient } from "../glsl.js";
+import { sunset, color } from "../palette.js";
 
 const DOME = 2400;
 const SUN_DISTANCE = 2000;

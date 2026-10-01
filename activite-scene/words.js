@@ -1,15 +1,16 @@
-// Words in four languages, written in light over the sea. An idea is written
-// in French; a thread of gold carries it on into English, Spanish and Malagasy;
+// Words in four languages, written in light over the water. An idea is written
+// in French; a thread of light carries it on into English, Spanish and Malagasy;
 // the four drift together a while, mirrored in the water, and fade.
 // And once a round, first of all, Parla: the word the school's founder made up
 // from French and Spanish. It is nobody's translation, so it comes on its own,
-// larger, and signed underneath with a gold flourish.
+// larger, and signed underneath with a flourish. The inks are the setting's
+// (palette.js): with a halo against the sunset, as light itself at night.
 // Each word is an instance of one mesh: its slot is written once, and the
 // shader does the rest (writing it out left to right, drifting, fading).
 // Everything is allocated up front; placing an idea creates nothing.
 import * as THREE from "three";
 import { billboard } from "./glsl.js";
-import { inks, signInk, halo, sunset, color as paint } from "./palette.js";
+import { color as paint } from "./palette.js";
 
 // French, English, Spanish, Malagasy
 export const CONCEPTS = [
@@ -64,6 +65,7 @@ const vertexShader = /* glsl */ `
 const fragmentShader = /* glsl */ `
   uniform sampler2D uAtlas;
   uniform vec3 uHalo;
+  uniform float uHaloAmount; // 1 by day, against the bright sky; 0 at night, where words are light
   varying vec2 vUv;
   varying float vX;
   varying float vReveal;
@@ -77,10 +79,10 @@ const fragmentShader = /* glsl */ `
     float front = vReveal * 1.2 - 0.08;
     float written = 1.0 - smoothstep(front - 0.1, front, vX);
     float nib = exp(-pow((vX - front) * 10.0, 2.0)) * (1.0 - smoothstep(0.9, 1.15, vReveal));
-    vec3 col = mix(uHalo, vColor * (1.0 + nib * 2.2), ink);
+    vec3 col = mix(uHalo, vColor * (1.0 + nib * 2.2), max(ink, 1.0 - uHaloAmount));
     // in the sea's mirror (its camera is below the water) the words show at half strength
     float mirrored = step(cameraPosition.y, 0.0);
-    gl_FragColor = vec4(col, max(ink, smoothstep(0.0, 0.5, glow) * 0.42) * written * vFade * (1.0 - 0.5 * mirrored));
+    gl_FragColor = vec4(col, max(ink, smoothstep(0.0, 0.5, glow) * 0.42 * uHaloAmount) * written * vFade * (1.0 - 0.5 * mirrored));
   }
 `;
 
@@ -101,10 +103,18 @@ export function createWords(ctx) {
   const iSize = make("iSize", 2), iColor = make("iColor", 3), iTime = make("iTime", 4);
   geometry.instanceCount = SLOTS;
 
-  const uniforms = { uTime: { value: 0 }, uAtlas: { value: atlas.texture }, uHalo: { value: paint(halo) } };
+  // the setting's ink (palette.js): by day with a halo, at night as light (added, no halo)
+  const ink = ctx.ink;
+  const uniforms = {
+    uTime: { value: 0 },
+    uAtlas: { value: atlas.texture },
+    uHalo: { value: paint(ink.halo || "#000000") },
+    uHaloAmount: { value: ink.halo ? 1 : 0 }
+  };
   const material = new THREE.ShaderMaterial({
     uniforms, vertexShader, fragmentShader,
-    transparent: true, depthWrite: false
+    transparent: true, depthWrite: false,
+    blending: ink.halo ? THREE.NormalBlending : THREE.AdditiveBlending
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
@@ -148,9 +158,10 @@ export function createWords(ctx) {
   // each word's place in the atlas, and the inks and thread colour, looked up once
   const table = CONCEPTS.map(texts => texts.map(text => atlas.word(text)));
   table[SIGN] = [atlas.word(SIGNATURE)];
-  const inkColors = inks.map(hex => paint(hex, 1.25));
-  const signColor = paint(signInk, 1.4);
-  const gold = paint(sunset.gold);
+  const inkColors = ink.colors.map(hex => paint(hex, ink.boost));
+  const threadColors = ink.colors.map(hex => paint(ink.thread || hex));
+  const signColor = paint(ink.sign, ink.signBoost);
+  const flourish = paint(ink.flourish);
 
   const v = new THREE.Vector3(), dir = new THREE.Vector3(), forward = new THREE.Vector3();
   const right = new THREE.Vector3(), up = new THREE.Vector3(), down = new THREE.Vector3();
@@ -236,7 +247,7 @@ export function createWords(ctx) {
       box.y0 = cy - blockH / 2;
       box.y1 = cy + blockH / 2;
       if (box.x0 < -0.97 || box.x1 > 0.97 || box.y0 < ctx.floor || box.y1 > ctx.ceiling) continue;
-      if (overlaps(box, ctx.avoid, 0.05) || overlaps(box, ctx.sun, 0.02)) continue;
+      if (overlaps(box, ctx.avoid, 0.05) || overlaps(box, ctx.light, 0.02)) continue;
       mirrored.x0 = box.x0;
       mirrored.x1 = box.x1;
       mirrored.y0 = 2 * horizon - box.y1 - below;
@@ -258,7 +269,8 @@ export function createWords(ctx) {
       ys[2] = top - lineH * 1.55;
       ys[3] = top - lineH * 1.65;
     }
-    const ink = signing ? signColor : inkColors[(ctx.stage() + hue++) % inkColors.length];
+    const k = signing ? 0 : (ctx.stage() + hue++) % inkColors.length;
+    const tint = signing ? signColor : inkColors[k];
     const driftX = (Math.random() - 0.5) * 0.08, driftY = 0.035 + Math.random() * 0.04;
     const seed = Math.random() * 100;
     for (let i = 0; i < n; i++) {
@@ -270,7 +282,7 @@ export function createWords(ctx) {
       set(iDrift, slot, driftX, driftY, 0, time);
       set(iRect, slot, e.u0, e.v0, e.u1, e.v1);
       set(iSize, slot, cellW[i], cell);
-      set(iColor, slot, ink.r, ink.g, ink.b);
+      set(iColor, slot, tint.r, tint.g, tint.b);
       set(iTime, slot, time + i * STEP, signing ? SIGN_WRITE : WRITE, time + STAY, seed);
     }
     if (signing) {
@@ -282,7 +294,7 @@ export function createWords(ctx) {
       from.copy(spots[0]).addScaledVector(right, cellW[0] * 0.46).addScaledVector(up, (e.baseline - 0.54) * cell).add(v);
       to.copy(spots[0]).addScaledVector(right, -cellW[0] * 0.4).addScaledVector(up, (e.baseline - 0.74) * cell).add(v);
       down.copy(up).negate();
-      threads.spawn(from, to, down, gold, start, draw, cell * 0.045, STAY - FADE - (start - time) - draw, FADE);
+      threads.spawn(from, to, down, flourish, start, draw, cell * 0.045, STAY - FADE - (start - time) - draw, FADE);
       idea.end = time + STAY;
       idea.box.x0 = box.x0;
       idea.box.x1 = box.x1;
@@ -299,7 +311,7 @@ export function createWords(ctx) {
         .add(v.set(driftX, driftY, 0).multiplyScalar(lead));
       to.copy(spots[i + 1]).addScaledVector(right, -cellW[i + 1] * 0.46).addScaledVector(up, (b.baseline - 0.36) * cell)
         .add(v.set(driftX, driftY, 0).multiplyScalar(lead));
-      threads.spawn(from, to, up, gold, start, STEP - WRITE * 0.85 + 0.12, cell * 0.05);
+      threads.spawn(from, to, up, threadColors[k], start, STEP - WRITE * 0.85 + 0.12, cell * 0.05);
     }
     idea.end = time + STAY;
     idea.box.x0 = box.x0;
